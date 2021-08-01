@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:vieiros/tabs/info.dart';
 import 'package:vieiros/tabs/waypoints.dart';
 import '../tabs/map.dart';
-import '../tabs/tracks.dart';
+import 'package:vieiros/tabs/tracks.dart';
 
 class Home extends StatefulWidget {
   Home({Key? key}) : super(key: key);
@@ -12,14 +12,18 @@ class Home extends StatefulWidget {
 }
 
 class _Home extends State<Home> with TickerProviderStateMixin {
-  String _title = 'Vieiros';
-
   int _tabIndex = 0;
 
   late List<Widget> tabs;
   late TabController _tabController;
 
+  final _mapKey = GlobalKey<MapState>();
+
   void _onTabItemTapped(int index) {
+    if(index == 1 && _mapKey.currentState != null){
+      //_mapKey.currentState!.loadCurrentTrack();
+      _mapKey.currentState!.getLocation();
+    }
     setState(() {
       _tabIndex = index;
       _tabController.animateTo(index);
@@ -30,8 +34,8 @@ class _Home extends State<Home> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     tabs = <Widget>[
-      Tracks(),
-      Map(),
+      Tracks(toTabIndex: _onTabItemTapped),
+      Map(key: _mapKey),
       Info(),
       Waypoints()
     ];
@@ -53,11 +57,6 @@ class _Home extends State<Home> with TickerProviderStateMixin {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-            appBar: AppBar(
-              // Here we take the value from the MyHomePage object that was created by
-              // the App.build method, and use it to set our appbar title.
-              title: Text(_title),
-            ),
             body: TabBarView(
                 controller: _tabController,
                 children: tabs

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../main/home.dart';
+import 'package:vieiros/main/home.dart';
+import 'package:vieiros/resources/CustomColors.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      systemNavigationBarColor: Colors.white,
+      systemNavigationBarColor: Colors.black,
+      systemNavigationBarIconBrightness: Brightness.light,
       statusBarColor: Colors.white,
       statusBarBrightness: Brightness.light,
-      systemNavigationBarIconBrightness: Brightness.dark
+      statusBarIconBrightness: Brightness.dark
   ));
   runApp(MyApp());
 }
@@ -21,23 +23,23 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.light,
         primaryColor: Colors.white,
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            primary: CustomColors.accent
+          )
+        ),
+        indicatorColor: CustomColors.accent,
         buttonTheme: ButtonThemeData(
-          buttonColor: Color(0xFF0081c6),         //  <-- light color
+          buttonColor: CustomColors.accent,         //  <-- light color
           textTheme: ButtonTextTheme.primary, //  <-- dark text for light background
         ),
         bottomNavigationBarTheme: BottomNavigationBarThemeData(
             selectedIconTheme: IconThemeData(
-                color: Color(0xFF0081c6)
+                color: CustomColors.accent
             )
         ),
         // Define the default font family.
         fontFamily: 'Lato',
-        appBarTheme: AppBarTheme(
-          backgroundColor: Colors.white,
-          backwardsCompatibility: false,
-          foregroundColor: Colors.black87,
-          elevation: 1,
-        ),
         // Define the default TextTheme. Use this to specify the default
         // text styling for headlines, titles, bodies of text, and more.
         textTheme: TextTheme(

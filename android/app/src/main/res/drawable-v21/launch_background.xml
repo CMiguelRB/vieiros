@@ -8,5 +8,5 @@
         android:gravity="center"
         android:height="300dp"
         android:width="300dp"
-        android:drawable="@drawable/endomorphine_logo"/>
+        android:drawable="@drawable/vieiros_logo"/>
 </layer-list>
