@@ -87,6 +87,11 @@ class _Tracks extends State<Tracks> {
       if (current == file.path) {
         prefs.remove('currentTrack');
       }
+      String? path = file.path;
+      if(path != null){
+        File deleteFile = new File(path);
+        deleteFile.delete();
+      }
       Navigator.pop(context, 'OK');
     });
   }
