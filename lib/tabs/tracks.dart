@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:vieiros/model/current_track.dart';
 import 'package:xml/xml.dart';
 import 'dart:io';
 
@@ -11,13 +12,13 @@ import 'package:vieiros/model/gpx_file.dart';
 
 class Tracks extends StatefulWidget {
   final Function toTabIndex;
+  final CurrentTrack currentTrack;
+  Tracks({Key? key, required this.toTabIndex, required this.currentTrack}) : super(key: key);
 
-  Tracks({required this.toTabIndex});
-
-  _Tracks createState() => _Tracks();
+  TracksState createState() => TracksState();
 }
 
-class _Tracks extends State<Tracks> {
+class TracksState extends State<Tracks> {
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   List<GpxFile> _files = [];
 
@@ -170,13 +171,13 @@ class _Tracks extends State<Tracks> {
             },
           ),
         ),
-        Container(
+        /*Container(
           margin: const EdgeInsets.all(20),
           child: ElevatedButton.icon(
               onPressed: openFile,
               icon: Icon(Icons.add),
               label: Text('Add track')),
-        )
+        )*/
       ],
     ));
   }

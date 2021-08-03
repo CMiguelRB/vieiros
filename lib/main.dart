@@ -28,6 +28,11 @@ class MyApp extends StatelessWidget {
             primary: CustomColors.accent
           )
         ),
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+            foregroundColor: Colors.white,
+            backgroundColor: CustomColors.accent,
+            elevation: 2
+        ),
         indicatorColor: CustomColors.accent,
         buttonTheme: ButtonThemeData(
           buttonColor: CustomColors.accent,         //  <-- light color

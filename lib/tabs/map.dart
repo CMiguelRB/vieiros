@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:location/location.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
+import 'package:vieiros/model/current_track.dart';
 import 'package:vieiros/model/position.dart';
 import 'package:xml/xml.dart';
 import 'package:flutter/cupertino.dart';
@@ -14,47 +15,27 @@ import 'package:gpx/gpx.dart';
 import 'package:vieiros/resources/CustomColors.dart';
 
 class Map extends StatefulWidget {
-  Map({Key? key}) : super(key: key);
+  final Function setPlayIcon;
+  final CurrentTrack currentTrack;
+  Map({Key? key, required this.setPlayIcon, required this.currentTrack}) : super(key: key);
   MapState createState() => MapState();
 }
 
 class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
+  Location _location = new Location();
   Completer<GoogleMapController> _mapController = Completer();
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   Set<Polyline> _polyline = Set();
   Set<Marker> _markers = Set();
-  bool recording = false;
-  List<RecordedPosition> recordedPositions = [];
+  String _path = '';
+  final _formKey = GlobalKey<FormState>();
 
   getLocation() async {
-    Location location = new Location();
-    _handlePermissions(location);
-    location.changeNotificationOptions(iconName: 'vieiros_logo_notification',color: CustomColors.accent);
-    location.enableBackgroundMode(enable: true);
+    _handlePermissions(_location);
     LocationData _locationData;
     final GoogleMapController controller = await _mapController.future;
-    List<RecordedPosition> recordedPositions = [];
 
-    location.onLocationChanged.listen((event) {
-      double? lat = event.latitude;
-      double? lon = event.longitude;
-      recordedPositions.add(RecordedPosition(lat, lon, event.altitude, event.time));
-      List<LatLng> points = [];
-      for(var i = 0;i<recordedPositions.length;i++){
-        double? lat = recordedPositions[i].latitude;
-        double? lon = recordedPositions[i].longitude;
-        if(lat != null && lon != null) points.add(LatLng(lat,lon));
-      }
-      Polyline recordingPolyline = Polyline(polylineId: PolylineId('recordingPolyline'), points: points, width: 5, color: CustomColors.ownPath);
-      setState(() {
-        _polyline.removeWhere((element) => element.polylineId.value == 'recordingPolyline');
-        _polyline.add(recordingPolyline);
-      });
-    });
-
-
-
-    _locationData = await location.getLocation();
+    _locationData = await _location.getLocation();
     double? lat = _locationData.latitude;
     double? lon = _locationData.longitude;
     if(lat != null && lon != null){
@@ -66,7 +47,6 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
   _handlePermissions(location) async{
     bool _serviceEnabled;
     PermissionStatus _permissionGranted;
-
     _serviceEnabled = await location.serviceEnabled();
     if (!_serviceEnabled) {
       _serviceEnabled = await location.requestService();
@@ -74,7 +54,6 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
         return;
       }
     }
-
     _permissionGranted = await location.hasPermission();
     if (_permissionGranted == PermissionStatus.denied) {
       _permissionGranted = await location.requestPermission();
@@ -93,7 +72,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
     }
     MarkerId markerId = MarkerId(Uuid().v4());
     Marker marker;
-    if(description != null && description != ''){
+    if(description != null && description.isNotEmpty){
       marker = Marker(markerId: markerId, position: latLng, icon: icon, infoWindow: InfoWindow(title: description), onTap: () => controller.showMarkerInfoWindow(markerId));
     }else{
       marker = Marker(markerId: markerId, position: latLng, icon: icon);
@@ -104,12 +83,12 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
   }
 
   loadCurrentTrack() async {
+    final prefs = await _prefs;
+    String? path = prefs.getString('currentTrack');
+    if (path == null || path.isEmpty || path == _path) return;
     _polyline.clear();
     _markers.clear();
     final GoogleMapController controller = await _mapController.future;
-    final prefs = await _prefs;
-    String? path = prefs.getString('currentTrack');
-    if (path == null) return;
     final xmlFile = new File(path);
     Gpx gpx = GpxReader().fromString(XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString());
     List<LatLng> points = [];
@@ -136,10 +115,107 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
     addMarkerSet(last, false, null, controller);
     setState(() {
       _polyline.add(polyline);
+      _path = path;
     });
     if(lat == null || lon == null) return;
     controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
         target: first, zoom: 14.0)));
+  }
+
+  startRecording(){
+    widget.currentTrack.setStatus(true);
+    _location.enableBackgroundMode(enable: true);
+    _location.onLocationChanged.listen((event) {
+      if(widget.currentTrack.isRecording()){
+        double? lat = event.latitude;
+        double? lon = event.longitude;
+        widget.currentTrack.addPosition(RecordedPosition(lat, lon, event.altitude, event.time));
+        List<LatLng> points = [];
+        for(var i = 0;i<widget.currentTrack.getPositions().length;i++){
+          double? lat = widget.currentTrack.getPositions()[i].latitude;
+          double? lon = widget.currentTrack.getPositions()[i].longitude;
+          if(lat != null && lon != null) points.add(LatLng(lat,lon));
+        }
+        Polyline recordingPolyline = Polyline(polylineId: PolylineId('recordingPolyline'), points: points, width: 5, color: CustomColors.ownPath);
+        setState(() {
+          _polyline.removeWhere((element) => element.polylineId.value == 'recordingPolyline');
+          _polyline.add(recordingPolyline);
+        });
+      }
+    });
+  }
+
+  stopRecording(){
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        content: const Text('Stop recording and save your track?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => _insertName(),
+            child: const Text('Save'),
+          ),
+          TextButton(
+            onPressed: () => _stopAndDiscard(),
+            child: const Text('Discard'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'Cancel'),
+            child: const Text('Cancel'),
+          )
+        ],
+      ),
+    );
+  }
+
+  _insertName(){
+    Navigator.pop(context, 'Stop and save');
+    showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        content: Form(
+            key: _formKey,
+            child:TextFormField(decoration: InputDecoration(labelText: 'Name'), validator: (text) {
+              if (text == null || text.isEmpty) {
+                return "Empty name";
+              }
+              return null;
+            })),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => _stopAndSave(),
+            child: const Text('Ok'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'Cancel'),
+            child: const Text('Cancel'),
+          )
+        ],
+      ),
+    );
+  }
+
+  _stopAndSave(){
+    if(!_formKey.currentState!.validate()) return;
+    Navigator.pop(context, 'Ok');
+    _location.enableBackgroundMode(enable: false);
+    widget.setPlayIcon();
+    //Todo save polyline to GPX
+    setState(() {
+      _polyline.removeWhere((element) => element.polylineId.value == 'recordingPolyline');
+      //Todo load saved polyline
+      widget.currentTrack.clear();
+    });
+  }
+
+  _stopAndDiscard(){
+    _location.enableBackgroundMode(enable: false);
+    Navigator.pop(context, 'Stop and discard');
+    widget.setPlayIcon();
+    setState(() {
+      _polyline.removeWhere((element) => element.polylineId.value == 'recordingPolyline');
+      widget.currentTrack.clear();
+    });
   }
 
   //Workaround for choppy Maps initialization
@@ -148,15 +224,16 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
   @override
   void initState() {
     super.initState();
+    _location.changeNotificationOptions(iconName: 'vieiros_logo_notification',color: CustomColors.accent, onTapBringToFront: true, title: 'Recording track', description: 'Vieiros is tracking your position');
+    _location.changeSettings(interval: 10000, distanceFilter: 5);
     Future.delayed(const Duration(milliseconds: 500), () {
       setState(() {
         showMap = true;
       });
     });
-    //loadCurrentTrack();
+    loadCurrentTrack();
     getLocation();
   }
-
 
   @override
   void dispose() {
