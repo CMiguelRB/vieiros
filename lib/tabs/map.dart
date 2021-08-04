@@ -5,6 +5,7 @@ import 'package:android_path_provider/android_path_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:location/location.dart';
+import 'package:permission_handler/permission_handler.dart' as permission_handler;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:vieiros/model/current_track.dart';
@@ -127,6 +128,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
 
   startRecording(){
     widget.currentTrack.setStatus(true);
+    widget.currentTrack.setDateTime(DateTime.now());
     _location.enableBackgroundMode(enable: true);
     _location.onLocationChanged.listen((event) {
       if(widget.currentTrack.isRecording()){
@@ -220,12 +222,20 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
     trksegs.add(Trkseg(trkpts: wpts));
     gpx.trks.add(Trk(name: name, trksegs: trksegs));
     final gpxString = GpxWriter().asString(gpx, pretty: true);
-    final directory = await AndroidPathProvider.downloadsPath;
-    String path = directory+'/'+name.replaceAll(' ','_')+'.gpx';
-    await File(path).writeAsString(gpxString);
-    final SharedPreferences prefs = await _prefs;
+    _writeFile(gpxString, name);
     setState(() {
       _polyline.removeWhere((element) => element.polylineId.value == 'recordingPolyline');
+      widget.currentTrack.clear();
+    });
+  }
+
+  void _writeFile(gpxString, name) async{
+    bool hasPermission = await _checkWritePermission();
+    if(hasPermission){
+      final directory = await AndroidPathProvider.downloadsPath;
+      String path = directory+'/'+name.replaceAll(' ','_')+'.gpx';
+      await File(path).writeAsString(gpxString);
+      final SharedPreferences prefs = await _prefs;
       String? jsonString = prefs.getString('files');
       if(jsonString != null){
         List<GpxFile> files = (json.decode(jsonString) as List).map((i) =>
@@ -233,8 +243,20 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
         files.add(GpxFile(name: name, path: path));
         prefs.setString('files', jsonEncode(files));
       }
-      widget.currentTrack.clear();
-    });
+    }
+  }
+
+  Future<bool> _checkWritePermission() async{
+    bool hasPermission = await permission_handler.Permission.storage.isGranted;
+    if(!hasPermission){
+      final status = await permission_handler.Permission.storage.request();
+      if(status == permission_handler.PermissionStatus.granted){
+        return true;
+      }else{
+        return false;
+      }
+    }
+    return true;
   }
 
   _stopAndDiscard(){

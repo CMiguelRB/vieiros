@@ -13,8 +13,8 @@ class Info extends StatelessWidget{
 
     return SafeArea(child: Column(
       children: [
-        Flexible(child: Text(currentTrack.getPositions().length.toString())),
-        Icon(Icons.insert_chart_rounded)
+        Flexible(flex: 2,child: Text(currentTrack.getPositions().length.toString())),
+        Flexible(flex: 10, child: Center())
       ],
     )
     );

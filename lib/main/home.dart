@@ -43,7 +43,6 @@ class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObs
   }
 
   void _setPlayFabIcon(){
-    print('set');
     setState(() {
       _fabIcon = Icon(Icons.play_arrow);
     });

@@ -3,6 +3,7 @@ import 'package:vieiros/model/waypoint.dart';
 
 class CurrentTrack {
   bool _recording = false;
+  DateTime? dateTime;
   final List<RecordedPosition> _positions = [];
   final List<Waypoint> _waypoints = [];
   String _name = '';
@@ -23,6 +24,10 @@ class CurrentTrack {
     this._waypoints.add(waypoint);
   }
 
+  void setDateTime(dateTime){
+    this.dateTime = dateTime;
+  }
+
   List<RecordedPosition> getPositions(){
     return this._positions;
   }
@@ -39,10 +44,15 @@ class CurrentTrack {
     return this._name;
   }
 
+  DateTime? getDateTime(){
+    return this.dateTime;
+  }
+
   void clear(){
     this._positions.clear();
     this._waypoints.clear();
     this._name = '';
+    this.dateTime = null;
     this._recording = false;
   }
 }

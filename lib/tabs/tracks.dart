@@ -23,7 +23,6 @@ class TracksState extends State<Tracks> {
   List<GpxFile> _files = [];
 
   loadPrefs() async {
-    //todo check if files exists on every start. If not, remove from list.
     final SharedPreferences prefs = await _prefs;
     String? jsonString = prefs.getString('files');
     jsonString = jsonString != null ? jsonString : '[]';
@@ -31,6 +30,15 @@ class TracksState extends State<Tracks> {
         .decode(jsonString)
         .map<GpxFile>((file) => GpxFile.fromJson(file))
         .toList();
+    for(var i = 0;i<files.length; i++){
+      String? path = files[i].path;
+      bool exists = false;
+      if(path != null)
+        exists = await File(path).exists();
+      if(!exists){
+        files.removeAt(i);
+      }
+    }
     setState(() {
       _files = files;
     });

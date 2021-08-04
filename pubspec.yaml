@@ -32,6 +32,7 @@ dependencies:
   uuid: ^3.0.4
   location: ^4.3.0
   android_path_provider: ^0.2.1
+  permission_handler: ^8.1.4+2
 
 dev_dependencies:
   flutter_test:
