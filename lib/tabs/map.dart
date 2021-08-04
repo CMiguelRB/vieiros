@@ -1,11 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+import 'package:android_path_provider/android_path_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:location/location.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:vieiros/model/current_track.dart';
+import 'package:vieiros/model/gpx_file.dart';
 import 'package:vieiros/model/position.dart';
 import 'package:xml/xml.dart';
 import 'package:flutter/cupertino.dart';
@@ -170,20 +173,22 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
 
   _insertName(){
     Navigator.pop(context, 'Stop and save');
+    String name = '';
     showDialog<String>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
         content: Form(
             key: _formKey,
-            child:TextFormField(decoration: InputDecoration(labelText: 'Name'), validator: (text) {
+            child:TextFormField(decoration: InputDecoration(labelText: 'Name'), onChanged: (value) => {name = value},validator: (text) {
               if (text == null || text.isEmpty) {
                 return "Empty name";
               }
+              name = text;
               return null;
             })),
         actions: <Widget>[
           TextButton(
-            onPressed: () => _stopAndSave(),
+            onPressed: () => _stopAndSave(name),
             child: const Text('Ok'),
           ),
           TextButton(
@@ -195,15 +200,39 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
     );
   }
 
-  _stopAndSave(){
+  _stopAndSave(name) async{
     if(!_formKey.currentState!.validate()) return;
     Navigator.pop(context, 'Ok');
     _location.enableBackgroundMode(enable: false);
     widget.setPlayIcon();
-    //Todo save polyline to GPX
+    Gpx gpx = Gpx();
+    gpx.metadata = Metadata(name: name);
+    gpx.version = '1.1';
+    gpx.creator = 'vieiros';
+    for(var i = 0; i<widget.currentTrack.getWaypoints().length; i++){
+      gpx.wpts.add(Wpt(lat: widget.currentTrack.getWaypoints()[i].position.latitude, lon: widget.currentTrack.getWaypoints()[i].position.longitude, ele: widget.currentTrack.getWaypoints()[i].position.elevation, name: widget.currentTrack.getWaypoints()[i].name));
+    }
+    List<Wpt> wpts = [];
+    for(var i = 0; i<widget.currentTrack.getPositions().length; i++){
+      wpts.add(Wpt(lat: widget.currentTrack.getPositions()[i].latitude, lon: widget.currentTrack.getPositions()[i].longitude, ele: widget.currentTrack.getPositions()[i].elevation, time: DateTime.fromMillisecondsSinceEpoch(widget.currentTrack.getPositions()[i].timestamp!.toInt())));
+    }
+    List<Trkseg> trksegs = [];
+    trksegs.add(Trkseg(trkpts: wpts));
+    gpx.trks.add(Trk(name: name, trksegs: trksegs));
+    final gpxString = GpxWriter().asString(gpx, pretty: true);
+    final directory = await AndroidPathProvider.downloadsPath;
+    String path = directory+'/'+name.replaceAll(' ','_')+'.gpx';
+    await File(path).writeAsString(gpxString);
+    final SharedPreferences prefs = await _prefs;
     setState(() {
       _polyline.removeWhere((element) => element.polylineId.value == 'recordingPolyline');
-      //Todo load saved polyline
+      String? jsonString = prefs.getString('files');
+      if(jsonString != null){
+        List<GpxFile> files = (json.decode(jsonString) as List).map((i) =>
+            GpxFile.fromJson(i)).toList();
+        files.add(GpxFile(name: name, path: path));
+        prefs.setString('files', jsonEncode(files));
+      }
       widget.currentTrack.clear();
     });
   }

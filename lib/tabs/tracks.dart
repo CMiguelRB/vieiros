@@ -23,6 +23,7 @@ class TracksState extends State<Tracks> {
   List<GpxFile> _files = [];
 
   loadPrefs() async {
+    //todo check if files exists on every start. If not, remove from list.
     final SharedPreferences prefs = await _prefs;
     String? jsonString = prefs.getString('files');
     jsonString = jsonString != null ? jsonString : '[]';

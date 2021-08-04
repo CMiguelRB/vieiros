@@ -35,6 +35,10 @@ class CurrentTrack {
     return this._recording;
   }
 
+  String getName(){
+    return this._name;
+  }
+
   void clear(){
     this._positions.clear();
     this._waypoints.clear();
