@@ -1,30 +1,31 @@
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vieiros/model/current_track.dart';
+import 'package:vieiros/model/loaded_track.dart';
 import 'package:xml/xml.dart';
 import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:gpx/gpx.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vieiros/model/gpx_file.dart';
 
 class Tracks extends StatefulWidget {
   final Function toTabIndex;
+  final Function clearTrack;
   final CurrentTrack currentTrack;
-  Tracks({Key? key, required this.toTabIndex, required this.currentTrack}) : super(key: key);
+  final SharedPreferences prefs;
+  final LoadedTrack loadedTrack;
+  Tracks({Key? key, required this.toTabIndex, required this.prefs, required this.currentTrack, required this.loadedTrack, required this.clearTrack}) : super(key: key);
 
   TracksState createState() => TracksState();
 }
 
 class TracksState extends State<Tracks> {
-  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   List<GpxFile> _files = [];
 
   loadPrefs() async {
-    final SharedPreferences prefs = await _prefs;
-    String? jsonString = prefs.getString('files');
+    String? jsonString = widget.prefs.getString('files');
     jsonString = jsonString != null ? jsonString : '[]';
     List<GpxFile> files = json
         .decode(jsonString)
@@ -49,8 +50,6 @@ class TracksState extends State<Tracks> {
       type: FileType.any,
     );
     if (result != null) {
-      print(result.files.single.name
-          .split('.')[result.files.single.name.split('.').length - 1]);
       if (result.files.single.name
               .split('.')[result.files.single.name.split('.').length - 1] !=
           'gpx') {
@@ -68,7 +67,6 @@ class TracksState extends State<Tracks> {
         );
         return;
       }
-      final SharedPreferences prefs = await _prefs;
       setState(() {
         for (var i = 0; i < _files.length; i++) {
           if (_files[i].path == result.files.single.path) {
@@ -83,19 +81,20 @@ class TracksState extends State<Tracks> {
         String? name = gpx.trks[0].name;
         if (name == null) name = result.files.single.name;
         _files.add(GpxFile(name: name, path: result.files.single.path));
-        prefs.setString('files', jsonEncode(_files));
+        widget.prefs.setString('files', jsonEncode(_files));
       });
     }
   }
 
   removeFile(context, index) async {
-    final SharedPreferences prefs = await _prefs;
     setState(() {
       GpxFile file = _files.removeAt(index);
-      prefs.setString('files', jsonEncode(_files));
-      String? current = prefs.getString('currentTrack');
+      widget.prefs.setString('files', jsonEncode(_files));
+      String? current = widget.prefs.getString('currentTrack');
       if (current == file.path) {
-        prefs.remove('currentTrack');
+        widget.prefs.remove('currentTrack');
+        widget.clearTrack();
+        widget.loadedTrack.clear();
       }
       String? path = file.path;
       if(path != null){
@@ -107,10 +106,9 @@ class TracksState extends State<Tracks> {
   }
 
   navigate(index) async {
-    final SharedPreferences prefs = await _prefs;
     String? path = _files[index].path;
     if (path == null) return;
-    prefs.setString('currentTrack', path);
+    widget.prefs.setString('currentTrack', path);
     widget.toTabIndex(1);
   }
 
@@ -173,20 +171,13 @@ class TracksState extends State<Tracks> {
                                       ),
                                     ),
                                 icon: Icon(Icons.delete))
-                          ],
+                          ]
                         ))),
                 onTap: () => navigate(index),
               );
-            },
-          ),
-        ),
-        /*Container(
-          margin: const EdgeInsets.all(20),
-          child: ElevatedButton.icon(
-              onPressed: openFile,
-              icon: Icon(Icons.add),
-              label: Text('Add track')),
-        )*/
+            }
+          )
+        )
       ],
     ));
   }

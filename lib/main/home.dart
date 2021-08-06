@@ -1,3 +1,5 @@
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vieiros/model/loaded_track.dart';
 import 'package:flutter/material.dart';
 import 'package:vieiros/model/current_track.dart';
 import 'package:vieiros/tabs/info.dart';
@@ -6,8 +8,9 @@ import '../tabs/map.dart';
 import 'package:vieiros/tabs/tracks.dart';
 
 class Home extends StatefulWidget {
-  Home({Key? key}) : super(key: key);
-
+  final SharedPreferences prefs;
+  final LoadedTrack loadedTrack;
+  Home({Key? key, required this.prefs, required this.loadedTrack}) : super(key: key);
   @override
   _Home createState() => _Home();
 }
@@ -16,30 +19,47 @@ class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObs
   int _tabIndex = 0;
   Icon _fabIcon = Icon(Icons.add);
 
-  late List<Widget> tabs;
+  late List<Widget> _tabs;
   late TabController _tabController;
   late CurrentTrack _currentTrack = CurrentTrack();
 
   final _mapKey = GlobalKey<MapState>();
   final _trackKey = GlobalKey<TracksState>();
+  final _infoKey = GlobalKey<InfoState>();
 
-  void _onTabItemTapped(int index) {
-    setState(() {
-      _tabIndex = index;
-      _tabController.animateTo(index);
-    });
+  void _onTabItemTapped(int index) async {
     if(index == 1){
       if(_mapKey.currentState != null){
-        _mapKey.currentState!.loadCurrentTrack();
-        if(_currentTrack.isRecording()){
+        String? path = widget.prefs.getString('currentTrack');
+        if(path != null && _mapKey.currentState!.currentPath != path) {
+          widget.loadedTrack.clear();
+          _mapKey.currentState!.loadTrack(path);
+        }
+        if(_currentTrack.isRecording){
           _fabIcon = Icon(Icons.stop);
+          if(this.mounted) setState(() {
+            _tabIndex = index;
+            _tabController.animateTo(index);
+          });
           return;
         }
       }
       _fabIcon = Icon(Icons.play_arrow);
+    }else if(index == 2){
+      if(_infoKey.currentState != null){
+        String? path = widget.prefs.getString('currentTrack');
+        if(path != null && _infoKey.currentState!.currentPath != path) {
+          widget.loadedTrack.clear();
+          _infoKey.currentState!.loadTrack(path);
+        }
+      }
     }else{
       _fabIcon = Icon(Icons.add);
     }
+    if(this.mounted) setState(() {
+      _tabIndex = index;
+      _tabController.animateTo(index);
+    });
   }
 
   void _setPlayFabIcon(){
@@ -48,17 +68,23 @@ class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObs
     });
   }
 
+  void _clearTrack(){
+    if(_mapKey.currentState != null){
+      _mapKey.currentState!.clearTrack();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance!.addObserver(this);
-    tabs = <Widget>[
-      Tracks(key: _trackKey, toTabIndex: _onTabItemTapped, currentTrack: _currentTrack),
-      Map(key: _mapKey, setPlayIcon: _setPlayFabIcon, currentTrack: _currentTrack),
-      Info(currentTrack: _currentTrack),
-      Settings()
+    _tabs = <Widget>[
+      Tracks(key: _trackKey, prefs: widget.prefs, toTabIndex: _onTabItemTapped, currentTrack: _currentTrack, loadedTrack: widget.loadedTrack, clearTrack: _clearTrack),
+      Map(key: _mapKey, prefs: widget.prefs, setPlayIcon: _setPlayFabIcon, currentTrack: _currentTrack, loadedTrack: widget.loadedTrack),
+      Info(key: _infoKey, currentTrack: _currentTrack, prefs: widget.prefs, loadedTrack: widget.loadedTrack),
+      Settings(widget.prefs)
     ];
-    _tabController = TabController(vsync: this, length: tabs.length, initialIndex: _tabIndex);
+    _tabController = TabController(vsync: this, length: _tabs.length, initialIndex: _tabIndex);
   }
 
   @override
@@ -80,9 +106,9 @@ class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObs
       _trackKey.currentState!.openFile();
     }
     if(index == 1 && _mapKey.currentState != null){
-      if(!_currentTrack.isRecording()){
+      if(!_currentTrack.isRecording){
         _mapKey.currentState!.startRecording();
-        setState(() {
+        if(this.mounted) setState(() {
           _fabIcon = Icon(Icons.stop);
         });
       }else{
@@ -93,16 +119,11 @@ class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObs
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
             body: TabBarView(
+                physics: NeverScrollableScrollPhysics(),
                 controller: _tabController,
-                children: tabs
+                children: _tabs
             ),
             floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
             floatingActionButton: _tabIndex <= 1 ? FloatingActionButton(

@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vieiros/main/home.dart';
+import 'package:vieiros/model/loaded_track.dart';
 import 'package:vieiros/resources/CustomColors.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final SharedPreferences _prefs = await SharedPreferences.getInstance();
+  String? path = _prefs.getString('currentTrack');
+  LoadedTrack loadedTrack = await LoadedTrack().loadTrack(path);
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.black,
       systemNavigationBarIconBrightness: Brightness.light,
-      statusBarColor: Colors.white,
+      statusBarColor: CustomColors.background,
       statusBarBrightness: Brightness.light,
       statusBarIconBrightness: Brightness.dark
   ));
-  runApp(MyApp());
+  runApp(MyApp(_prefs, loadedTrack));
 }
-
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  final SharedPreferences _prefs;
+  final LoadedTrack _loadedTrack;
+  MyApp(this._prefs, this._loadedTrack);
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -23,6 +30,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         brightness: Brightness.light,
         primaryColor: Colors.white,
+        backgroundColor: Colors.white,
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             primary: CustomColors.accent
@@ -54,7 +62,7 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       debugShowCheckedModeBanner: false,
-      home: Home()
+      home: Home(prefs: _prefs, loadedTrack: _loadedTrack)
     );
   }
 }

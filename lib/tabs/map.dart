@@ -10,8 +10,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:vieiros/model/current_track.dart';
 import 'package:vieiros/model/gpx_file.dart';
+import 'package:vieiros/model/loaded_track.dart';
 import 'package:vieiros/model/position.dart';
-import 'package:xml/xml.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -21,21 +21,29 @@ import 'package:vieiros/resources/CustomColors.dart';
 class Map extends StatefulWidget {
   final Function setPlayIcon;
   final CurrentTrack currentTrack;
-  Map({Key? key, required this.setPlayIcon, required this.currentTrack}) : super(key: key);
+  final LoadedTrack loadedTrack;
+  final SharedPreferences prefs;
+  Map({Key? key, required this.setPlayIcon, required this.prefs, required this.currentTrack, required this.loadedTrack}) : super(key: key);
   MapState createState() => MapState();
 }
 
 class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
   Location _location = new Location();
   Completer<GoogleMapController> _mapController = Completer();
-  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   Set<Polyline> _polyline = Set();
   Set<Marker> _markers = Set();
-  String _path = '';
   final _formKey = GlobalKey<FormState>();
+  String currentPath = '';
 
   getLocation() async {
-    _handlePermissions(_location);
+    await _handlePermissions();
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if(this.mounted) setState(() {
+        showMap = true;
+      });
+    });
+    _location.changeNotificationOptions(iconName: 'vieiros_logo_notification',color: CustomColors.accent, onTapBringToFront: true, title: 'Recording track', description: 'Vieiros is tracking your position');
+    _location.changeSettings(interval: 10000, distanceFilter: 5);
     LocationData _locationData;
     final GoogleMapController controller = await _mapController.future;
 
@@ -48,23 +56,17 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
     }
   }
 
-  _handlePermissions(location) async{
-    bool _serviceEnabled;
-    PermissionStatus _permissionGranted;
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled) {
-        return;
+  _handlePermissions() async{
+    bool hasPermission = await permission_handler.Permission.location.isGranted;
+    if(!hasPermission){
+      final status = await permission_handler.Permission.locationAlways.request();
+      if(status == permission_handler.PermissionStatus.granted){
+        return true;
+      }else{
+        return false;
       }
     }
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
-      _permissionGranted = await location.requestPermission();
-      if (_permissionGranted != PermissionStatus.granted) {
-        return;
-      }
-    }
+    return true;
   }
 
   addMarkerSet(LatLng latLng, bool isWayPoint, String? description, GoogleMapController controller) async{
@@ -81,68 +83,78 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
     }else{
       marker = Marker(markerId: markerId, position: latLng, icon: icon);
     }
-    setState(() {
+    if(this.mounted) setState(() {
       _markers.add(marker);
     });
   }
 
+  loadTrack(path) async{
+    await widget.loadedTrack.loadTrack(path);
+    loadCurrentTrack();
+  }
+
+  clearTrack(){
+    if(this.mounted) setState(() {
+      _polyline.clear();
+      _markers.clear();
+    });
+  }
+
   loadCurrentTrack() async {
-    final prefs = await _prefs;
-    String? path = prefs.getString('currentTrack');
-    if (path == null || path.isEmpty || path == _path) return;
     _polyline.clear();
     _markers.clear();
     final GoogleMapController controller = await _mapController.future;
-    final xmlFile = new File(path);
-    Gpx gpx = GpxReader().fromString(XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString());
-    List<LatLng> points = [];
-    LatLng first = LatLng(0, 0);
-    LatLng last = LatLng(0, 0);
-    double? lat;
-    double? lon;
-    for(var i = 0; i<gpx.trks[0].trksegs[0].trkpts.length; i++){
-      lat = gpx.trks[0].trksegs[0].trkpts[i].lat;
-      lon = gpx.trks[0].trksegs[0].trkpts[i].lon;
-      if(lat == null || lon == null) continue;
-      if(i == 0) first = LatLng(lat, lon);
-      points.add(LatLng(lat, lon));
+    if(widget.loadedTrack.gpx != null){
+      Gpx gpx = widget.loadedTrack.gpx as Gpx;
+      List<LatLng> points = [];
+      LatLng first = LatLng(0, 0);
+      LatLng last = LatLng(0, 0);
+      double? lat;
+      double? lon;
+      for(var i = 0; i<gpx.trks[0].trksegs[0].trkpts.length; i++){
+        lat = gpx.trks[0].trksegs[0].trkpts[i].lat;
+        lon = gpx.trks[0].trksegs[0].trkpts[i].lon;
+        if(lat == null || lon == null) continue;
+        if(i == 0) first = LatLng(lat, lon);
+        points.add(LatLng(lat, lon));
+      }
+      for(var i = 0; i<gpx.wpts.length;i++){
+        lat = gpx.wpts[i].lat;
+        lon = gpx.wpts[i].lon;
+        if(lat == null || lon == null) continue;
+        addMarkerSet(LatLng(lat, lon), true, gpx.wpts[i].name, controller);
+      }
+      if(lat != null && lon != null) last = LatLng(lat, lon);
+      Polyline polyline = new Polyline(polylineId: new PolylineId('loadedTrack'), points: points, width: 5, color: CustomColors.accent);
+      addMarkerSet(first, false, null, controller);
+      addMarkerSet(last, false, null, controller);
+      if(this.mounted) setState(() {
+        _polyline.add(polyline);
+        currentPath = widget.loadedTrack.path as String;
+      });
+      if(lat == null || lon == null) return;
+      controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+          target: first, zoom: 14.0)));
     }
-    for(var i = 0; i<gpx.wpts.length;i++){
-      lat = gpx.wpts[i].lat;
-      lon = gpx.wpts[i].lon;
-      if(lat == null || lon == null) continue;
-      addMarkerSet(LatLng(lat, lon), true, gpx.wpts[i].name, controller);
-    }
-    if(lat != null && lon != null) last = LatLng(lat, lon);
-    Polyline polyline = new Polyline(polylineId: new PolylineId('loadedTrack'), points: points, width: 5, color: CustomColors.accent);
-    addMarkerSet(first, false, null, controller);
-    addMarkerSet(last, false, null, controller);
-    setState(() {
-      _polyline.add(polyline);
-      _path = path;
-    });
-    if(lat == null || lon == null) return;
-    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
-        target: first, zoom: 14.0)));
   }
 
   startRecording(){
-    widget.currentTrack.setStatus(true);
-    widget.currentTrack.setDateTime(DateTime.now());
+    widget.currentTrack.isRecording = true;
+    widget.currentTrack.dateTime = DateTime.now();
     _location.enableBackgroundMode(enable: true);
     _location.onLocationChanged.listen((event) {
-      if(widget.currentTrack.isRecording()){
+      if(widget.currentTrack.isRecording){
         double? lat = event.latitude;
         double? lon = event.longitude;
-        widget.currentTrack.addPosition(RecordedPosition(lat, lon, event.altitude, event.time));
+        widget.currentTrack.positions.add(RecordedPosition(lat, lon, event.altitude, event.time));
         List<LatLng> points = [];
-        for(var i = 0;i<widget.currentTrack.getPositions().length;i++){
-          double? lat = widget.currentTrack.getPositions()[i].latitude;
-          double? lon = widget.currentTrack.getPositions()[i].longitude;
+        for(var i = 0;i<widget.currentTrack.positions.length;i++){
+          double? lat = widget.currentTrack.positions[i].latitude;
+          double? lon = widget.currentTrack.positions[i].longitude;
           if(lat != null && lon != null) points.add(LatLng(lat,lon));
         }
         Polyline recordingPolyline = Polyline(polylineId: PolylineId('recordingPolyline'), points: points, width: 5, color: CustomColors.ownPath);
-        setState(() {
+        if(this.mounted) setState(() {
           _polyline.removeWhere((element) => element.polylineId.value == 'recordingPolyline');
           _polyline.add(recordingPolyline);
         });
@@ -211,19 +223,19 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
     gpx.metadata = Metadata(name: name);
     gpx.version = '1.1';
     gpx.creator = 'vieiros';
-    for(var i = 0; i<widget.currentTrack.getWaypoints().length; i++){
-      gpx.wpts.add(Wpt(lat: widget.currentTrack.getWaypoints()[i].position.latitude, lon: widget.currentTrack.getWaypoints()[i].position.longitude, ele: widget.currentTrack.getWaypoints()[i].position.elevation, name: widget.currentTrack.getWaypoints()[i].name));
+    for(var i = 0; i<widget.currentTrack.waypoints.length; i++){
+      gpx.wpts.add(Wpt(lat: widget.currentTrack.waypoints[i].position.latitude, lon: widget.currentTrack.waypoints[i].position.longitude, ele: widget.currentTrack.waypoints[i].position.elevation, name: widget.currentTrack.waypoints[i].name));
     }
     List<Wpt> wpts = [];
-    for(var i = 0; i<widget.currentTrack.getPositions().length; i++){
-      wpts.add(Wpt(lat: widget.currentTrack.getPositions()[i].latitude, lon: widget.currentTrack.getPositions()[i].longitude, ele: widget.currentTrack.getPositions()[i].elevation, time: DateTime.fromMillisecondsSinceEpoch(widget.currentTrack.getPositions()[i].timestamp!.toInt())));
+    for(var i = 0; i<widget.currentTrack.positions.length; i++){
+      wpts.add(Wpt(lat: widget.currentTrack.positions[i].latitude, lon: widget.currentTrack.positions[i].longitude, ele: widget.currentTrack.positions[i].elevation, time: DateTime.fromMillisecondsSinceEpoch(widget.currentTrack.positions[i].timestamp!.toInt())));
     }
     List<Trkseg> trksegs = [];
     trksegs.add(Trkseg(trkpts: wpts));
     gpx.trks.add(Trk(name: name, trksegs: trksegs));
     final gpxString = GpxWriter().asString(gpx, pretty: true);
     _writeFile(gpxString, name);
-    setState(() {
+    if(this.mounted) setState(() {
       _polyline.removeWhere((element) => element.polylineId.value == 'recordingPolyline');
       widget.currentTrack.clear();
     });
@@ -235,13 +247,12 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
       final directory = await AndroidPathProvider.downloadsPath;
       String path = directory+'/'+name.replaceAll(' ','_')+'.gpx';
       await File(path).writeAsString(gpxString);
-      final SharedPreferences prefs = await _prefs;
-      String? jsonString = prefs.getString('files');
+      String? jsonString = widget.prefs.getString('files');
       if(jsonString != null){
         List<GpxFile> files = (json.decode(jsonString) as List).map((i) =>
             GpxFile.fromJson(i)).toList();
         files.add(GpxFile(name: name, path: path));
-        prefs.setString('files', jsonEncode(files));
+        widget.prefs.setString('files', jsonEncode(files));
       }
     }
   }
@@ -263,7 +274,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
     _location.enableBackgroundMode(enable: false);
     Navigator.pop(context, 'Stop and discard');
     widget.setPlayIcon();
-    setState(() {
+    if(this.mounted) setState(() {
       _polyline.removeWhere((element) => element.polylineId.value == 'recordingPolyline');
       widget.currentTrack.clear();
     });
@@ -275,13 +286,6 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
   @override
   void initState() {
     super.initState();
-    _location.changeNotificationOptions(iconName: 'vieiros_logo_notification',color: CustomColors.accent, onTapBringToFront: true, title: 'Recording track', description: 'Vieiros is tracking your position');
-    _location.changeSettings(interval: 10000, distanceFilter: 5);
-    Future.delayed(const Duration(milliseconds: 500), () {
-      setState(() {
-        showMap = true;
-      });
-    });
     loadCurrentTrack();
     getLocation();
   }
