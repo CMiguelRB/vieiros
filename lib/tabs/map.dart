@@ -72,9 +72,9 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
   addMarkerSet(LatLng latLng, bool isWayPoint, String? description, GoogleMapController controller) async{
     BitmapDescriptor icon;
     if(!isWayPoint){
-      icon = await BitmapDescriptor.fromAssetImage(ImageConfiguration(size: Size(100, 100)), 'assets/pin.png');
+      icon = await BitmapDescriptor.fromAssetImage(ImageConfiguration(size: Size(100, 100)), 'assets/loaded_pin.png');
     }else{
-      icon = await BitmapDescriptor.fromAssetImage(ImageConfiguration(size: Size(100, 100)), 'assets/flag.png');
+      icon = await BitmapDescriptor.fromAssetImage(ImageConfiguration(size: Size(100, 100)), 'assets/loaded_waypoint.png');
     }
     MarkerId markerId = MarkerId(Uuid().v4());
     Marker marker;
@@ -126,8 +126,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
       }
       if(lat != null && lon != null) last = LatLng(lat, lon);
       Polyline polyline = new Polyline(polylineId: new PolylineId('loadedTrack'), points: points, width: 5, color: CustomColors.accent);
-      addMarkerSet(first, false, null, controller);
-      addMarkerSet(last, false, null, controller);
+      addMarkerSet(first, false, 'Start', controller);
+      addMarkerSet(last, false, 'Finish', controller);
       if(this.mounted) setState(() {
         _polyline.add(polyline);
         currentPath = widget.loadedTrack.path as String;
@@ -310,9 +310,10 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
                 mapToolbarEnabled: true,
                 buildingsEnabled: false,
                 initialCameraPosition:
-                    CameraPosition(target: new LatLng(0.0, 0.0), zoom: 15.0),
+                    CameraPosition(target: new LatLng(43.463305, -8.273529), zoom: 15.0),
                 myLocationEnabled: true,
                 myLocationButtonEnabled: true,
+                trafficEnabled: false,
                 compassEnabled: true,
                 polylines: _polyline,
                 markers: _markers,

@@ -2,6 +2,7 @@ import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart' as latlong;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sunrise_sunset_calc/sunrise_sunset_calc.dart';
+import 'package:vieiros/components/timer.dart';
 import 'package:vieiros/model/elevation_point.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/cupertino.dart';
@@ -157,7 +158,6 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
               .split('.')
               .first
               .padLeft(8, "0");
-
           _avgPace = avgPaceMin + ':' + avgPaceSec;
           _distance = totalDistance > 1000
               ? (totalDistance / 1000).toStringAsFixed(2)
@@ -251,10 +251,11 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                   Text('Total time',
                                       style: TextStyle(
                                           color: CustomColors.subText)),
-                                  Text(_totalTime,
+                                  TimerWidget(time: _totalTime),
+                                  /*Text(_totalTime,
                                       style: TextStyle(
                                           fontSize: 35,
-                                          fontWeight: FontWeight.bold))
+                                          fontWeight: FontWeight.bold))*/
                                 ],
                               ),
                               width: MediaQuery.of(context).size.width / 2,

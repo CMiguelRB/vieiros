@@ -37,6 +37,7 @@ dependencies:
   latlong2: ^0.8.0
   intl: ^0.17.0
   sunrise_sunset_calc: ^2.1.0
+  provider: ^5.0.0
 
 dev_dependencies:
   flutter_test:
