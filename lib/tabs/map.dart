@@ -33,7 +33,6 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
   Set<Polyline> _polyline = Set();
   Set<Marker> _markers = Set();
   final _formKey = GlobalKey<FormState>();
-  String currentPath = '';
 
   getLocation() async {
     await _handlePermissions();
@@ -42,7 +41,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
         showMap = true;
       });
     });
-    _location.changeNotificationOptions(iconName: 'vieiros_logo_notification',color: CustomColors.accent, onTapBringToFront: true, title: 'Recording track', description: 'Vieiros is tracking your position');
+    _location.changeNotificationOptions(iconName: 'ic_stat_name',color: CustomColors.accent, onTapBringToFront: true, title: 'Recording track', description: 'Vieiros is tracking your position');
     _location.changeSettings(interval: 10000, distanceFilter: 5);
     LocationData _locationData;
     final GoogleMapController controller = await _mapController.future;
@@ -118,19 +117,18 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
         if(i == 0) first = LatLng(lat, lon);
         points.add(LatLng(lat, lon));
       }
+      if(lat != null && lon != null) last = LatLng(lat, lon);
       for(var i = 0; i<gpx.wpts.length;i++){
         lat = gpx.wpts[i].lat;
         lon = gpx.wpts[i].lon;
         if(lat == null || lon == null) continue;
         addMarkerSet(LatLng(lat, lon), true, gpx.wpts[i].name, controller);
       }
-      if(lat != null && lon != null) last = LatLng(lat, lon);
       Polyline polyline = new Polyline(polylineId: new PolylineId('loadedTrack'), points: points, width: 5, color: CustomColors.accent);
       addMarkerSet(first, false, 'Start', controller);
       addMarkerSet(last, false, 'Finish', controller);
       if(this.mounted) setState(() {
         _polyline.add(polyline);
-        currentPath = widget.loadedTrack.path as String;
       });
       if(lat == null || lon == null) return;
       controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
@@ -138,15 +136,17 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
     }
   }
 
-  startRecording(){
-    widget.currentTrack.isRecording = true;
+  startRecording() {
+    widget.currentTrack.setRecording(true);
     widget.currentTrack.dateTime = DateTime.now();
     _location.enableBackgroundMode(enable: true);
-    _location.onLocationChanged.listen((event) {
-      if(widget.currentTrack.isRecording){
+    _location.onLocationChanged.listen((event) async {
+      print(event.accuracy);
+      if(widget.currentTrack.isRecording && event.accuracy != null && event.accuracy! >= LocationAccuracy.balanced.index){
+
         double? lat = event.latitude;
         double? lon = event.longitude;
-        widget.currentTrack.positions.add(RecordedPosition(lat, lon, event.altitude, event.time));
+        widget.currentTrack.addPosition(RecordedPosition(lat, lon, event.altitude, event.time));
         List<LatLng> points = [];
         for(var i = 0;i<widget.currentTrack.positions.length;i++){
           double? lat = widget.currentTrack.positions[i].latitude;
@@ -154,9 +154,13 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
           if(lat != null && lon != null) points.add(LatLng(lat,lon));
         }
         Polyline recordingPolyline = Polyline(polylineId: PolylineId('recordingPolyline'), points: points, width: 5, color: CustomColors.ownPath);
+        BitmapDescriptor icon = await BitmapDescriptor.fromAssetImage(ImageConfiguration(size: Size(100, 100)), 'assets/current_pin.png');
+        Marker marker = Marker(markerId: MarkerId('recordingPin'), position: LatLng(points.first.latitude, points.first.longitude), icon: icon);
         if(this.mounted) setState(() {
           _polyline.removeWhere((element) => element.polylineId.value == 'recordingPolyline');
           _polyline.add(recordingPolyline);
+          _markers.removeWhere((element) => element.markerId.value == 'recordingPin');
+          _markers.add(marker);
         });
       }
     });
@@ -238,6 +242,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
     if(this.mounted) setState(() {
       _polyline.removeWhere((element) => element.polylineId.value == 'recordingPolyline');
       widget.currentTrack.clear();
+      _markers.removeWhere((element) => element.markerId.value == 'recordingPin');
     });
   }
 
@@ -277,6 +282,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
     if(this.mounted) setState(() {
       _polyline.removeWhere((element) => element.polylineId.value == 'recordingPolyline');
       widget.currentTrack.clear();
+      _markers.removeWhere((element) => element.markerId.value == 'recordingPin');
     });
   }
 
@@ -307,7 +313,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
                   ),
                 ].toSet(),
                 mapType: MapType.hybrid,
-                mapToolbarEnabled: true,
+                mapToolbarEnabled: false,
                 buildingsEnabled: false,
                 initialCameraPosition:
                     CameraPosition(target: new LatLng(43.463305, -8.273529), zoom: 15.0),

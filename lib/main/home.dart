@@ -31,7 +31,7 @@ class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObs
     if(index == 1){
       if(_mapKey.currentState != null){
         String? path = widget.prefs.getString('currentTrack');
-        if(path != null && _mapKey.currentState!.currentPath != path) {
+        if(path != null && widget.loadedTrack.path != path) {
           widget.loadedTrack.clear();
           _mapKey.currentState!.loadTrack(path);
         }
@@ -43,6 +43,9 @@ class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObs
           });
           return;
         }
+      }
+      if(_infoKey.currentState != null){
+        _infoKey.currentState!.clearScreen();
       }
       _fabIcon = Icon(Icons.play_arrow);
     }else if(index == 2){

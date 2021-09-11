@@ -1,4 +1,3 @@
-import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart' as latlong;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sunrise_sunset_calc/sunrise_sunset_calc.dart';
@@ -29,11 +28,12 @@ class Info extends StatefulWidget {
 
 class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   int? _slideState = 0;
+  bool _recording = false;
   ElevationPoint? _selectedPoint;
   String _distanceUnit = 'Km';
-  String _distance = '00.00';
-  String _totalTime = '00:00:00';
-  String _avgPace = '--:--';
+  String _distance = '0';
+  String _totalTime = '--:--:--';
+  String _avgPace = '00:00';
   String _paceUnit = 'min/Km';
   String _elevation = '0';
   double _elevationMin = 0;
@@ -45,12 +45,12 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   DateTime? _sunset;
   String _sunsetTime = '--:--';
   String _toSunset = '--:--';
+  Color _chartColor = CustomColors.accent;
   List<charts.Series<ElevationPoint, num>> _elevationData = [];
   Map<int, Widget> _tabMap = {
     0: Text('Current track'),
     1: Text('Loaded track')
   };
-  bool _recording = true;
 
   Map axisValuesCenter = {
     'mainAxisSize': MainAxisSize.max,
@@ -60,8 +60,30 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
-    //_getGeolocation();
+    _recording = widget.currentTrack.isRecording;
     _loadTrackData();
+    widget.currentTrack.eventListener.listen((_) => recordingListener(widget.currentTrack));
+  }
+
+  void recordingListener(CurrentTrack currentTrack){
+    if(currentTrack.isRecording){
+      clearScreen();
+      setState(() {
+        _slideState = 0;
+        _recording = true;
+      });
+      if(currentTrack.positions.length > 0){
+        _getDaylight();
+        _loadTrackData();
+      }
+    }else{
+      clearScreen();
+      _loadTrackData();
+      setState(() {
+        _slideState = 1;
+        _recording = false;
+      });
+    }
   }
 
   @override
@@ -69,37 +91,40 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
     super.dispose();
   }
 
-  /*_getDaylight() async {
-    double? lat = locationData.latitude;
-    double? lon = locationData.longitude;
-    if (lat != null && lon != null && this.mounted) {
-      setState(() {
-        _sunset = getSunriseSunset(
-                lat, lon, DateTime.now().timeZoneOffset.inHours, DateTime.now())
-            .sunset;
-        if (_sunset != null)
-          _toSunset =
-              DateTime.now().difference(_sunset!).abs().inHours.toString();
-        if (_sunset != null)
-          _toSunset = (DateTime.now().difference(_sunset!).abs().inMinutes -
-                  (DateTime.now().difference(_sunset!).abs().inHours * 60))
-              .toString();
-      });
+  _getDaylight() async {
+    if(widget.currentTrack.positions.length > 0){
+      double? lat = widget.currentTrack.positions[0].latitude;
+      double? lon = widget.currentTrack.positions[0].longitude;
+      if (lat != null && lon != null && this.mounted) {
+        setState(() {
+          _sunset = getSunriseSunset(
+              lat, lon, DateTime.now().timeZoneOffset.inHours, DateTime.now())
+              .sunset;
+          if(_sunset != null)
+            _sunsetTime = _sunset!.hour.toString()+':'+_sunset!.minute.toString();
+          if (_sunset != null){
+            String toSunsetH = (DateTime.now().difference(_sunset!).abs().inHours - DateTime.now().timeZoneOffset.inHours).toString();
+            toSunsetH = toSunsetH.length > 1 ? toSunsetH : '0'+toSunsetH;
+            String toSunsetM = (DateTime.now().difference(_sunset!).abs().inMinutes -
+                (DateTime.now().difference(_sunset!).abs().inHours * 60))
+                .toString();
+            toSunsetM = toSunsetM.length > 1 ? toSunsetM : '0'+toSunsetM;
+            _toSunset = toSunsetH  + ':' + toSunsetM;
+          }
+        });
+      }
     }
-  }*/
+  }
 
   loadTrack(path) async {
     await widget.loadedTrack.loadTrack(path);
     _loadTrackData();
   }
 
-  /// Create one series with sample hard coded data.
   void _loadTrackData() async {
     List<ElevationPoint> elevationPoints = [];
-    final chartColor = _recording ? CustomColors.ownPath : CustomColors.accent;
-    if (widget.loadedTrack.gpx != null) {
+    if(widget.currentTrack.isRecording && _slideState == 0){
       final latlong.Distance distance = new latlong.Distance();
-      Gpx gpx = widget.loadedTrack.gpx as Gpx;
       latlong.LatLng first = latlong.LatLng(0, 0);
       double? lat;
       double? lon;
@@ -107,28 +132,24 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
       int totalDistance = 0;
       latlong.LatLng previous = latlong.LatLng(0, 0);
       DateTime? timeStart;
-      DateTime? timeEnd;
       double maxElevation = 0;
       double minElevation = 8849;
       double previousElevation = 0;
       double elevationGain = 0;
-      int totalPoints = gpx.trks[0].trksegs[0].trkpts.length;
-      for (var i = 0; i < gpx.trks[0].trksegs[0].trkpts.length; i++) {
+      int totalPoints = widget.currentTrack.positions.length;
+      for (var i = 0; i < widget.currentTrack.positions.length; i++) {
         if((totalPoints > 1000 && i%2 != 0)||(totalPoints > 2000 && i%3 != 0)||(totalPoints > 5000 && i%5 != 0)){
           continue;
         }
-        lat = gpx.trks[0].trksegs[0].trkpts[i].lat;
-        lon = gpx.trks[0].trksegs[0].trkpts[i].lon;
-        ele = gpx.trks[0].trksegs[0].trkpts[i].ele;
+        lat = widget.currentTrack.positions[i].longitude;
+        lon = widget.currentTrack.positions[i].longitude;
+        ele = widget.currentTrack.positions[i].elevation;
         if (lat == null || lon == null || ele == null) continue;
         if (i == 0) {
           first = latlong.LatLng(lat, lon);
           previous = first;
           previousElevation = ele;
-          timeStart = gpx.trks[0].trksegs[0].trkpts[i].time;
-        }
-        if (i == gpx.trks[0].trksegs[0].trkpts.length - 1) {
-          timeEnd = gpx.trks[0].trksegs[0].trkpts[i].time;
+          timeStart = DateTime.fromMillisecondsSinceEpoch(widget.currentTrack.positions[i].timestamp!.toInt());
         }
         if (ele > maxElevation) maxElevation = ele;
         if (ele < minElevation) minElevation = ele;
@@ -142,22 +163,14 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
         totalDistance += dist;
         elevationPoints.add(ElevationPoint(totalDistance, ele));
       }
-      double avgPaceSeconds = timeEnd!.difference(timeStart!).abs().inMilliseconds/1000 /
+      double avgPaceSeconds = DateTime.now().difference(timeStart!).abs().inMilliseconds/1000 /
           (totalDistance / 1000);
       String avgPaceMin = (avgPaceSeconds / 60).toStringAsFixed(0);
       String avgPaceSec = (avgPaceSeconds % 60).toStringAsFixed(0);
-      avgPaceMin = avgPaceMin.length > 1 ? avgPaceMin : "0$avgPaceMin";
-      avgPaceSec = avgPaceSec.length > 1 ? avgPaceSec : "0$avgPaceSec";
+      avgPaceMin = !avgPaceSeconds.isNaN && !avgPaceSeconds.isInfinite && avgPaceSeconds < 3600  ? (avgPaceMin.length > 1 ? avgPaceMin : "0$avgPaceMin") : '00';
+      avgPaceSec = !avgPaceSeconds.isNaN && !avgPaceSeconds.isInfinite && avgPaceSeconds < 3600 ? (avgPaceSec.length > 1 ? avgPaceSec : "0$avgPaceSec"): '00';
       if (this.mounted)
         setState(() {
-          currentPath = widget.loadedTrack.path as String;
-          _totalTime = timeEnd!
-              .difference(timeStart!)
-              .abs()
-              .toString()
-              .split('.')
-              .first
-              .padLeft(8, "0");
           _avgPace = avgPaceMin + ':' + avgPaceSec;
           _distance = totalDistance > 1000
               ? (totalDistance / 1000).toStringAsFixed(2)
@@ -166,11 +179,12 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           _elevation = maxElevation.toInt().toString();
           _elevationMin = minElevation;
           _elevationGain = elevationGain.toInt().toString();
+          _elevationCurrent = widget.currentTrack.positions.last.elevation!.toInt().toString();
           _elevationData = [
             new charts.Series<ElevationPoint, int>(
                 id: 'elevation',
                 colorFn: (_, __) => charts.Color(
-                    r: chartColor.red, g: chartColor.green, b: chartColor.blue),
+                    r: _chartColor.red, g: _chartColor.green, b: _chartColor.blue),
                 domainFn: (ElevationPoint point, _) => point.totalDistance,
                 measureFn: (ElevationPoint point, _) => point.elevation,
                 strokeWidthPxFn: (datum, index) => 1,
@@ -178,39 +192,127 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           ];
           _loadingElevationChart = false;
         });
-    } else {
-      if (this.mounted)
-        setState(() {
-          _loadingElevationChart = false;
-          _totalTime = '00:00:00';
-          _distance = '0';
-          _distanceUnit = 'm';
-          _elevation = '0';
-          _elevationMin = 0;
-          _elevationGain = '0';
-          _elevationData = [
-            new charts.Series<ElevationPoint, int>(
-                id: 'elevation',
-                colorFn: (_, __) => charts.Color(
-                    r: chartColor.red, g: chartColor.green, b: chartColor.blue),
-                domainFn: (ElevationPoint point, _) => point.totalDistance,
-                measureFn: (ElevationPoint point, _) => point.elevation,
-                strokeWidthPxFn: (datum, index) => 1,
-                data: elevationPoints)
-          ];
-        });
+    }else{
+      if (widget.loadedTrack.gpx != null) {
+        final latlong.Distance distance = new latlong.Distance();
+        Gpx gpx = widget.loadedTrack.gpx as Gpx;
+        latlong.LatLng first = latlong.LatLng(0, 0);
+        double? lat;
+        double? lon;
+        double? ele;
+        int totalDistance = 0;
+        latlong.LatLng previous = latlong.LatLng(0, 0);
+        DateTime? timeStart;
+        DateTime? timeEnd;
+        double maxElevation = 0;
+        double minElevation = 8849;
+        double previousElevation = 0;
+        double elevationGain = 0;
+        int totalPoints = gpx.trks[0].trksegs[0].trkpts.length;
+        for (var i = 0; i < gpx.trks[0].trksegs[0].trkpts.length; i++) {
+          if(((totalPoints > 1000 && i%2 != 0)||(totalPoints > 2000 && i%3 != 0)||(totalPoints > 5000 && i%5 != 0)) && i != gpx.trks[0].trksegs[0].trkpts.length - 1){
+            continue;
+          }
+          lat = gpx.trks[0].trksegs[0].trkpts[i].lat;
+          lon = gpx.trks[0].trksegs[0].trkpts[i].lon;
+          ele = gpx.trks[0].trksegs[0].trkpts[i].ele;
+          if (lat == null || lon == null || ele == null) continue;
+          if (i == 0) {
+            first = latlong.LatLng(lat, lon);
+            previous = first;
+            previousElevation = ele;
+            timeStart = gpx.trks[0].trksegs[0].trkpts[i].time;
+          }
+          if (i == gpx.trks[0].trksegs[0].trkpts.length - 1) {
+            timeEnd = gpx.trks[0].trksegs[0].trkpts[i].time;
+          }
+          if (ele > maxElevation) maxElevation = ele;
+          if (ele < minElevation) minElevation = ele;
+          double elevationDiff = ele - previousElevation;
+          if (elevationDiff > 0) elevationGain += elevationDiff;
+          int dist = distance
+              .as(latlong.LengthUnit.Meter, latlong.LatLng(lat, lon), previous)
+              .toInt();
+          previous = latlong.LatLng(lat, lon);
+          previousElevation = ele;
+          totalDistance += dist;
+          elevationPoints.add(ElevationPoint(totalDistance, ele));
+        }
+        double avgPaceSeconds = timeEnd!.difference(timeStart!).abs().inMilliseconds/1000 /
+            (totalDistance / 1000);
+        String avgPaceMin = (avgPaceSeconds / 60).toStringAsFixed(0);
+        String avgPaceSec = (avgPaceSeconds % 60).toStringAsFixed(0);
+        avgPaceMin = avgPaceMin.length > 1 ? avgPaceMin : "0$avgPaceMin";
+        avgPaceSec = avgPaceSec.length > 1 ? avgPaceSec : "0$avgPaceSec";
+        if (this.mounted)
+          setState(() {
+            currentPath = widget.loadedTrack.path as String;
+            _totalTime = timeEnd!
+                .difference(timeStart!)
+                .abs()
+                .toString()
+                .split('.')
+                .first
+                .padLeft(8, "0");
+            _avgPace = avgPaceMin + ':' + avgPaceSec;
+            _distance = totalDistance > 1000
+                ? (totalDistance / 1000).toStringAsFixed(2)
+                : totalDistance.toString();
+            _distanceUnit = totalDistance > 1000 ? 'Km' : 'm';
+            _elevation = maxElevation.toInt().toString();
+            _elevationMin = minElevation;
+            _elevationGain = elevationGain.toInt().toString();
+            _elevationData = [
+              new charts.Series<ElevationPoint, int>(
+                  id: 'elevation',
+                  colorFn: (_, __) => charts.Color(
+                      r: _chartColor.red, g: _chartColor.green, b: _chartColor.blue),
+                  domainFn: (ElevationPoint point, _) => point.totalDistance,
+                  measureFn: (ElevationPoint point, _) => point.elevation,
+                  strokeWidthPxFn: (datum, index) => 1,
+                  data: elevationPoints)
+            ];
+            _loadingElevationChart = false;
+          });
+      } else {
+        clearScreen();
+      }
     }
+  }
+
+  void clearScreen(){
+    List<ElevationPoint> elevationPoints = [];
+    if (this.mounted)
+      setState(() {
+        _selectedPoint = null;
+        _chartColor = CustomColors.accent;
+        _loadingElevationChart = false;
+        _totalTime = '--:--:--';
+        _distance = '0';
+        _distanceUnit = 'm';
+        _elevation = '0';
+        _elevationMin = 0;
+        _elevationGain = '-';
+        _elevationCurrent = '-';
+        _avgPace = '00:00';
+        //_toSunset = '--:--';
+        //_sunsetTime = '--:--';
+        _elevationData = [
+          new charts.Series<ElevationPoint, int>(
+              id: 'elevation',
+              colorFn: (_, __) => charts.Color(
+                  r: _chartColor.red, g: _chartColor.green, b: _chartColor.blue),
+              domainFn: (ElevationPoint point, _) => point.totalDistance,
+              measureFn: (ElevationPoint point, _) => point.elevation,
+              strokeWidthPxFn: (datum, index) => 1,
+              data: elevationPoints)
+        ];
+      });
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    /*final distance = _selectedPoint != null
-        ? NumberFormat('###,###')
-            .format(_selectedPoint!.totalDistance)
-            .replaceAll(',', '.')
-        : '';
-    final elevation = '';*/
 
     return SafeArea(
         child: Column(children: [
@@ -222,10 +324,14 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                       children: _tabMap,
                       groupValue: _slideState,
                       onValueChanged: (value) {
-                        if (this.mounted)
+                        if (this.mounted){
                           setState(() {
                             _slideState = int.parse(value!.toString());
                           });
+                          clearScreen();
+                          _getDaylight();
+                          _loadTrackData();
+                        }
                       }))
               : Container()),
       Flexible(
@@ -251,11 +357,11 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                   Text('Total time',
                                       style: TextStyle(
                                           color: CustomColors.subText)),
-                                  TimerWidget(time: _totalTime),
-                                  /*Text(_totalTime,
+                                  widget.currentTrack.isRecording && _slideState == 0 ? TimerWidget(time: widget.currentTrack.dateTime!.millisecondsSinceEpoch) :
+                                  Text(_totalTime,
                                       style: TextStyle(
                                           fontSize: 35,
-                                          fontWeight: FontWeight.bold))*/
+                                          fontWeight: FontWeight.bold))
                                 ],
                               ),
                               width: MediaQuery.of(context).size.width / 2,
@@ -567,11 +673,12 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                     ])),
             Flexible(
                 flex: 1,
-                child: Column(
+                child: Container(margin: EdgeInsets.only(left: 10), child:Column(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Container(color: Colors.red, child: Text('')),
+                      Column( mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly, crossAxisAlignment: CrossAxisAlignment.start,children: [Text(_selectedPoint != null ? 'Elevation: '+_selectedPoint!.elevation.toInt().toString()+' m.':''),Text(_selectedPoint != null ? 'Distance: '+_selectedPoint!.totalDistance.toString()+' m.':''),Container(margin: EdgeInsets.only(right: 20),)]),
                       _loadingElevationChart
                           ? CircularProgressIndicator(
                               color: CustomColors.accent,
@@ -646,7 +753,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                     ],
                                   )),
                                   animate: true))
-                    ]))
+                    ])))
           ]))
     ]));
   }

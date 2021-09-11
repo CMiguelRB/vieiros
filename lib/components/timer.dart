@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 class TimerWidget extends StatefulWidget{
 
-  final String time;
+  final int time;
 
   TimerWidget({Key? key, required this.time});
 
@@ -20,14 +20,13 @@ class _TimerState extends State<TimerWidget>{
   @override
   void initState() {
     super.initState();
-    //_baseTime = widget.time;
+    _baseTime = widget.time;
     timer = Timer.periodic(Duration(seconds: 1), (Timer t) => _updateTimer());
-  _totalTime = widget.time;
   }
 
   _updateTimer(){
     setState(() {
-      int diff = DateTime.now().millisecondsSinceEpoch - 1628300749000;
+      int diff = DateTime.now().millisecondsSinceEpoch - _baseTime;
       _totalTime = Duration(milliseconds: diff).abs().toString().split('.')[0];
       if(_totalTime.split(':')[0].length < 2){
         _totalTime = '0'+_totalTime;

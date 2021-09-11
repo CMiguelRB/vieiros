@@ -1,4 +1,4 @@
-package com.rabocorp.vieiros.vieiros;
+package com.rabocorp.vieiros;
 
 import io.flutter.embedding.android.FlutterActivity;
 
