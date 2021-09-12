@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:latlong2/latlong.dart' as latlong;
 import 'package:android_path_provider/android_path_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -16,6 +18,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gpx/gpx.dart';
+import 'package:vieiros/model/waypoint.dart';
 import 'package:vieiros/resources/CustomColors.dart';
 
 class Map extends StatefulWidget {
@@ -32,6 +35,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
   Completer<GoogleMapController> _mapController = Completer();
   Set<Polyline> _polyline = Set();
   Set<Marker> _markers = Set();
+  List<Marker> _currentMarkers = [];
   final _formKey = GlobalKey<FormState>();
 
   getLocation() async {
@@ -92,11 +96,37 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
     loadCurrentTrack();
   }
 
+  navigateTrack(path) async{
+    await widget.loadedTrack.loadTrack(path);
+    navigateCurrentTrack();
+  }
+
   clearTrack(){
     if(this.mounted) setState(() {
       _polyline.clear();
       _markers.clear();
     });
+  }
+
+  navigateCurrentTrack() async{
+    final GoogleMapController controller = await _mapController.future;
+    if(widget.loadedTrack.gpx != null) {
+      Gpx gpx = widget.loadedTrack.gpx as Gpx;
+      LatLng first = LatLng(0, 0);
+      double? lat;
+      double? lon;
+      for (var i = 0; i < gpx.trks[0].trksegs[0].trkpts.length; i++) {
+        lat = gpx.trks[0].trksegs[0].trkpts[i].lat;
+        lon = gpx.trks[0].trksegs[0].trkpts[i].lon;
+        if (lat == null || lon == null) continue;
+        if (i == 0){
+          first = LatLng(lat, lon);
+          break;
+        }
+      }
+      controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+          target: first, zoom: 14.0)));
+    }
   }
 
   loadCurrentTrack() async {
@@ -136,14 +166,20 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
     }
   }
 
-  startRecording() {
+  startRecording() async {
     widget.currentTrack.setRecording(true);
     widget.currentTrack.dateTime = DateTime.now();
     _location.enableBackgroundMode(enable: true);
+    FlutterTts flutterTts = FlutterTts();
+    String lang = Platform.localeName.replaceAll("_", "-");
+    await flutterTts.setLanguage(lang);
+    await flutterTts.setSpeechRate(0.5);
+    await flutterTts.setVolume(1.0);
+    await flutterTts.setPitch(0.9);
+    int referenceDistance = 1000;
+    final latlong.Distance distance = new latlong.Distance();
     _location.onLocationChanged.listen((event) async {
-      print(event.accuracy);
       if(widget.currentTrack.isRecording && event.accuracy != null && event.accuracy! >= LocationAccuracy.balanced.index){
-
         double? lat = event.latitude;
         double? lon = event.longitude;
         widget.currentTrack.addPosition(RecordedPosition(lat, lon, event.altitude, event.time));
@@ -156,6 +192,35 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
         Polyline recordingPolyline = Polyline(polylineId: PolylineId('recordingPolyline'), points: points, width: 5, color: CustomColors.ownPath);
         BitmapDescriptor icon = await BitmapDescriptor.fromAssetImage(ImageConfiguration(size: Size(100, 100)), 'assets/current_pin.png');
         Marker marker = Marker(markerId: MarkerId('recordingPin'), position: LatLng(points.first.latitude, points.first.longitude), icon: icon);
+        latlong.LatLng previous = latlong.LatLng(0, 0);
+        int dist = 0;
+        for(var i = 0; i< recordingPolyline.points.length; i++){
+          if(i==0) previous = latlong.LatLng(recordingPolyline.points[i].latitude, recordingPolyline.points[i].longitude);
+          dist = distance
+              .as(latlong.LengthUnit.Meter, latlong.LatLng(recordingPolyline.points[i].latitude, recordingPolyline.points[i].longitude), previous)
+              .toInt();
+        }
+        if(event.latitude != null && event.longitude != null)previous = latlong.LatLng(event.latitude as double, event.longitude as double);
+        if(dist > referenceDistance && (widget.prefs.getString("voice_alerts") == null || widget.prefs.getString("voice_alerts") == 'true')){
+          DateTime? start = widget.currentTrack.dateTime;
+          int secs = DateTime.now().difference(start!).abs().inSeconds;
+          String hours = '';
+          String minutes = '';
+          String seconds = '';
+          if(secs > 3600){
+            int h = secs ~/ 3600;
+            hours = h.toString() + ' hours';
+            secs -= h*3600;
+          }
+          if(secs > 60){
+            int m = secs ~/ 60;
+            minutes = m.toString() + ' minutes';
+            secs -= m*60;
+          }
+          seconds = secs.toString() + ' seconds';
+          flutterTts.speak((dist~/1000).toString()+' kilometers in $hours $minutes $seconds');
+          referenceDistance += 1000;
+        }
         if(this.mounted) setState(() {
           _polyline.removeWhere((element) => element.polylineId.value == 'recordingPolyline');
           _polyline.add(recordingPolyline);
@@ -163,6 +228,97 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
           _markers.add(marker);
         });
       }
+    });
+  }
+
+  _currentMarkerDialog(LatLng latLng){
+    if(!widget.currentTrack.isRecording) return;
+    String name = '';
+    showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+      content: Form(
+          key: _formKey,
+          child:TextFormField(decoration: InputDecoration(labelText: 'Waypoint name'), onChanged: (value) => {name = value},validator: (text) {
+            if (text == null || text.isEmpty) {
+              return "Empty name";
+            }
+            name = text;
+            return null;
+          })),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => _addCurrentMarker(latLng, name, false, null),
+          child: const Text('Ok'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, 'Cancel'),
+          child: const Text('Cancel'),
+        )
+      ],
+    ));
+  }
+
+  _addCurrentMarker(LatLng latLng, String name, bool edit, MarkerId? markerId) async{
+    if(edit){
+      Navigator.pop(context, 'Edit');
+    }else{
+      Navigator.pop(context, 'Ok');
+    }
+    BitmapDescriptor icon = await BitmapDescriptor.fromAssetImage(ImageConfiguration(size: Size(100, 100)), 'assets/current_waypoint.png');
+    MarkerId mrkId;
+    if(edit && markerId != null){
+      mrkId = markerId;
+    }else{
+      mrkId = MarkerId(Uuid().v4());
+    }
+    Marker marker;
+    marker = Marker(markerId: mrkId, position: latLng, icon: icon, infoWindow: InfoWindow(title: name), onTap: () => _editMarkerDialog(mrkId, latLng, name));
+    if(this.mounted) setState(() {
+      if(edit) {
+        _markers.removeWhere((element) => element.markerId.value == mrkId.value);
+        _currentMarkers.removeWhere((element) => element.markerId.value == mrkId.value);
+      }
+      _currentMarkers.add(marker);
+      _markers.add(marker);
+    });
+  }
+
+  _editMarkerDialog(MarkerId markerId, LatLng latLng, String name){
+    showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          content: Form(
+              key: _formKey,
+              child:TextFormField(decoration: InputDecoration(labelText: 'Waypoint name'), initialValue: name, onChanged: (value) => {name = value},validator: (text) {
+                if (text == null || text.isEmpty) {
+                  return "Empty name";
+                }
+                name = text;
+                return null;
+              })),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => _removeMarker(markerId),
+              child: const Text('Delete'),
+            ),
+            TextButton(
+              onPressed: () => _addCurrentMarker(latLng, name, true, markerId),
+              child: const Text('Edit'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'Cancel'),
+              child: const Text('Cancel'),
+            )
+          ],
+        ));
+  }
+
+  _removeMarker(MarkerId markerId){
+    Navigator.pop(context, 'Delete');
+    if(this.mounted) setState(() {
+      _markers.removeWhere((element) => element.markerId.value == markerId.value);
+      _currentMarkers.removeWhere((element) => element.markerId.value == markerId.value);
     });
   }
 
@@ -227,6 +383,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
     gpx.metadata = Metadata(name: name);
     gpx.version = '1.1';
     gpx.creator = 'vieiros';
+    _setWaypoints();
     for(var i = 0; i<widget.currentTrack.waypoints.length; i++){
       gpx.wpts.add(Wpt(lat: widget.currentTrack.waypoints[i].position.latitude, lon: widget.currentTrack.waypoints[i].position.longitude, ele: widget.currentTrack.waypoints[i].position.elevation, name: widget.currentTrack.waypoints[i].name));
     }
@@ -243,7 +400,14 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
       _polyline.removeWhere((element) => element.polylineId.value == 'recordingPolyline');
       widget.currentTrack.clear();
       _markers.removeWhere((element) => element.markerId.value == 'recordingPin');
+      _currentMarkers = [];
     });
+  }
+
+  _setWaypoints(){
+    for(var i = 0;i<_currentMarkers.length;i++){
+      widget.currentTrack.waypoints.add(new Waypoint(position: new RecordedPosition(_currentMarkers[i].position.latitude, _currentMarkers[i].position.longitude, null, null), name: _currentMarkers[i].infoWindow.title ?? ''));
+    }
   }
 
   void _writeFile(gpxString, name) async{
@@ -282,6 +446,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
     if(this.mounted) setState(() {
       _polyline.removeWhere((element) => element.polylineId.value == 'recordingPolyline');
       widget.currentTrack.clear();
+      _currentMarkers = [];
       _markers.removeWhere((element) => element.markerId.value == 'recordingPin');
     });
   }
@@ -323,6 +488,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin{
                 compassEnabled: true,
                 polylines: _polyline,
                 markers: _markers,
+                onLongPress: _currentMarkerDialog,
                 onMapCreated: (GoogleMapController controller) {
                   if (!_mapController.isCompleted) {
                     _mapController.complete(controller);

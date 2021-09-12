@@ -1,4 +1,5 @@
 import 'package:latlong2/latlong.dart' as latlong;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sunrise_sunset_calc/sunrise_sunset_calc.dart';
 import 'package:vieiros/components/timer.dart';
@@ -10,6 +11,7 @@ import 'package:gpx/gpx.dart';
 import 'package:vieiros/model/current_track.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:vieiros/resources/CustomColors.dart';
+import 'package:vieiros/resources/Themes.dart';
 
 class Info extends StatefulWidget {
   final CurrentTrack currentTrack;
@@ -62,21 +64,22 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
     super.initState();
     _recording = widget.currentTrack.isRecording;
     _loadTrackData();
-    widget.currentTrack.eventListener.listen((_) => recordingListener(widget.currentTrack));
+    widget.currentTrack.eventListener
+        .listen((_) => recordingListener(widget.currentTrack));
   }
 
-  void recordingListener(CurrentTrack currentTrack){
-    if(currentTrack.isRecording){
+  void recordingListener(CurrentTrack currentTrack) {
+    if (currentTrack.isRecording) {
       clearScreen();
       setState(() {
         _slideState = 0;
         _recording = true;
       });
-      if(currentTrack.positions.length > 0){
+      if (currentTrack.positions.length > 0) {
         _getDaylight();
         _loadTrackData();
       }
-    }else{
+    } else {
       clearScreen();
       _loadTrackData();
       setState(() {
@@ -92,24 +95,31 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   }
 
   _getDaylight() async {
-    if(widget.currentTrack.positions.length > 0){
+    if (widget.currentTrack.positions.length > 0) {
       double? lat = widget.currentTrack.positions[0].latitude;
       double? lon = widget.currentTrack.positions[0].longitude;
       if (lat != null && lon != null && this.mounted) {
         setState(() {
-          _sunset = getSunriseSunset(
-              lat, lon, DateTime.now().timeZoneOffset.inHours, DateTime.now())
+          _sunset = getSunriseSunset(lat, lon,
+                  DateTime.now().timeZoneOffset.inHours, DateTime.now())
               .sunset;
-          if(_sunset != null)
-            _sunsetTime = _sunset!.hour.toString()+':'+_sunset!.minute.toString();
-          if (_sunset != null){
-            String toSunsetH = (DateTime.now().difference(_sunset!).abs().inHours - DateTime.now().timeZoneOffset.inHours).toString();
-            toSunsetH = toSunsetH.length > 1 ? toSunsetH : '0'+toSunsetH;
-            String toSunsetM = (DateTime.now().difference(_sunset!).abs().inMinutes -
-                (DateTime.now().difference(_sunset!).abs().inHours * 60))
+          if (_sunset != null)
+            _sunsetTime =
+                _sunset!.hour.toString() + ':' + _sunset!.minute.toString();
+          if (_sunset != null) {
+            String toSunsetH =
+                (DateTime.now().difference(_sunset!).abs().inHours -
+                        DateTime.now().timeZoneOffset.inHours)
+                    .toString();
+            toSunsetH = toSunsetH.length > 1 ? toSunsetH : '0' + toSunsetH;
+            String toSunsetM = (DateTime.now()
+                        .difference(_sunset!)
+                        .abs()
+                        .inMinutes -
+                    (DateTime.now().difference(_sunset!).abs().inHours * 60))
                 .toString();
-            toSunsetM = toSunsetM.length > 1 ? toSunsetM : '0'+toSunsetM;
-            _toSunset = toSunsetH  + ':' + toSunsetM;
+            toSunsetM = toSunsetM.length > 1 ? toSunsetM : '0' + toSunsetM;
+            _toSunset = toSunsetH + ':' + toSunsetM;
           }
         });
       }
@@ -123,7 +133,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
 
   void _loadTrackData() async {
     List<ElevationPoint> elevationPoints = [];
-    if(widget.currentTrack.isRecording && _slideState == 0){
+    if (widget.currentTrack.isRecording && _slideState == 0) {
       final latlong.Distance distance = new latlong.Distance();
       latlong.LatLng first = latlong.LatLng(0, 0);
       double? lat;
@@ -138,7 +148,9 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
       double elevationGain = 0;
       int totalPoints = widget.currentTrack.positions.length;
       for (var i = 0; i < widget.currentTrack.positions.length; i++) {
-        if((totalPoints > 1000 && i%2 != 0)||(totalPoints > 2000 && i%3 != 0)||(totalPoints > 5000 && i%5 != 0)){
+        if ((totalPoints > 1000 && i % 2 != 0) ||
+            (totalPoints > 2000 && i % 3 != 0) ||
+            (totalPoints > 5000 && i % 5 != 0)) {
           continue;
         }
         lat = widget.currentTrack.positions[i].longitude;
@@ -149,7 +161,8 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           first = latlong.LatLng(lat, lon);
           previous = first;
           previousElevation = ele;
-          timeStart = DateTime.fromMillisecondsSinceEpoch(widget.currentTrack.positions[i].timestamp!.toInt());
+          timeStart = DateTime.fromMillisecondsSinceEpoch(
+              widget.currentTrack.positions[i].timestamp!.toInt());
         }
         if (ele > maxElevation) maxElevation = ele;
         if (ele < minElevation) minElevation = ele;
@@ -163,12 +176,23 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
         totalDistance += dist;
         elevationPoints.add(ElevationPoint(totalDistance, ele));
       }
-      double avgPaceSeconds = DateTime.now().difference(timeStart!).abs().inMilliseconds/1000 /
-          (totalDistance / 1000);
+
+      double avgPaceSeconds =
+          DateTime.now().difference(timeStart!).abs().inMilliseconds /
+              1000 /
+              (totalDistance / 1000);
       String avgPaceMin = (avgPaceSeconds / 60).toStringAsFixed(0);
       String avgPaceSec = (avgPaceSeconds % 60).toStringAsFixed(0);
-      avgPaceMin = !avgPaceSeconds.isNaN && !avgPaceSeconds.isInfinite && avgPaceSeconds < 3600  ? (avgPaceMin.length > 1 ? avgPaceMin : "0$avgPaceMin") : '00';
-      avgPaceSec = !avgPaceSeconds.isNaN && !avgPaceSeconds.isInfinite && avgPaceSeconds < 3600 ? (avgPaceSec.length > 1 ? avgPaceSec : "0$avgPaceSec"): '00';
+      avgPaceMin = !avgPaceSeconds.isNaN &&
+              !avgPaceSeconds.isInfinite &&
+              avgPaceSeconds < 3600
+          ? (avgPaceMin.length > 1 ? avgPaceMin : "0$avgPaceMin")
+          : '00';
+      avgPaceSec = !avgPaceSeconds.isNaN &&
+              !avgPaceSeconds.isInfinite &&
+              avgPaceSeconds < 3600
+          ? (avgPaceSec.length > 1 ? avgPaceSec : "0$avgPaceSec")
+          : '00';
       if (this.mounted)
         setState(() {
           _avgPace = avgPaceMin + ':' + avgPaceSec;
@@ -179,12 +203,15 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           _elevation = maxElevation.toInt().toString();
           _elevationMin = minElevation;
           _elevationGain = elevationGain.toInt().toString();
-          _elevationCurrent = widget.currentTrack.positions.last.elevation!.toInt().toString();
+          _elevationCurrent =
+              widget.currentTrack.positions.last.elevation!.toInt().toString();
           _elevationData = [
             new charts.Series<ElevationPoint, int>(
                 id: 'elevation',
                 colorFn: (_, __) => charts.Color(
-                    r: _chartColor.red, g: _chartColor.green, b: _chartColor.blue),
+                    r: _chartColor.red,
+                    g: _chartColor.green,
+                    b: _chartColor.blue),
                 domainFn: (ElevationPoint point, _) => point.totalDistance,
                 measureFn: (ElevationPoint point, _) => point.elevation,
                 strokeWidthPxFn: (datum, index) => 1,
@@ -192,7 +219,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           ];
           _loadingElevationChart = false;
         });
-    }else{
+    } else {
       if (widget.loadedTrack.gpx != null) {
         final latlong.Distance distance = new latlong.Distance();
         Gpx gpx = widget.loadedTrack.gpx as Gpx;
@@ -210,7 +237,10 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
         double elevationGain = 0;
         int totalPoints = gpx.trks[0].trksegs[0].trkpts.length;
         for (var i = 0; i < gpx.trks[0].trksegs[0].trkpts.length; i++) {
-          if(((totalPoints > 1000 && i%2 != 0)||(totalPoints > 2000 && i%3 != 0)||(totalPoints > 5000 && i%5 != 0)) && i != gpx.trks[0].trksegs[0].trkpts.length - 1){
+          if (((totalPoints > 1000 && i % 2 != 0) ||
+                  (totalPoints > 2000 && i % 3 != 0) ||
+                  (totalPoints > 5000 && i % 5 != 0)) &&
+              i != gpx.trks[0].trksegs[0].trkpts.length - 1) {
             continue;
           }
           lat = gpx.trks[0].trksegs[0].trkpts[i].lat;
@@ -238,8 +268,10 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           totalDistance += dist;
           elevationPoints.add(ElevationPoint(totalDistance, ele));
         }
-        double avgPaceSeconds = timeEnd!.difference(timeStart!).abs().inMilliseconds/1000 /
-            (totalDistance / 1000);
+        double avgPaceSeconds =
+            timeEnd!.difference(timeStart!).abs().inMilliseconds /
+                1000 /
+                (totalDistance / 1000);
         String avgPaceMin = (avgPaceSeconds / 60).toStringAsFixed(0);
         String avgPaceSec = (avgPaceSeconds % 60).toStringAsFixed(0);
         avgPaceMin = avgPaceMin.length > 1 ? avgPaceMin : "0$avgPaceMin";
@@ -266,7 +298,9 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
               new charts.Series<ElevationPoint, int>(
                   id: 'elevation',
                   colorFn: (_, __) => charts.Color(
-                      r: _chartColor.red, g: _chartColor.green, b: _chartColor.blue),
+                      r: _chartColor.red,
+                      g: _chartColor.green,
+                      b: _chartColor.blue),
                   domainFn: (ElevationPoint point, _) => point.totalDistance,
                   measureFn: (ElevationPoint point, _) => point.elevation,
                   strokeWidthPxFn: (datum, index) => 1,
@@ -280,7 +314,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  void clearScreen(){
+  void clearScreen() {
     List<ElevationPoint> elevationPoints = [];
     if (this.mounted)
       setState(() {
@@ -301,7 +335,9 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           new charts.Series<ElevationPoint, int>(
               id: 'elevation',
               colorFn: (_, __) => charts.Color(
-                  r: _chartColor.red, g: _chartColor.green, b: _chartColor.blue),
+                  r: _chartColor.red,
+                  g: _chartColor.green,
+                  b: _chartColor.blue),
               domainFn: (ElevationPoint point, _) => point.totalDistance,
               measureFn: (ElevationPoint point, _) => point.elevation,
               strokeWidthPxFn: (datum, index) => 1,
@@ -313,7 +349,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     super.build(context);
-
+    bool lightMode = Provider.of<ThemeProvider>(context).isLightMode;
     return SafeArea(
         child: Column(children: [
       Container(
@@ -324,7 +360,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                       children: _tabMap,
                       groupValue: _slideState,
                       onValueChanged: (value) {
-                        if (this.mounted){
+                        if (this.mounted) {
                           setState(() {
                             _slideState = int.parse(value!.toString());
                           });
@@ -356,12 +392,18 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                 children: [
                                   Text('Total time',
                                       style: TextStyle(
-                                          color: CustomColors.subText)),
-                                  widget.currentTrack.isRecording && _slideState == 0 ? TimerWidget(time: widget.currentTrack.dateTime!.millisecondsSinceEpoch) :
-                                  Text(_totalTime,
-                                      style: TextStyle(
-                                          fontSize: 35,
-                                          fontWeight: FontWeight.bold))
+                                          color: lightMode
+                                              ? CustomColors.subText
+                                              : CustomColors.subTextDark)),
+                                  widget.currentTrack.isRecording &&
+                                          _slideState == 0
+                                      ? TimerWidget(
+                                          time: widget.currentTrack.dateTime!
+                                              .millisecondsSinceEpoch)
+                                      : Text(_totalTime,
+                                          style: TextStyle(
+                                              fontSize: 35,
+                                              fontWeight: FontWeight.bold))
                                 ],
                               ),
                               width: MediaQuery.of(context).size.width / 2,
@@ -375,7 +417,9 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                 children: [
                                   Text('Distance',
                                       style: TextStyle(
-                                          color: CustomColors.subText)),
+                                          color: lightMode
+                                              ? CustomColors.subText
+                                              : CustomColors.subTextDark)),
                                   Container(
                                       child: Row(
                                           mainAxisSize: MainAxisSize.max,
@@ -420,7 +464,9 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                 children: [
                                   Text('Daytime',
                                       style: TextStyle(
-                                          color: CustomColors.subText)),
+                                          color: lightMode
+                                              ? CustomColors.subText
+                                              : CustomColors.subTextDark)),
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceEvenly,
@@ -437,7 +483,10 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                             Text(
                                               'Hours left',
                                               style: TextStyle(
-                                                  color: CustomColors.subText,
+                                                  color: lightMode
+                                                      ? CustomColors.subText
+                                                      : CustomColors
+                                                          .subTextDark,
                                                   fontSize: 12),
                                             ),
                                             Text(_toSunset,
@@ -457,7 +506,10 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                             Text(
                                               'Sunset',
                                               style: TextStyle(
-                                                  color: CustomColors.subText,
+                                                  color: lightMode
+                                                      ? CustomColors.subText
+                                                      : CustomColors
+                                                          .subTextDark,
                                                   fontSize: 12),
                                             ),
                                             Text(_sunsetTime,
@@ -479,8 +531,10 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text('Avg pace',
-                                    style:
-                                        TextStyle(color: CustomColors.subText)),
+                                    style: TextStyle(
+                                        color: lightMode
+                                            ? CustomColors.subText
+                                            : CustomColors.subTextDark)),
                                 Container(
                                     child: Row(
                                         mainAxisSize: MainAxisSize.max,
@@ -520,7 +574,9 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                 children: [
                                   Text('Elevation',
                                       style: TextStyle(
-                                          color: CustomColors.subText)),
+                                          color: lightMode
+                                              ? CustomColors.subText
+                                              : CustomColors.subTextDark)),
                                   Column(
                                     mainAxisSize: MainAxisSize.max,
                                     mainAxisAlignment:
@@ -543,7 +599,10 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                                 'Current',
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
-                                                    color: CustomColors.subText,
+                                                    color: lightMode
+                                                        ? CustomColors.subText
+                                                        : CustomColors
+                                                            .subTextDark,
                                                     fontSize: 12),
                                               )),
                                           Container(
@@ -555,7 +614,10 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                                 'Top',
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
-                                                    color: CustomColors.subText,
+                                                    color: lightMode
+                                                        ? CustomColors.subText
+                                                        : CustomColors
+                                                            .subTextDark,
                                                     fontSize: 12),
                                               )),
                                           Container(
@@ -567,7 +629,10 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                                 'Gain',
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
-                                                    color: CustomColors.subText,
+                                                    color: lightMode
+                                                        ? CustomColors.subText
+                                                        : CustomColors
+                                                            .subTextDark,
                                                     fontSize: 12),
                                               )),
                                         ],
@@ -673,87 +738,143 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                     ])),
             Flexible(
                 flex: 1,
-                child: Container(margin: EdgeInsets.only(left: 10), child:Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Column( mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly, crossAxisAlignment: CrossAxisAlignment.start,children: [Text(_selectedPoint != null ? 'Elevation: '+_selectedPoint!.elevation.toInt().toString()+' m.':''),Text(_selectedPoint != null ? 'Distance: '+_selectedPoint!.totalDistance.toString()+' m.':''),Container(margin: EdgeInsets.only(right: 20),)]),
-                      _loadingElevationChart
-                          ? CircularProgressIndicator(
-                              color: CustomColors.accent,
-                            )
-                          : Flexible(
-                              flex: 1,
-                              child: charts.LineChart(_elevationData,
-                                  /*behaviors: [
-                  charts.LinePointHighlighter(
-                  showVerticalFollowLine: charts.LinePointHighlighterFollowLineType.none
-                  ),
-                ],*/
-                                  primaryMeasureAxis: charts.NumericAxisSpec(
-                                      tickProviderSpec:
-                                          charts.StaticNumericTickProviderSpec(
-                                    <charts.TickSpec<num>>[
-                                      charts.TickSpec<num>(
-                                          _elevationMin.toInt()),
-                                      charts.TickSpec<num>(
-                                          ((int.parse(_elevation) -
-                                                      _elevationMin) ~/
-                                                  3.03) +
-                                              _elevationMin.toInt()),
-                                      charts.TickSpec<num>(
-                                          ((int.parse(_elevation) -
-                                                      _elevationMin) ~/
-                                                  1.51) +
-                                              _elevationMin.toInt()),
-                                      charts.TickSpec<num>(
-                                          int.parse(_elevation)),
-                                    ],
-                                  )),
-                                  selectionModels: [
-                                    charts.SelectionModelConfig(
-                                        type: charts.SelectionModelType.info,
-                                        changedListener:
-                                            (charts.SelectionModel model) {
-                                          final selectedDatum =
-                                              model.selectedDatum;
-                                          if (selectedDatum.isNotEmpty &&
-                                              this.mounted) {
-                                            setState(() {
-                                              _selectedPoint =
-                                                  selectedDatum.first.datum;
-                                            });
-                                          }
-                                        })
-                                  ],
-                                  domainAxis: charts.NumericAxisSpec(
-                                      tickProviderSpec:
-                                          charts.StaticNumericTickProviderSpec(
-                                    <charts.TickSpec<num>>[
-                                      charts.TickSpec<num>(0),
-                                      charts.TickSpec<num>(
-                                          _distance.indexOf('.') != -1
-                                              ? double.parse(_distance) *
-                                                  1000 ~/
-                                                  3.03
-                                              : double.parse(_distance) ~/
-                                                  3.03),
-                                      charts.TickSpec<num>(
-                                          _distance.indexOf('.') != -1
-                                              ? double.parse(_distance) *
-                                                  1000 ~/
-                                                  1.51
-                                              : double.parse(_distance) ~/
-                                                  1.51),
-                                      charts.TickSpec<num>(
-                                          _distance.indexOf('.') != -1
-                                              ? double.parse(_distance) * 1000
-                                              : int.parse(_distance)),
-                                    ],
-                                  )),
-                                  animate: true))
-                    ])))
+                child: Container(
+                    margin: EdgeInsets.only(left: 10),
+                    child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Column(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(_selectedPoint != null
+                                    ? 'Elevation: ' +
+                                        _selectedPoint!.elevation
+                                            .toInt()
+                                            .toString() +
+                                        ' m.'
+                                    : ''),
+                                Text(_selectedPoint != null
+                                    ? 'Distance: ' +
+                                        _selectedPoint!.totalDistance
+                                            .toString() +
+                                        ' m.'
+                                    : ''),
+                                Container(
+                                  margin: EdgeInsets.only(right: 20),
+                                )
+                              ]),
+                          _loadingElevationChart
+                              ? CircularProgressIndicator(
+                                  color: CustomColors.accent,
+                                )
+                              : Flexible(
+                                  flex: 1,
+                                  child: charts.LineChart(_elevationData,
+                                      primaryMeasureAxis:
+                                          charts.NumericAxisSpec(
+                                              renderSpec: !lightMode
+                                                  ? charts.GridlineRendererSpec(
+                                                      labelStyle: new charts
+                                                          .TextStyleSpec(
+                                                        color: charts
+                                                            .MaterialPalette
+                                                            .white,
+                                                      ),
+                                                      lineStyle:
+                                                          charts.LineStyleSpec(
+                                                        color: charts
+                                                            .MaterialPalette
+                                                            .gray
+                                                            .shadeDefault,
+                                                      ))
+                                                  : null,
+                                              tickProviderSpec: charts
+                                                  .StaticNumericTickProviderSpec(
+                                                <charts.TickSpec<num>>[
+                                                  charts.TickSpec<num>(
+                                                      _elevationMin.toInt()),
+                                                  charts.TickSpec<
+                                                      num>(((int.parse(
+                                                                  _elevation) -
+                                                              _elevationMin) ~/
+                                                          3.03) +
+                                                      _elevationMin.toInt()),
+                                                  charts.TickSpec<
+                                                      num>(((int.parse(
+                                                                  _elevation) -
+                                                              _elevationMin) ~/
+                                                          1.51) +
+                                                      _elevationMin.toInt()),
+                                                  charts.TickSpec<num>(
+                                                      int.parse(_elevation)),
+                                                ],
+                                              )),
+                                      selectionModels: [
+                                        charts.SelectionModelConfig(
+                                            type:
+                                                charts.SelectionModelType.info,
+                                            changedListener:
+                                                (charts.SelectionModel model) {
+                                              final selectedDatum =
+                                                  model.selectedDatum;
+                                              if (selectedDatum.isNotEmpty &&
+                                                  this.mounted) {
+                                                setState(() {
+                                                  _selectedPoint =
+                                                      selectedDatum.first.datum;
+                                                });
+                                              }
+                                            })
+                                      ],
+                                      domainAxis: charts.NumericAxisSpec(
+                                          renderSpec: !lightMode
+                                              ? charts.GridlineRendererSpec(
+                                                  labelStyle:
+                                                      new charts.TextStyleSpec(
+                                                    color: charts
+                                                        .MaterialPalette.white,
+                                                  ),
+                                                  lineStyle:
+                                                      charts.LineStyleSpec(
+                                                    color: charts
+                                                        .MaterialPalette
+                                                        .gray
+                                                        .shadeDefault,
+                                                  ))
+                                              : null,
+                                          tickProviderSpec: charts
+                                              .StaticNumericTickProviderSpec(
+                                            <charts.TickSpec<num>>[
+                                              charts.TickSpec<num>(0),
+                                              charts.TickSpec<num>(_distance
+                                                          .indexOf('.') !=
+                                                      -1
+                                                  ? double.parse(_distance) *
+                                                      1000 ~/
+                                                      3.03
+                                                  : double.parse(_distance) ~/
+                                                      3.03),
+                                              charts.TickSpec<num>(_distance
+                                                          .indexOf('.') !=
+                                                      -1
+                                                  ? double.parse(_distance) *
+                                                      1000 ~/
+                                                      1.51
+                                                  : double.parse(_distance) ~/
+                                                      1.51),
+                                              charts.TickSpec<num>(_distance
+                                                          .indexOf('.') !=
+                                                      -1
+                                                  ? double.parse(_distance) *
+                                                      1000
+                                                  : int.parse(_distance)),
+                                            ],
+                                          )),
+                                      animate: true))
+                        ])))
           ]))
     ]));
   }

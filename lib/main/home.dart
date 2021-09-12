@@ -34,6 +34,12 @@ class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObs
         if(path != null && widget.loadedTrack.path != path) {
           widget.loadedTrack.clear();
           _mapKey.currentState!.loadTrack(path);
+          if(_infoKey.currentState != null){
+            _infoKey.currentState!.clearScreen();
+          }
+        }
+        if(path != null && widget.loadedTrack.path == path) {
+          _mapKey.currentState!.navigateTrack(path);
         }
         if(_currentTrack.isRecording){
           _fabIcon = Icon(Icons.stop);
@@ -43,9 +49,6 @@ class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObs
           });
           return;
         }
-      }
-      if(_infoKey.currentState != null){
-        _infoKey.currentState!.clearScreen();
       }
       _fabIcon = Icon(Icons.play_arrow);
     }else if(index == 2){
@@ -85,7 +88,7 @@ class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObs
       Tracks(key: _trackKey, prefs: widget.prefs, toTabIndex: _onTabItemTapped, currentTrack: _currentTrack, loadedTrack: widget.loadedTrack, clearTrack: _clearTrack),
       Map(key: _mapKey, prefs: widget.prefs, setPlayIcon: _setPlayFabIcon, currentTrack: _currentTrack, loadedTrack: widget.loadedTrack),
       Info(key: _infoKey, currentTrack: _currentTrack, prefs: widget.prefs, loadedTrack: widget.loadedTrack),
-      Settings(widget.prefs)
+      Settings(prefs: widget.prefs)
     ];
     _tabController = TabController(vsync: this, length: _tabs.length, initialIndex: _tabIndex);
   }
@@ -159,8 +162,6 @@ class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObs
                   )
                 ],
                 currentIndex: _tabIndex,
-                selectedItemColor: Colors.blueGrey,
-                unselectedItemColor: Colors.black,
                 selectedFontSize: 12,
                 unselectedFontSize: 12,
                 showUnselectedLabels: true,

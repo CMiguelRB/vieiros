@@ -74,7 +74,6 @@ class TracksState extends State<Tracks> {
           }
         }
         String? path = result.files.single.path;
-        if (path == null) return;
         final xmlFile = new File(path);
         Gpx gpx = GpxReader().fromString(
             XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString());
@@ -84,6 +83,19 @@ class TracksState extends State<Tracks> {
         widget.prefs.setString('files', jsonEncode(_files));
       });
     }
+  }
+
+  unloadTrack(context, index) async {
+    setState(() {
+      GpxFile file = _files[index];
+      String? current = widget.prefs.getString('currentTrack');
+      if (current == file.path) {
+        widget.prefs.remove('currentTrack');
+        widget.clearTrack();
+        widget.loadedTrack.clear();
+      }
+      Navigator.pop(context, 'OK');
+    });
   }
 
   removeFile(context, index) async {
@@ -135,26 +147,23 @@ class TracksState extends State<Tracks> {
             itemCount: _files.length,
             shrinkWrap: true,
             itemBuilder: (context, index) {
+              bool _loadedElement = widget.loadedTrack.path == _files[index].path;
               return InkWell(
                 child: Card(
                     elevation: 0,
                     color: Colors.black12,
                     child: Padding(
                         padding:
-                            EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+                            EdgeInsets.only(left: _loadedElement ? 0 : 16, right: 8),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           mainAxisSize: MainAxisSize.max,
                           children: [
-                            Flexible(
-                                child: Text(_files[index].name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis)),
-                            IconButton(
+                            _loadedElement ? IconButton(
                                 onPressed: () => showDialog<String>(
-                                      context: context,
-                                      builder: (BuildContext context) =>
-                                          AlertDialog(
+                                  context: context,
+                                  builder: (BuildContext context) =>
+                                      AlertDialog(
                                         content: const Text('You sure?'),
                                         actions: <Widget>[
                                           TextButton(
@@ -164,13 +173,41 @@ class TracksState extends State<Tracks> {
                                           ),
                                           TextButton(
                                             onPressed: () =>
-                                                removeFile(context, index),
+                                                unloadTrack(context, index),
                                             child: const Text('OK'),
                                           ),
                                         ],
                                       ),
+                                ),
+                                icon: Icon(Icons.clear)):Text(''),
+                            Flexible(
+                                fit: FlexFit.tight,
+                                child: Text(_files[index].name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis)),
+
+                              IconButton(
+                                alignment: Alignment.centerRight,
+                                    onPressed: () => showDialog<String>(
+                                      context: context,
+                                      builder: (BuildContext context) =>
+                                          AlertDialog(
+                                            content: const Text('You sure?'),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(
+                                                    context, 'Cancel'),
+                                                child: const Text('Cancel'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () =>
+                                                    removeFile(context, index),
+                                                child: const Text('OK'),
+                                              ),
+                                            ],
+                                          ),
                                     ),
-                                icon: Icon(Icons.delete))
+                                    icon: Icon(Icons.delete))
                           ]
                         ))),
                 onTap: () => navigate(index),
