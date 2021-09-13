@@ -114,7 +114,7 @@ class SettingsState extends State<Settings> {
                   Spacer(),
                   Container(
                     child: ElevatedButton(
-                      style: ButtonStyle(),
+
                       onPressed: _donate, child: Text('Donate'),
                     ),
                   ),

@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vieiros/model/current_track.dart';
 import 'package:vieiros/model/loaded_track.dart';
+import 'package:vieiros/resources/CustomColors.dart';
+import 'package:vieiros/resources/Themes.dart';
 import 'package:xml/xml.dart';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
@@ -137,11 +140,12 @@ class TracksState extends State<Tracks> {
 
   @override
   Widget build(BuildContext context) {
+    bool lightMode = Provider.of<ThemeProvider>(context).isLightMode;
     return SafeArea(
         child: Column(
       children: [
         Expanded(
-          child: ListView.builder(
+          child: _files.length == 0 ? Container(alignment: Alignment.center,child:Text('Press + to load a gpx track file', style: TextStyle(color: lightMode ? CustomColors.subText:CustomColors.subTextDark))) : ListView.builder(
             scrollDirection: Axis.vertical,
             padding: const EdgeInsets.all(8),
             itemCount: _files.length,
