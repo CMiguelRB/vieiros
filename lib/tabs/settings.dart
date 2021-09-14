@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vieiros/resources/CustomColors.dart';
+import 'package:vieiros/resources/I18n.dart';
 import 'package:vieiros/resources/Themes.dart';
 
 
@@ -95,7 +96,7 @@ class SettingsState extends State<Settings> {
                 child: Column(children: [
                   Container(
                     padding: EdgeInsets.all(10),
-                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, mainAxisSize: MainAxisSize.max,children:[Text('Dark mode'),Switch(
+                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, mainAxisSize: MainAxisSize.max,children:[Text(I18n.translate('settings_dark_mode')),Switch(
                       value: _darkMode,
                       onChanged: (value) => _onChangeDarkMode(value, context),
                       thumbColor: MaterialStateColor.resolveWith((states) => _getTextColor(states, false)),
@@ -104,7 +105,7 @@ class SettingsState extends State<Settings> {
                   ),
                   Container(
                     padding: EdgeInsets.all(10),
-                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, mainAxisSize: MainAxisSize.max,children:[Text('Voice alerts'),Switch(
+                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, mainAxisSize: MainAxisSize.max,children:[Text(I18n.translate('settings_voice_alerts')),Switch(
                       value: _voiceAlerts,
                       onChanged: _onChangeVoiceAlerts,
                       thumbColor: MaterialStateColor.resolveWith((states) => _getTextColor(states, false)),
@@ -115,7 +116,7 @@ class SettingsState extends State<Settings> {
                   Container(
                     child: ElevatedButton(
 
-                      onPressed: _donate, child: Text('Donate'),
+                      onPressed: _donate, child: Text(I18n.translate('settings_donate')),
                     ),
                   ),
                   Spacer()

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vieiros/model/current_track.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:vieiros/resources/CustomColors.dart';
+import 'package:vieiros/resources/I18n.dart';
 import 'package:vieiros/resources/Themes.dart';
 import 'package:xml/xml.dart';
 import 'dart:io';
@@ -19,7 +20,15 @@ class Tracks extends StatefulWidget {
   final CurrentTrack currentTrack;
   final SharedPreferences prefs;
   final LoadedTrack loadedTrack;
-  Tracks({Key? key, required this.toTabIndex, required this.prefs, required this.currentTrack, required this.loadedTrack, required this.clearTrack}) : super(key: key);
+
+  Tracks(
+      {Key? key,
+      required this.toTabIndex,
+      required this.prefs,
+      required this.currentTrack,
+      required this.loadedTrack,
+      required this.clearTrack})
+      : super(key: key);
 
   TracksState createState() => TracksState();
 }
@@ -34,12 +43,11 @@ class TracksState extends State<Tracks> {
         .decode(jsonString)
         .map<GpxFile>((file) => GpxFile.fromJson(file))
         .toList();
-    for(var i = 0;i<files.length; i++){
+    for (var i = 0; i < files.length; i++) {
       String? path = files[i].path;
       bool exists = false;
-      if(path != null)
-        exists = await File(path).exists();
-      if(!exists){
+      if (path != null) exists = await File(path).exists();
+      if (!exists) {
         files.removeAt(i);
       }
     }
@@ -56,18 +64,15 @@ class TracksState extends State<Tracks> {
       if (result.files.single.name
               .split('.')[result.files.single.name.split('.').length - 1] !=
           'gpx') {
-        showDialog<String>(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(
-            content: const Text('Not a valid gpx file'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.pop(context, 'Ok'),
-                child: const Text('Ok'),
-              ),
-            ],
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(I18n.translate('tracks_file_validation_error')),
+          backgroundColor: CustomColors.error,
+          duration: const Duration(milliseconds: 1500),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4.0),
           ),
-        );
+        ));
         return;
       }
       setState(() {
@@ -88,7 +93,7 @@ class TracksState extends State<Tracks> {
     }
   }
 
-  unloadTrack(context, index) async {
+  unloadTrack(index) async {
     setState(() {
       GpxFile file = _files[index];
       String? current = widget.prefs.getString('currentTrack');
@@ -97,7 +102,15 @@ class TracksState extends State<Tracks> {
         widget.clearTrack();
         widget.loadedTrack.clear();
       }
-      Navigator.pop(context, 'OK');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(I18n.translate('tracks_unloaded')),
+        backgroundColor: CustomColors.ownPath,
+        duration: const Duration(milliseconds: 1500),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4.0),
+        ),
+      ));
     });
   }
 
@@ -112,11 +125,11 @@ class TracksState extends State<Tracks> {
         widget.loadedTrack.clear();
       }
       String? path = file.path;
-      if(path != null){
+      if (path != null) {
         File deleteFile = new File(path);
         deleteFile.delete();
       }
-      Navigator.pop(context, 'OK');
+      Navigator.pop(context, I18n.translate("common_ok"));
     });
   }
 
@@ -145,80 +158,81 @@ class TracksState extends State<Tracks> {
         child: Column(
       children: [
         Expanded(
-          child: _files.length == 0 ? Container(alignment: Alignment.center,child:Text('Press + to load a gpx track file', style: TextStyle(color: lightMode ? CustomColors.subText:CustomColors.subTextDark))) : ListView.builder(
-            scrollDirection: Axis.vertical,
-            padding: const EdgeInsets.all(8),
-            itemCount: _files.length,
-            shrinkWrap: true,
-            itemBuilder: (context, index) {
-              bool _loadedElement = widget.loadedTrack.path == _files[index].path;
-              return InkWell(
-                child: Card(
-                    elevation: 0,
-                    color: Colors.black12,
-                    child: Padding(
-                        padding:
-                            EdgeInsets.only(left: _loadedElement ? 0 : 16, right: 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            _loadedElement ? IconButton(
-                                onPressed: () => showDialog<String>(
-                                  context: context,
-                                  builder: (BuildContext context) =>
-                                      AlertDialog(
-                                        content: const Text('You sure?'),
-                                        actions: <Widget>[
-                                          TextButton(
-                                            onPressed: () => Navigator.pop(
-                                                context, 'Cancel'),
-                                            child: const Text('Cancel'),
-                                          ),
-                                          TextButton(
-                                            onPressed: () =>
-                                                unloadTrack(context, index),
-                                            child: const Text('OK'),
-                                          ),
-                                        ],
-                                      ),
-                                ),
-                                icon: Icon(Icons.clear)):Text(''),
-                            Flexible(
-                                fit: FlexFit.tight,
-                                child: Text(_files[index].name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis)),
-
-                              IconButton(
-                                alignment: Alignment.centerRight,
-                                    onPressed: () => showDialog<String>(
-                                      context: context,
-                                      builder: (BuildContext context) =>
-                                          AlertDialog(
-                                            content: const Text('You sure?'),
-                                            actions: <Widget>[
-                                              TextButton(
-                                                onPressed: () => Navigator.pop(
-                                                    context, 'Cancel'),
-                                                child: const Text('Cancel'),
+            child: _files.length == 0
+                ? Container(
+                    alignment: Alignment.center,
+                    child: Text(I18n.translate('tracks_background_tip'),
+                        style: TextStyle(
+                            color: lightMode
+                                ? CustomColors.subText
+                                : CustomColors.subTextDark)))
+                : ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    padding: const EdgeInsets.all(8),
+                    itemCount: _files.length,
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      bool _loadedElement =
+                          widget.loadedTrack.path == _files[index].path;
+                      return InkWell(
+                        child: Card(
+                            elevation: 0,
+                            color: Colors.black12,
+                            child: Padding(
+                                padding: EdgeInsets.only(
+                                    left: _loadedElement ? 0 : 16, right: 8),
+                                child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.max,
+                                    children: [
+                                      _loadedElement
+                                          ? IconButton(
+                                              onPressed: () => unloadTrack(index),
+                                              icon: Icon(Icons.clear))
+                                          : Text(''),
+                                      Flexible(
+                                          fit: FlexFit.tight,
+                                          child: Text(_files[index].name,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis)),
+                                      IconButton(
+                                          alignment: Alignment.centerRight,
+                                          onPressed: () => showDialog<String>(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) =>
+                                                        AlertDialog(
+                                                  content: Text(I18n.translate(
+                                                      "common_confirm")),
+                                                  actions: <Widget>[
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Navigator.pop(
+                                                              context,
+                                                              I18n.translate(
+                                                                  "common_cancel")),
+                                                      child: Text(
+                                                          I18n.translate(
+                                                              "common_cancel"),
+                                                          style: TextStyle(color: CustomColors.accent)),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          removeFile(
+                                                              context, index),
+                                                      child: Text(
+                                                          I18n.translate(
+                                                              "common_ok"),
+                                                          style: TextStyle(color: CustomColors.accent)),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
-                                              TextButton(
-                                                onPressed: () =>
-                                                    removeFile(context, index),
-                                                child: const Text('OK'),
-                                              ),
-                                            ],
-                                          ),
-                                    ),
-                                    icon: Icon(Icons.delete))
-                          ]
-                        ))),
-                onTap: () => navigate(index),
-              );
-            }
-          )
-        )
+                                          icon: Icon(Icons.delete))
+                                    ]))),
+                        onTap: () => navigate(index),
+                      );
+                    }))
       ],
     ));
   }

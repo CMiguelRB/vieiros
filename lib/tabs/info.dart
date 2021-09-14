@@ -11,6 +11,7 @@ import 'package:gpx/gpx.dart';
 import 'package:vieiros/model/current_track.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:vieiros/resources/CustomColors.dart';
+import 'package:vieiros/resources/I18n.dart';
 import 'package:vieiros/resources/Themes.dart';
 
 class Info extends StatefulWidget {
@@ -37,9 +38,9 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   String _totalTime = '--:--:--';
   String _avgPace = '00:00';
   String _paceUnit = 'min/Km';
-  String _elevation = '0';
+  String _elevation = '-';
   double _elevationMin = 0;
-  String _elevationGain = '0';
+  String _elevationGain = '-';
   String _elevationCurrent = '-';
   String _elevationUnit = 'm';
   bool _loadingElevationChart = true;
@@ -50,8 +51,8 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   Color _chartColor = CustomColors.accent;
   List<charts.Series<ElevationPoint, num>> _elevationData = [];
   Map<int, Widget> _tabMap = {
-    0: Text('Current track'),
-    1: Text('Loaded track')
+    0: Text(I18n.translate('info_current_track')),
+    1: Text(I18n.translate('info_loaded_track'))
   };
 
   Map axisValuesCenter = {
@@ -324,7 +325,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
         _totalTime = '--:--:--';
         _distance = '0';
         _distanceUnit = 'm';
-        _elevation = '0';
+        _elevation = '-';
         _elevationMin = 0;
         _elevationGain = '-';
         _elevationCurrent = '-';
@@ -390,7 +391,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Total time',
+                                  Text(I18n.translate('info_total_time'),
                                       style: TextStyle(
                                           color: lightMode
                                               ? CustomColors.subText
@@ -415,7 +416,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Distance',
+                                  Text(I18n.translate('info_total_distance'),
                                       style: TextStyle(
                                           color: lightMode
                                               ? CustomColors.subText
@@ -462,7 +463,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Daytime',
+                                  Text(I18n.translate('info_daytime'),
                                       style: TextStyle(
                                           color: lightMode
                                               ? CustomColors.subText
@@ -481,7 +482,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                           textBaseline: TextBaseline.alphabetic,
                                           children: [
                                             Text(
-                                              'Hours left',
+                                              I18n.translate('info_daytime_left'),
                                               style: TextStyle(
                                                   color: lightMode
                                                       ? CustomColors.subText
@@ -504,7 +505,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                           textBaseline: TextBaseline.alphabetic,
                                           children: [
                                             Text(
-                                              'Sunset',
+                                              I18n.translate('info_daytime_sunset'),
                                               style: TextStyle(
                                                   color: lightMode
                                                       ? CustomColors.subText
@@ -530,7 +531,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                               mainAxisSize: MainAxisSize.max,
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Avg pace',
+                                Text(I18n.translate('info_pace'),
                                     style: TextStyle(
                                         color: lightMode
                                             ? CustomColors.subText
@@ -572,7 +573,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Elevation',
+                                  Text(I18n.translate('info_elevation'),
                                       style: TextStyle(
                                           color: lightMode
                                               ? CustomColors.subText
@@ -596,7 +597,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                                       .width /
                                                   3,
                                               child: Text(
-                                                'Current',
+                                                I18n.translate('info_elevation_current'),
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
                                                     color: lightMode
@@ -611,7 +612,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                                       .width /
                                                   3,
                                               child: Text(
-                                                'Top',
+                                                I18n.translate('info_elevation_top'),
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
                                                     color: lightMode
@@ -626,7 +627,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                                       .width /
                                                   3,
                                               child: Text(
-                                                'Gain',
+                                                I18n.translate('info_elevation_gain'),
                                                 textAlign: TextAlign.center,
                                                 style: TextStyle(
                                                     color: lightMode
@@ -693,7 +694,9 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                                           fontSize: 25,
                                                           fontWeight:
                                                               FontWeight.bold)),
-                                                  Text(_elevationUnit,
+                                                  Text(_elevation != '-'
+                                                  ? _elevationUnit
+                                                      : '',
                                                       style: TextStyle(
                                                           fontSize: 15,
                                                           fontWeight:
@@ -719,7 +722,9 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                                           fontSize: 25,
                                                           fontWeight:
                                                               FontWeight.bold)),
-                                                  Text(_elevationUnit,
+                                                  Text(_elevationGain != '-'
+                                                      ? _elevationUnit
+                                                      : '',
                                                       style: TextStyle(
                                                           fontSize: 15,
                                                           fontWeight:
@@ -750,14 +755,14 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(_selectedPoint != null
-                                    ? 'Elevation: ' +
+                                    ? I18n.translate('info_chart_elevation')+': ' +
                                         _selectedPoint!.elevation
                                             .toInt()
                                             .toString() +
                                         ' m.'
                                     : ''),
                                 Text(_selectedPoint != null
-                                    ? 'Distance: ' +
+                                    ? I18n.translate('info_chart_distance')+': ' +
                                         _selectedPoint!.totalDistance
                                             .toString() +
                                         ' m.'
@@ -798,18 +803,18 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                                                       _elevationMin.toInt()),
                                                   charts.TickSpec<
                                                       num>(((int.parse(
-                                                                  _elevation) -
+                                                                  _elevation == '-' ? '0' : _elevation) -
                                                               _elevationMin) ~/
                                                           3.03) +
                                                       _elevationMin.toInt()),
                                                   charts.TickSpec<
                                                       num>(((int.parse(
-                                                                  _elevation) -
+                                                      _elevation == '-' ? '0' : _elevation) -
                                                               _elevationMin) ~/
                                                           1.51) +
                                                       _elevationMin.toInt()),
                                                   charts.TickSpec<num>(
-                                                      int.parse(_elevation)),
+                                                      int.parse(_elevation == '-' ? '0' : _elevation)),
                                                 ],
                                               )),
                                       selectionModels: [

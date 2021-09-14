@@ -6,6 +6,7 @@ import 'package:vieiros/main/home.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:vieiros/resources/CustomColors.dart';
 import 'package:vieiros/resources/Themes.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,48 +17,55 @@ void main() async {
   runApp(MyApp(_prefs, loadedTrack));
 }
 
-void loadStatusBarTheme(prefs){
-  if(prefs.getString('dark_mode') == 'true'){
+void loadStatusBarTheme(prefs) {
+  if (prefs.getString('dark_mode') == 'true') {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         systemNavigationBarColor: Colors.black,
         systemNavigationBarIconBrightness: Brightness.light,
         statusBarColor: Colors.black87,
         statusBarBrightness: Brightness.dark,
-        statusBarIconBrightness: Brightness.light
-    ));
-  }else{
+        statusBarIconBrightness: Brightness.light));
+  } else {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         systemNavigationBarColor: Colors.black,
         systemNavigationBarIconBrightness: Brightness.light,
         statusBarColor: CustomColors.background,
         statusBarBrightness: Brightness.light,
-        statusBarIconBrightness: Brightness.dark
-    ));
+        statusBarIconBrightness: Brightness.dark));
   }
 }
-
 
 class MyApp extends StatelessWidget {
   final SharedPreferences _prefs;
   final LoadedTrack _loadedTrack;
+
   MyApp(this._prefs, this._loadedTrack);
+
   @override
   Widget build(BuildContext context) => ChangeNotifierProvider(
-    create: (context) => ThemeProvider(),
-    builder: (context, _){
-      final provider = Provider.of<ThemeProvider>(context);
-      bool darkMode = _prefs.getString("dark_mode") == 'true';
-      if(provider.isLightMode && darkMode){
-        provider.setThemeMode(darkMode);
-      }
-      return MaterialApp(
-      title: 'Vieiros',
-      themeMode: provider.themeMode,
-      theme: Themes.lightTheme,
-      darkTheme: Themes.darkTheme,
-      debugShowCheckedModeBanner: false,
-      home: Home(prefs: _prefs, loadedTrack: _loadedTrack)
-    );
-    }
-  );
+      create: (context) => ThemeProvider(),
+      builder: (context, _) {
+        final provider = Provider.of<ThemeProvider>(context);
+        bool darkMode = _prefs.getString("dark_mode") == 'true';
+        if (provider.isLightMode && darkMode) {
+          provider.setThemeMode(darkMode);
+        }
+        return MaterialApp(
+            title: 'Vieiros',
+            localizationsDelegates: [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: [
+              Locale('en', ''),
+              Locale('es', ''),
+              Locale('gl', '')
+            ],
+            themeMode: provider.themeMode,
+            theme: Themes.lightTheme,
+            darkTheme: Themes.darkTheme,
+            debugShowCheckedModeBanner: false,
+            home: Home(prefs: _prefs, loadedTrack: _loadedTrack));
+      });
 }

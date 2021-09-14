@@ -9,4 +9,5 @@ class CustomColors {
   static final subTextDark = Color(0xffeeeeee);
   static final faintedText = Color(0xFFC3C3C3);
   static final backgroundDark = Color(0xff303030);
+  static final error = Color(0xffd94d3a);
 }

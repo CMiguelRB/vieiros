@@ -2,6 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:flutter/material.dart';
 import 'package:vieiros/model/current_track.dart';
+import 'package:vieiros/resources/I18n.dart';
 import 'package:vieiros/tabs/info.dart';
 import 'package:vieiros/tabs/settings.dart';
 import '../tabs/map.dart';
@@ -49,6 +50,11 @@ class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObs
           });
           return;
         }
+      }else{
+        String? path = widget.prefs.getString('currentTrack');
+        if(path != null && widget.loadedTrack.path != path) {
+          await widget.loadedTrack.loadTrack(path);
+        }
       }
       _fabIcon = Icon(Icons.play_arrow);
     }else if(index == 2){
@@ -77,6 +83,9 @@ class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObs
   void _clearTrack(){
     if(_mapKey.currentState != null){
       _mapKey.currentState!.clearTrack();
+    }
+    if(_infoKey.currentState != null){
+      _infoKey.currentState!.clearScreen();
     }
   }
 
@@ -143,22 +152,22 @@ class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObs
                 clipBehavior: Clip.antiAlias,
                 child: BottomNavigationBar(
                 type: BottomNavigationBarType.fixed,
-                items: const <BottomNavigationBarItem>[
+                items: <BottomNavigationBarItem>[
                   BottomNavigationBarItem(
                     icon: Icon(Icons.timeline),
-                    label: 'Tracks',
+                    label: I18n.translate('appbar_tab_tracks'),
                   ),
                   BottomNavigationBarItem(
                     icon: Icon(Icons.terrain),
-                    label: 'Map',
+                    label: I18n.translate('appbar_tab_map'),
                   ),
                   BottomNavigationBarItem(
                     icon: Icon(Icons.insert_chart_rounded),
-                    label: 'Info',
+                    label: I18n.translate('appbar_tab_info'),
                   ),
                   BottomNavigationBarItem(
                     icon: Icon(Icons.settings),
-                    label: 'Settings',
+                    label: I18n.translate('appbar_tab_settings'),
                   )
                 ],
                 currentIndex: _tabIndex,
