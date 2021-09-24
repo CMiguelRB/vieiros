@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:vieiros/resources/CustomColors.dart';
+import 'package:vieiros/resources/custom_colors.dart';
 
 class ThemeProvider extends ChangeNotifier{
   ThemeMode themeMode = ThemeMode.light;
@@ -12,15 +12,15 @@ class ThemeProvider extends ChangeNotifier{
 
     if(!value){
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-          systemNavigationBarColor: Colors.black,
-          systemNavigationBarIconBrightness: Brightness.light,
+          systemNavigationBarColor: CustomColors.background,
+          systemNavigationBarIconBrightness: Brightness.dark,
           statusBarColor: CustomColors.background,
           statusBarBrightness: Brightness.light,
           statusBarIconBrightness: Brightness.dark
       ));
     }else{
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-          systemNavigationBarColor: Colors.black,
+          systemNavigationBarColor: CustomColors.backgroundDark,
           systemNavigationBarIconBrightness: Brightness.light,
           statusBarColor: CustomColors.backgroundDark,
           statusBarBrightness: Brightness.dark,
@@ -36,8 +36,8 @@ class Themes{
 
   static final lightTheme = ThemeData(
     brightness: Brightness.light,
-    primaryColor: Colors.white,
-    backgroundColor: Colors.white,
+    primaryColor: CustomColors.background,
+    backgroundColor: CustomColors.background,
     elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
             primary: CustomColors.accent
@@ -50,8 +50,8 @@ class Themes{
     ),
     indicatorColor: CustomColors.accent,
     buttonTheme: ButtonThemeData(
-      buttonColor: CustomColors.accent,         //  <-- light color
-      textTheme: ButtonTextTheme.primary, //  <-- dark text for light background
+      buttonColor: CustomColors.accent,
+      textTheme: ButtonTextTheme.primary,
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
         selectedIconTheme: IconThemeData(
@@ -60,10 +60,7 @@ class Themes{
       selectedItemColor: CustomColors.accent,
       unselectedItemColor: Colors.black87,
     ),
-    // Define the default font family.
     fontFamily: 'Lato',
-    // Define the default TextTheme. Use this to specify the default
-    // text styling for headlines, titles, bodies of text, and more.
     textTheme: TextTheme(
       headline1: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, fontFamily: 'Rubik', color: Colors.black87),
       bodyText1: TextStyle(fontSize: 14.0, fontFamily: 'Lato', color: Colors.black87),
@@ -74,8 +71,8 @@ class Themes{
 
   static final darkTheme = ThemeData(
     brightness: Brightness.dark,
-    primaryColor: Colors.black87,
-    backgroundColor: Colors.black87,
+    primaryColor: CustomColors.backgroundDark,
+    backgroundColor: CustomColors.backgroundDark,
     elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
             primary: CustomColors.accent
@@ -88,8 +85,8 @@ class Themes{
     ),
     indicatorColor: CustomColors.accent,
     buttonTheme: ButtonThemeData(
-      buttonColor: CustomColors.accent,         //  <-- light color
-      textTheme: ButtonTextTheme.primary, //  <-- dark text for light background
+      buttonColor: CustomColors.accent,
+      textTheme: ButtonTextTheme.primary,
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
         selectedIconTheme: IconThemeData(
@@ -99,10 +96,7 @@ class Themes{
       selectedItemColor: CustomColors.accent,
       unselectedItemColor: Colors.white,
     ),
-    // Define the default font family.
     fontFamily: 'Lato',
-    // Define the default TextTheme. Use this to specify the default
-    // text styling for headlines, titles, bodies of text, and more.
     textTheme: TextTheme(
       headline1: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, fontFamily: 'Rubik', color: Colors.white),
       bodyText1: TextStyle(fontSize: 14.0, fontFamily: 'Lato', color: Colors.white),

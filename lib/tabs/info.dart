@@ -1,18 +1,25 @@
-import 'package:latlong2/latlong.dart' as latlong;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sunrise_sunset_calc/sunrise_sunset_calc.dart';
-import 'package:vieiros/components/timer.dart';
-import 'package:vieiros/model/elevation_point.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:vieiros/components/info/altitude_widget.dart';
+import 'package:vieiros/components/info/chart_point_info_widget.dart';
+import 'package:vieiros/components/info/chart_widget.dart';
+import 'package:vieiros/components/info/daytime_widget.dart';
+import 'package:vieiros/components/info/distance_widget.dart';
+import 'package:vieiros/components/info/pace_widget.dart';
+import 'package:vieiros/components/info/time_widget.dart';
+import 'package:vieiros/components/vieiros_segmented_control.dart';
+import 'package:vieiros/model/altitude_point.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gpx/gpx.dart';
 import 'package:vieiros/model/current_track.dart';
 import 'package:vieiros/model/loaded_track.dart';
-import 'package:vieiros/resources/CustomColors.dart';
-import 'package:vieiros/resources/I18n.dart';
-import 'package:vieiros/resources/Themes.dart';
+import 'package:vieiros/resources/custom_colors.dart';
+import 'package:vieiros/resources/i18n.dart';
+import 'package:vieiros/resources/themes.dart';
+import 'package:vieiros/utils/calc.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
 
 class Info extends StatefulWidget {
   final CurrentTrack currentTrack;
@@ -30,26 +37,26 @@ class Info extends StatefulWidget {
 }
 
 class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
-  int? _slideState = 0;
-  bool _recording = false;
-  ElevationPoint? _selectedPoint;
+  int _slideState = 0;
+  AltitudePoint? _selectedPoint;
   String _distanceUnit = 'Km';
   String _distance = '0';
   String _totalTime = '--:--:--';
   String _avgPace = '00:00';
   String _paceUnit = 'min/Km';
-  String _elevation = '-';
-  double _elevationMin = 0;
-  String _elevationGain = '-';
-  String _elevationCurrent = '-';
-  String _elevationUnit = 'm';
-  bool _loadingElevationChart = true;
+  String _altitude = '-';
+  int _altitudeMin = 0;
+  String _altitudeGain = '-';
+  String _altitudeCurrent = '-';
+  String _altitudeUnit = 'm';
+  bool _loadingAltitudeChart = true;
   String currentPath = '';
   DateTime? _sunset;
   String _sunsetTime = '--:--';
   String _toSunset = '--:--';
   Color _chartColor = CustomColors.accent;
-  List<charts.Series<ElevationPoint, num>> _elevationData = [];
+  List<charts.Series<AltitudePoint, num>> _altitudeDataLoaded = [];
+  List<charts.Series<AltitudePoint, num>> _altitudeDataCurrent = [];
   Map<int, Widget> _tabMap = {
     0: Text(I18n.translate('info_current_track')),
     1: Text(I18n.translate('info_loaded_track'))
@@ -63,20 +70,24 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
-    _recording = widget.currentTrack.isRecording;
+    clearScreen();
     _loadTrackData();
-    widget.currentTrack.eventListener
-        .listen((_) => recordingListener(widget.currentTrack));
+    widget.currentTrack.eventListener.listen((_) => recordingListener());
   }
 
-  void recordingListener(CurrentTrack currentTrack) {
-    if (currentTrack.isRecording) {
-      clearScreen();
-      setState(() {
-        _slideState = 0;
-        _recording = true;
-      });
-      if (currentTrack.positions.length > 0) {
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void recordingListener() {
+    if (widget.currentTrack.isRecording) {
+      if (widget.currentTrack.positions.length == 1) {
+        setState(() {
+          _slideState = 0;
+        });
+      }
+      if (widget.currentTrack.positions.length > 0) {
         _getDaylight();
         _loadTrackData();
       }
@@ -85,46 +96,21 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
       _loadTrackData();
       setState(() {
         _slideState = 1;
-        _recording = false;
       });
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  _getDaylight() async {
-    if (widget.currentTrack.positions.length > 0) {
-      double? lat = widget.currentTrack.positions[0].latitude;
-      double? lon = widget.currentTrack.positions[0].longitude;
-      if (lat != null && lon != null && this.mounted) {
-        setState(() {
-          _sunset = getSunriseSunset(lat, lon,
-                  DateTime.now().timeZoneOffset.inHours, DateTime.now())
-              .sunset;
-          if (_sunset != null)
-            _sunsetTime =
-                _sunset!.hour.toString() + ':' + _sunset!.minute.toString();
-          if (_sunset != null) {
-            String toSunsetH =
-                (DateTime.now().difference(_sunset!).abs().inHours -
-                        DateTime.now().timeZoneOffset.inHours)
-                    .toString();
-            toSunsetH = toSunsetH.length > 1 ? toSunsetH : '0' + toSunsetH;
-            String toSunsetM = (DateTime.now()
-                        .difference(_sunset!)
-                        .abs()
-                        .inMinutes -
-                    (DateTime.now().difference(_sunset!).abs().inHours * 60))
-                .toString();
-            toSunsetM = toSunsetM.length > 1 ? toSunsetM : '0' + toSunsetM;
-            _toSunset = toSunsetH + ':' + toSunsetM;
-          }
-        });
-      }
-    }
+  _getDaylight() {
+    _sunset = getSunriseSunset(
+            widget.currentTrack.positions.last.latitude!,
+            widget.currentTrack.positions.last.longitude!,
+            DateTime.now().timeZoneOffset.inHours,
+            DateTime.now())
+        .sunset;
+    setState(() {
+      _sunsetTime = Calc().getSunsetTime(widget.currentTrack, _sunset!);
+      _toSunset = Calc().getDaylight(widget.currentTrack, _sunset!);
+    });
   }
 
   loadTrack(path) async {
@@ -133,218 +119,154 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   }
 
   void _loadTrackData() async {
-    List<ElevationPoint> elevationPoints = [];
-    if (widget.currentTrack.isRecording && _slideState == 0) {
-      final latlong.Distance distance = new latlong.Distance();
-      latlong.LatLng first = latlong.LatLng(0, 0);
-      double? lat;
-      double? lon;
-      double? ele;
-      int totalDistance = 0;
-      latlong.LatLng previous = latlong.LatLng(0, 0);
-      DateTime? timeStart;
-      double maxElevation = 0;
-      double minElevation = 8849;
-      double previousElevation = 0;
-      double elevationGain = 0;
-      int totalPoints = widget.currentTrack.positions.length;
-      for (var i = 0; i < widget.currentTrack.positions.length; i++) {
-        if ((totalPoints > 1000 && i % 2 != 0) ||
-            (totalPoints > 2000 && i % 3 != 0) ||
-            (totalPoints > 5000 && i % 5 != 0)) {
-          continue;
-        }
-        lat = widget.currentTrack.positions[i].longitude;
-        lon = widget.currentTrack.positions[i].longitude;
-        ele = widget.currentTrack.positions[i].elevation;
-        if (lat == null || lon == null || ele == null) continue;
-        if (i == 0) {
-          first = latlong.LatLng(lat, lon);
-          previous = first;
-          previousElevation = ele;
-          timeStart = DateTime.fromMillisecondsSinceEpoch(
-              widget.currentTrack.positions[i].timestamp!.toInt());
-        }
-        if (ele > maxElevation) maxElevation = ele;
-        if (ele < minElevation) minElevation = ele;
-        double elevationDiff = ele - previousElevation;
-        if (elevationDiff > 0) elevationGain += elevationDiff;
-        int dist = distance
-            .as(latlong.LengthUnit.Meter, latlong.LatLng(lat, lon), previous)
-            .toInt();
-        previous = latlong.LatLng(lat, lon);
-        previousElevation = ele;
-        totalDistance += dist;
-        elevationPoints.add(ElevationPoint(totalDistance, ele));
-      }
+    int _totalDistance = 0;
+    double _avgPaceSeconds = 0.0;
+    String _avgPaceMin = '';
+    String _avgPaceSec = '';
 
-      double avgPaceSeconds =
-          DateTime.now().difference(timeStart!).abs().inMilliseconds /
-              1000 /
-              (totalDistance / 1000);
-      String avgPaceMin = (avgPaceSeconds / 60).toStringAsFixed(0);
-      String avgPaceSec = (avgPaceSeconds % 60).toStringAsFixed(0);
-      avgPaceMin = !avgPaceSeconds.isNaN &&
-              !avgPaceSeconds.isInfinite &&
-              avgPaceSeconds < 3600
-          ? (avgPaceMin.length > 1 ? avgPaceMin : "0$avgPaceMin")
-          : '00';
-      avgPaceSec = !avgPaceSeconds.isNaN &&
-              !avgPaceSeconds.isInfinite &&
-              avgPaceSeconds < 3600
-          ? (avgPaceSec.length > 1 ? avgPaceSec : "0$avgPaceSec")
-          : '00';
+    if (widget.currentTrack.isRecording && _slideState == 0) {
+      _totalDistance = widget.currentTrack.distance;
+      _avgPaceSeconds = Calc().avgPaceSecs(widget.currentTrack);
+      _avgPaceMin = Calc().avgPaceMinString(_avgPaceSeconds);
+      _avgPaceSec = Calc().avgPaceSecString(_avgPaceSeconds);
       if (this.mounted)
         setState(() {
-          _avgPace = avgPaceMin + ':' + avgPaceSec;
-          _distance = totalDistance > 1000
-              ? (totalDistance / 1000).toStringAsFixed(2)
-              : totalDistance.toString();
-          _distanceUnit = totalDistance > 1000 ? 'Km' : 'm';
-          _elevation = maxElevation.toInt().toString();
-          _elevationMin = minElevation;
-          _elevationGain = elevationGain.toInt().toString();
-          _elevationCurrent =
-              widget.currentTrack.positions.last.elevation!.toInt().toString();
-          _elevationData = [
-            new charts.Series<ElevationPoint, int>(
-                id: 'elevation',
+          _chartColor = CustomColors.ownPath;
+          _avgPace = _avgPaceMin + ':' + _avgPaceSec;
+          _distance = _totalDistance > 1000
+              ? (_totalDistance / 1000).toStringAsFixed(2)
+              : _totalDistance.toString();
+          _distanceUnit = _totalDistance > 1000 ? 'Km' : 'm';
+          _altitude = widget.currentTrack.altitudeTop.toString();
+          _altitudeMin = widget.currentTrack.altitudeMin;
+          _altitudeGain = widget.currentTrack.altitudeGain.toString();
+          if (widget.currentTrack.positions.length > 0) {
+            _altitudeCurrent =
+                widget.currentTrack.positions.last.altitude!.toInt().toString();
+          }
+          List<AltitudePoint> data = _altitudeDataCurrent.first.data;
+          if (data.isEmpty) {
+            _altitudeDataCurrent.first.data.add(AltitudePoint(
+                _totalDistance, widget.currentTrack.positions.last.altitude!));
+          } else if (data.last.totalDistance != _totalDistance) {
+            _altitudeDataCurrent.first.data.add(AltitudePoint(
+                _totalDistance, widget.currentTrack.positions.last.altitude!));
+          }
+          _loadingAltitudeChart = false;
+        });
+    } else {
+      if (widget.loadedTrack.gpx == null) return clearScreen();
+      List<AltitudePoint> _altitudePoints = widget.loadedTrack.altitudePoints;
+      Gpx _gpx = widget.loadedTrack.gpx as Gpx;
+      DateTime? _timeStart = _gpx.trks[0].trksegs[0].trkpts.first.time;
+      DateTime? _timeEnd = _gpx.trks[0].trksegs[0].trkpts.last.time;
+      _totalDistance = widget.loadedTrack.distance;
+      _avgPaceSeconds = _timeEnd!.difference(_timeStart!).abs().inMilliseconds /
+          1000 /
+          (_totalDistance / 1000);
+      _avgPaceMin = Calc().avgPaceMinString(_avgPaceSeconds);
+      _avgPaceSec = Calc().avgPaceSecString(_avgPaceSeconds);
+      if (this.mounted)
+        setState(() {
+          _chartColor = CustomColors.accent;
+          _avgPace = _avgPaceMin + ':' + _avgPaceSec;
+          _distance = _totalDistance > 1000
+              ? (_totalDistance / 1000).toStringAsFixed(2)
+              : _totalDistance.toString();
+          _distanceUnit = _totalDistance > 1000 ? 'Km' : 'm';
+          _altitude = widget.loadedTrack.altitudeTop.toString();
+          _altitudeMin = widget.loadedTrack.altitudeMin;
+          _altitudeGain = widget.loadedTrack.altitudeGain.toString();
+          _totalTime = _timeEnd
+              .difference(_timeStart)
+              .abs()
+              .toString()
+              .split('.')
+              .first
+              .padLeft(8, "0");
+          _altitudeDataLoaded = [
+            new charts.Series<AltitudePoint, int>(
+                id: 'altitude',
                 colorFn: (_, __) => charts.Color(
                     r: _chartColor.red,
                     g: _chartColor.green,
                     b: _chartColor.blue),
-                domainFn: (ElevationPoint point, _) => point.totalDistance,
-                measureFn: (ElevationPoint point, _) => point.elevation,
+                domainFn: (AltitudePoint point, _) => point.totalDistance,
+                measureFn: (AltitudePoint point, _) => point.altitude,
                 strokeWidthPxFn: (datum, index) => 1,
-                data: elevationPoints)
+                data: _altitudePoints)
           ];
-          _loadingElevationChart = false;
+          _loadingAltitudeChart = false;
         });
-    } else {
-      if (widget.loadedTrack.gpx != null) {
-        final latlong.Distance distance = new latlong.Distance();
-        Gpx gpx = widget.loadedTrack.gpx as Gpx;
-        latlong.LatLng first = latlong.LatLng(0, 0);
-        double? lat;
-        double? lon;
-        double? ele;
-        int totalDistance = 0;
-        latlong.LatLng previous = latlong.LatLng(0, 0);
-        DateTime? timeStart;
-        DateTime? timeEnd;
-        double maxElevation = 0;
-        double minElevation = 8849;
-        double previousElevation = 0;
-        double elevationGain = 0;
-        int totalPoints = gpx.trks[0].trksegs[0].trkpts.length;
-        for (var i = 0; i < gpx.trks[0].trksegs[0].trkpts.length; i++) {
-          if (((totalPoints > 1000 && i % 2 != 0) ||
-                  (totalPoints > 2000 && i % 3 != 0) ||
-                  (totalPoints > 5000 && i % 5 != 0)) &&
-              i != gpx.trks[0].trksegs[0].trkpts.length - 1) {
-            continue;
-          }
-          lat = gpx.trks[0].trksegs[0].trkpts[i].lat;
-          lon = gpx.trks[0].trksegs[0].trkpts[i].lon;
-          ele = gpx.trks[0].trksegs[0].trkpts[i].ele;
-          if (lat == null || lon == null || ele == null) continue;
-          if (i == 0) {
-            first = latlong.LatLng(lat, lon);
-            previous = first;
-            previousElevation = ele;
-            timeStart = gpx.trks[0].trksegs[0].trkpts[i].time;
-          }
-          if (i == gpx.trks[0].trksegs[0].trkpts.length - 1) {
-            timeEnd = gpx.trks[0].trksegs[0].trkpts[i].time;
-          }
-          if (ele > maxElevation) maxElevation = ele;
-          if (ele < minElevation) minElevation = ele;
-          double elevationDiff = ele - previousElevation;
-          if (elevationDiff > 0) elevationGain += elevationDiff;
-          int dist = distance
-              .as(latlong.LengthUnit.Meter, latlong.LatLng(lat, lon), previous)
-              .toInt();
-          previous = latlong.LatLng(lat, lon);
-          previousElevation = ele;
-          totalDistance += dist;
-          elevationPoints.add(ElevationPoint(totalDistance, ele));
-        }
-        double avgPaceSeconds =
-            timeEnd!.difference(timeStart!).abs().inMilliseconds /
-                1000 /
-                (totalDistance / 1000);
-        String avgPaceMin = (avgPaceSeconds / 60).toStringAsFixed(0);
-        String avgPaceSec = (avgPaceSeconds % 60).toStringAsFixed(0);
-        avgPaceMin = avgPaceMin.length > 1 ? avgPaceMin : "0$avgPaceMin";
-        avgPaceSec = avgPaceSec.length > 1 ? avgPaceSec : "0$avgPaceSec";
-        if (this.mounted)
-          setState(() {
-            currentPath = widget.loadedTrack.path as String;
-            _totalTime = timeEnd!
-                .difference(timeStart!)
-                .abs()
-                .toString()
-                .split('.')
-                .first
-                .padLeft(8, "0");
-            _avgPace = avgPaceMin + ':' + avgPaceSec;
-            _distance = totalDistance > 1000
-                ? (totalDistance / 1000).toStringAsFixed(2)
-                : totalDistance.toString();
-            _distanceUnit = totalDistance > 1000 ? 'Km' : 'm';
-            _elevation = maxElevation.toInt().toString();
-            _elevationMin = minElevation;
-            _elevationGain = elevationGain.toInt().toString();
-            _elevationData = [
-              new charts.Series<ElevationPoint, int>(
-                  id: 'elevation',
-                  colorFn: (_, __) => charts.Color(
-                      r: _chartColor.red,
-                      g: _chartColor.green,
-                      b: _chartColor.blue),
-                  domainFn: (ElevationPoint point, _) => point.totalDistance,
-                  measureFn: (ElevationPoint point, _) => point.elevation,
-                  strokeWidthPxFn: (datum, index) => 1,
-                  data: elevationPoints)
-            ];
-            _loadingElevationChart = false;
-          });
-      } else {
-        clearScreen();
-      }
     }
   }
 
+  void clearLoaded() {
+    if (!widget.currentTrack.isRecording) {
+      clearLoadedChart();
+    }
+  }
+
+  clearLoadedChart() {
+    _altitudeDataLoaded = [
+      new charts.Series<AltitudePoint, int>(
+          id: 'altitude',
+          colorFn: (_, __) => charts.Color(
+              r: _chartColor.red, g: _chartColor.green, b: _chartColor.blue),
+          domainFn: (AltitudePoint point, _) => point.totalDistance,
+          measureFn: (AltitudePoint point, _) => point.altitude,
+          strokeWidthPxFn: (datum, index) => 1,
+          data: [])
+    ];
+  }
+
   void clearScreen() {
-    List<ElevationPoint> elevationPoints = [];
     if (this.mounted)
       setState(() {
         _selectedPoint = null;
         _chartColor = CustomColors.accent;
-        _loadingElevationChart = false;
+        _loadingAltitudeChart = false;
         _totalTime = '--:--:--';
         _distance = '0';
         _distanceUnit = 'm';
-        _elevation = '-';
-        _elevationMin = 0;
-        _elevationGain = '-';
-        _elevationCurrent = '-';
+        _altitude = '-';
+        _altitudeMin = 0;
+        _altitudeGain = '-';
+        _altitudeCurrent = '-';
         _avgPace = '00:00';
-        //_toSunset = '--:--';
         //_sunsetTime = '--:--';
-        _elevationData = [
-          new charts.Series<ElevationPoint, int>(
-              id: 'elevation',
+        _altitudeDataCurrent = [
+          new charts.Series<AltitudePoint, int>(
+              id: 'altitude',
               colorFn: (_, __) => charts.Color(
                   r: _chartColor.red,
                   g: _chartColor.green,
                   b: _chartColor.blue),
-              domainFn: (ElevationPoint point, _) => point.totalDistance,
-              measureFn: (ElevationPoint point, _) => point.elevation,
+              domainFn: (AltitudePoint point, _) => point.totalDistance,
+              measureFn: (AltitudePoint point, _) => point.altitude,
               strokeWidthPxFn: (datum, index) => 1,
-              data: elevationPoints)
+              data: [])
         ];
+        clearLoadedChart();
       });
+  }
+
+  _slidingStateChanged(value) {
+    if (this.mounted) {
+      setState(() {
+        _slideState = int.parse(value!.toString());
+      });
+      _loadTrackData();
+    }
+  }
+
+  _onChangeSelectedPoint(charts.SelectionModel model) {
+    final selectedDatum = model.selectedDatum;
+    if (selectedDatum.isNotEmpty && this.mounted) {
+      setState(() {
+        _selectedPoint = selectedDatum.first.datum;
+      });
+    }
   }
 
   @override
@@ -353,24 +275,13 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
     bool lightMode = Provider.of<ThemeProvider>(context).isLightMode;
     return SafeArea(
         child: Column(children: [
-      Container(
-          child: _recording
-              ? Container(
-                  padding: EdgeInsets.only(top: 20),
-                  child: CupertinoSlidingSegmentedControl(
-                      children: _tabMap,
-                      groupValue: _slideState,
-                      onValueChanged: (value) {
-                        if (this.mounted) {
-                          setState(() {
-                            _slideState = int.parse(value!.toString());
-                          });
-                          clearScreen();
-                          _getDaylight();
-                          _loadTrackData();
-                        }
-                      }))
-              : Container()),
+      widget.currentTrack.isRecording && widget.loadedTrack.gpx != null
+          ? VieirosSegmentedControl(
+              slideState: _slideState,
+              tabMap: _tabMap,
+              onValueChanged: _slidingStateChanged,
+            )
+          : Container(),
       Flexible(
           flex: 1,
           child: Column(children: [
@@ -384,70 +295,17 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         mainAxisSize: MainAxisSize.max,
                         children: [
-                          Container(
-                              height: 80,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(I18n.translate('info_total_time'),
-                                      style: TextStyle(
-                                          color: lightMode
-                                              ? CustomColors.subText
-                                              : CustomColors.subTextDark)),
-                                  widget.currentTrack.isRecording &&
-                                          _slideState == 0
-                                      ? TimerWidget(
-                                          time: widget.currentTrack.dateTime!
-                                              .millisecondsSinceEpoch)
-                                      : Text(_totalTime,
-                                          style: TextStyle(
-                                              fontSize: 35,
-                                              fontWeight: FontWeight.bold))
-                                ],
-                              ),
-                              width: MediaQuery.of(context).size.width / 2,
-                              alignment: Alignment.center),
-                          Container(
-                              height: 80,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(I18n.translate('info_total_distance'),
-                                      style: TextStyle(
-                                          color: lightMode
-                                              ? CustomColors.subText
-                                              : CustomColors.subTextDark)),
-                                  Container(
-                                      child: Row(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.baseline,
-                                          textBaseline: TextBaseline.alphabetic,
-                                          children: [
-                                            Text(_distance,
-                                                style: TextStyle(
-                                                    fontSize: 35,
-                                                    fontWeight:
-                                                        FontWeight.bold)),
-                                            Container(
-                                                margin: EdgeInsets.all(2)),
-                                            Text(_distanceUnit,
-                                                style: TextStyle(
-                                                    fontSize: 17,
-                                                    fontWeight:
-                                                        FontWeight.bold))
-                                          ]),
-                                      alignment: Alignment.center)
-                                ],
-                              ),
-                              width: MediaQuery.of(context).size.width / 2,
-                              alignment: Alignment.center)
+                          TimeWidget(
+                            lightMode: lightMode,
+                            slideState: _slideState,
+                            initDatetime: widget.currentTrack.dateTime,
+                            isRecording: widget.currentTrack.isRecording,
+                            totalTime: _totalTime,
+                          ),
+                          DistanceWidget(
+                              lightMode: lightMode,
+                              distance: _distance,
+                              distanceUnit: _distanceUnit)
                         ],
                       ),
                       Row(
@@ -456,109 +314,14 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         textBaseline: TextBaseline.alphabetic,
                         children: [
-                          Container(
-                              height: 80,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(I18n.translate('info_daytime'),
-                                      style: TextStyle(
-                                          color: lightMode
-                                              ? CustomColors.subText
-                                              : CustomColors.subTextDark)),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      Column(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          textBaseline: TextBaseline.alphabetic,
-                                          children: [
-                                            Text(
-                                              I18n.translate('info_daytime_left'),
-                                              style: TextStyle(
-                                                  color: lightMode
-                                                      ? CustomColors.subText
-                                                      : CustomColors
-                                                          .subTextDark,
-                                                  fontSize: 12),
-                                            ),
-                                            Text(_toSunset,
-                                                style: TextStyle(
-                                                    fontSize: 25,
-                                                    fontWeight:
-                                                        FontWeight.bold))
-                                          ]),
-                                      Column(
-                                          mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          textBaseline: TextBaseline.alphabetic,
-                                          children: [
-                                            Text(
-                                              I18n.translate('info_daytime_sunset'),
-                                              style: TextStyle(
-                                                  color: lightMode
-                                                      ? CustomColors.subText
-                                                      : CustomColors
-                                                          .subTextDark,
-                                                  fontSize: 12),
-                                            ),
-                                            Text(_sunsetTime,
-                                                style: TextStyle(
-                                                    fontSize: 25,
-                                                    fontWeight:
-                                                        FontWeight.bold))
-                                          ])
-                                    ],
-                                  )
-                                ],
-                              ),
-                              width: MediaQuery.of(context).size.width / 2,
-                              alignment: Alignment.center),
-                          Container(
-                            height: 80,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(I18n.translate('info_pace'),
-                                    style: TextStyle(
-                                        color: lightMode
-                                            ? CustomColors.subText
-                                            : CustomColors.subTextDark)),
-                                Container(
-                                    child: Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.baseline,
-                                        textBaseline: TextBaseline.alphabetic,
-                                        children: [
-                                      Text(_avgPace,
-                                          style: TextStyle(
-                                              fontSize: 35,
-                                              fontWeight: FontWeight.bold)),
-                                      Container(margin: EdgeInsets.all(2)),
-                                      Text(_paceUnit,
-                                          style: TextStyle(
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.bold))
-                                    ]))
-                              ],
-                            ),
-                            width: MediaQuery.of(context).size.width / 2,
-                          )
+                          DaytimeWidget(
+                              lightMode: lightMode,
+                              sunsetTime: _sunsetTime,
+                              toSunset: _toSunset),
+                          PaceWidget(
+                              lightMode: lightMode,
+                              avgPace: _avgPace,
+                              paceUnit: _paceUnit)
                         ],
                       ),
                       Row(
@@ -566,178 +329,12 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                         mainAxisSize: MainAxisSize.max,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Container(
-                              height: 80,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(I18n.translate('info_elevation'),
-                                      style: TextStyle(
-                                          color: lightMode
-                                              ? CustomColors.subText
-                                              : CustomColors.subTextDark)),
-                                  Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.baseline,
-                                    textBaseline: TextBaseline.alphabetic,
-                                    children: [
-                                      Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Container(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width /
-                                                  3,
-                                              child: Text(
-                                                I18n.translate('info_elevation_current'),
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    color: lightMode
-                                                        ? CustomColors.subText
-                                                        : CustomColors
-                                                            .subTextDark,
-                                                    fontSize: 12),
-                                              )),
-                                          Container(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width /
-                                                  3,
-                                              child: Text(
-                                                I18n.translate('info_elevation_top'),
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    color: lightMode
-                                                        ? CustomColors.subText
-                                                        : CustomColors
-                                                            .subTextDark,
-                                                    fontSize: 12),
-                                              )),
-                                          Container(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width /
-                                                  3,
-                                              child: Text(
-                                                I18n.translate('info_elevation_gain'),
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(
-                                                    color: lightMode
-                                                        ? CustomColors.subText
-                                                        : CustomColors
-                                                            .subTextDark,
-                                                    fontSize: 12),
-                                              )),
-                                        ],
-                                      ),
-                                      Container(
-                                          margin: EdgeInsets.symmetric(
-                                              vertical: 3)),
-                                      Row(
-                                        mainAxisSize: MainAxisSize.max,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Container(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width /
-                                                  3,
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.baseline,
-                                                textBaseline:
-                                                    TextBaseline.alphabetic,
-                                                children: [
-                                                  Text(_elevationCurrent,
-                                                      style: TextStyle(
-                                                          fontSize: 25,
-                                                          fontWeight:
-                                                              FontWeight.bold)),
-                                                  Text(
-                                                      _elevationCurrent != '-'
-                                                          ? _elevationUnit
-                                                          : '',
-                                                      style: TextStyle(
-                                                          fontSize: 15,
-                                                          fontWeight:
-                                                              FontWeight.bold))
-                                                ],
-                                              )),
-                                          Container(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width /
-                                                  3,
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.baseline,
-                                                textBaseline:
-                                                    TextBaseline.alphabetic,
-                                                children: [
-                                                  Text(_elevation,
-                                                      style: TextStyle(
-                                                          fontSize: 25,
-                                                          fontWeight:
-                                                              FontWeight.bold)),
-                                                  Text(_elevation != '-'
-                                                  ? _elevationUnit
-                                                      : '',
-                                                      style: TextStyle(
-                                                          fontSize: 15,
-                                                          fontWeight:
-                                                              FontWeight.bold))
-                                                ],
-                                              )),
-                                          Container(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width /
-                                                  3,
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.max,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.baseline,
-                                                textBaseline:
-                                                    TextBaseline.alphabetic,
-                                                children: [
-                                                  Text(_elevationGain,
-                                                      style: TextStyle(
-                                                          fontSize: 25,
-                                                          fontWeight:
-                                                              FontWeight.bold)),
-                                                  Text(_elevationGain != '-'
-                                                      ? _elevationUnit
-                                                      : '',
-                                                      style: TextStyle(
-                                                          fontSize: 15,
-                                                          fontWeight:
-                                                              FontWeight.bold))
-                                                ],
-                                              ))
-                                        ],
-                                      ),
-                                    ],
-                                  )
-                                ],
-                              ),
-                              width: MediaQuery.of(context).size.width)
+                          AltitudeWidget(
+                              lightMode: lightMode,
+                              altitudeUnit: _altitudeUnit,
+                              altitude: _altitude,
+                              altitudeGain: _altitudeGain,
+                              altitudeCurrent: _altitudeCurrent)
                         ],
                       )
                     ])),
@@ -749,136 +346,21 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          Column(
-                              mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(_selectedPoint != null
-                                    ? I18n.translate('info_chart_elevation')+': ' +
-                                        _selectedPoint!.elevation
-                                            .toInt()
-                                            .toString() +
-                                        ' m.'
-                                    : ''),
-                                Text(_selectedPoint != null
-                                    ? I18n.translate('info_chart_distance')+': ' +
-                                        _selectedPoint!.totalDistance
-                                            .toString() +
-                                        ' m.'
-                                    : ''),
-                                Container(
-                                  margin: EdgeInsets.only(right: 20),
-                                )
-                              ]),
-                          _loadingElevationChart
+                          ChartPointInfoWidget(selectedPoint: _selectedPoint),
+                          _loadingAltitudeChart
                               ? CircularProgressIndicator(
                                   color: CustomColors.accent,
                                 )
-                              : Flexible(
-                                  flex: 1,
-                                  child: charts.LineChart(_elevationData,
-                                      primaryMeasureAxis:
-                                          charts.NumericAxisSpec(
-                                              renderSpec: !lightMode
-                                                  ? charts.GridlineRendererSpec(
-                                                      labelStyle: new charts
-                                                          .TextStyleSpec(
-                                                        color: charts
-                                                            .MaterialPalette
-                                                            .white,
-                                                      ),
-                                                      lineStyle:
-                                                          charts.LineStyleSpec(
-                                                        color: charts
-                                                            .MaterialPalette
-                                                            .gray
-                                                            .shadeDefault,
-                                                      ))
-                                                  : null,
-                                              tickProviderSpec: charts
-                                                  .StaticNumericTickProviderSpec(
-                                                <charts.TickSpec<num>>[
-                                                  charts.TickSpec<num>(
-                                                      _elevationMin.toInt()),
-                                                  charts.TickSpec<
-                                                      num>(((int.parse(
-                                                                  _elevation == '-' ? '0' : _elevation) -
-                                                              _elevationMin) ~/
-                                                          3.03) +
-                                                      _elevationMin.toInt()),
-                                                  charts.TickSpec<
-                                                      num>(((int.parse(
-                                                      _elevation == '-' ? '0' : _elevation) -
-                                                              _elevationMin) ~/
-                                                          1.51) +
-                                                      _elevationMin.toInt()),
-                                                  charts.TickSpec<num>(
-                                                      int.parse(_elevation == '-' ? '0' : _elevation)),
-                                                ],
-                                              )),
-                                      selectionModels: [
-                                        charts.SelectionModelConfig(
-                                            type:
-                                                charts.SelectionModelType.info,
-                                            changedListener:
-                                                (charts.SelectionModel model) {
-                                              final selectedDatum =
-                                                  model.selectedDatum;
-                                              if (selectedDatum.isNotEmpty &&
-                                                  this.mounted) {
-                                                setState(() {
-                                                  _selectedPoint =
-                                                      selectedDatum.first.datum;
-                                                });
-                                              }
-                                            })
-                                      ],
-                                      domainAxis: charts.NumericAxisSpec(
-                                          renderSpec: !lightMode
-                                              ? charts.GridlineRendererSpec(
-                                                  labelStyle:
-                                                      new charts.TextStyleSpec(
-                                                    color: charts
-                                                        .MaterialPalette.white,
-                                                  ),
-                                                  lineStyle:
-                                                      charts.LineStyleSpec(
-                                                    color: charts
-                                                        .MaterialPalette
-                                                        .gray
-                                                        .shadeDefault,
-                                                  ))
-                                              : null,
-                                          tickProviderSpec: charts
-                                              .StaticNumericTickProviderSpec(
-                                            <charts.TickSpec<num>>[
-                                              charts.TickSpec<num>(0),
-                                              charts.TickSpec<num>(_distance
-                                                          .indexOf('.') !=
-                                                      -1
-                                                  ? double.parse(_distance) *
-                                                      1000 ~/
-                                                      3.03
-                                                  : double.parse(_distance) ~/
-                                                      3.03),
-                                              charts.TickSpec<num>(_distance
-                                                          .indexOf('.') !=
-                                                      -1
-                                                  ? double.parse(_distance) *
-                                                      1000 ~/
-                                                      1.51
-                                                  : double.parse(_distance) ~/
-                                                      1.51),
-                                              charts.TickSpec<num>(_distance
-                                                          .indexOf('.') !=
-                                                      -1
-                                                  ? double.parse(_distance) *
-                                                      1000
-                                                  : int.parse(_distance)),
-                                            ],
-                                          )),
-                                      animate: true))
+                              : ChartWidget(
+                                  lightMode: lightMode,
+                                  altitudeData: _slideState == 0 &&
+                                          widget.currentTrack.isRecording
+                                      ? _altitudeDataCurrent
+                                      : _altitudeDataLoaded,
+                                  altitude: _altitude,
+                                  altitudeMin: _altitudeMin,
+                                  distance: _distance,
+                                  onChangeSelected: _onChangeSelectedPoint)
                         ])))
           ]))
     ]));

@@ -1,8 +1,10 @@
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vieiros/components/vieiros_notification.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:flutter/material.dart';
 import 'package:vieiros/model/current_track.dart';
-import 'package:vieiros/resources/I18n.dart';
+import 'package:vieiros/resources/i18n.dart';
 import 'package:vieiros/tabs/info.dart';
 import 'package:vieiros/tabs/settings.dart';
 import '../tabs/map.dart';
@@ -11,12 +13,34 @@ import 'package:vieiros/tabs/tracks.dart';
 class Home extends StatefulWidget {
   final SharedPreferences prefs;
   final LoadedTrack loadedTrack;
-  Home({Key? key, required this.prefs, required this.loadedTrack}) : super(key: key);
+
+  Home({Key? key, required this.prefs, required this.loadedTrack})
+      : super(key: key);
+
   @override
   _Home createState() => _Home();
 }
 
-class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObserver {
+class _Home extends State<Home>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
+
+  static const platform =
+  const MethodChannel('com.rabocorp.vieiros/open_file');
+
+  String? openFileUrl;
+
+  void getOpenFileUrl() async {
+    dynamic url = await platform.invokeMethod("getOpenFileUrl");
+    print("getOpenFileUrl");
+    VieirosNotification().showNotification(context, url, NotificationType.INFO);
+    if (url != null && url != openFileUrl) {
+      setState(() {
+        openFileUrl = url;
+      });
+    }
+  }
+
+
   int _tabIndex = 0;
   Icon _fabIcon = Icon(Icons.add);
 
@@ -29,63 +53,65 @@ class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObs
   final _infoKey = GlobalKey<InfoState>();
 
   void _onTabItemTapped(int index) async {
-    if(index == 1){
-      if(_mapKey.currentState != null){
+    if (index == 1) {
+      if (_mapKey.currentState != null) {
         String? path = widget.prefs.getString('currentTrack');
-        if(path != null && widget.loadedTrack.path != path) {
+        if (path != null && widget.loadedTrack.path != path) {
           widget.loadedTrack.clear();
           _mapKey.currentState!.loadTrack(path);
-          if(_infoKey.currentState != null){
+          if (_infoKey.currentState != null) {
             _infoKey.currentState!.clearScreen();
           }
         }
-        if(path != null && widget.loadedTrack.path == path) {
+        if (path != null && widget.loadedTrack.path == path) {
           _mapKey.currentState!.navigateTrack(path);
         }
-        if(_currentTrack.isRecording){
-          _fabIcon = Icon(Icons.stop);
-          if(this.mounted) setState(() {
-            _tabIndex = index;
-            _tabController.animateTo(index);
-          });
+        if (_currentTrack.isRecording) {
+          _fabIcon = const Icon(Icons.stop);
+          if (this.mounted)
+            setState(() {
+              _tabIndex = index;
+              _tabController.animateTo(index);
+            });
           return;
         }
-      }else{
+      } else {
         String? path = widget.prefs.getString('currentTrack');
-        if(path != null && widget.loadedTrack.path != path) {
+        if (path != null && widget.loadedTrack.path != path) {
           await widget.loadedTrack.loadTrack(path);
         }
       }
-      _fabIcon = Icon(Icons.play_arrow);
-    }else if(index == 2){
-      if(_infoKey.currentState != null){
+      _fabIcon = const Icon(Icons.play_arrow);
+    } else if (index == 2) {
+      if (_infoKey.currentState != null) {
         String? path = widget.prefs.getString('currentTrack');
-        if(path != null && _infoKey.currentState!.currentPath != path) {
+        if (path != null && _infoKey.currentState!.currentPath != path) {
           widget.loadedTrack.clear();
           _infoKey.currentState!.loadTrack(path);
         }
       }
-    }else{
-      _fabIcon = Icon(Icons.add);
+    } else {
+      _fabIcon = const Icon(Icons.add);
     }
-    if(this.mounted) setState(() {
-      _tabIndex = index;
-      _tabController.animateTo(index);
-    });
+    if (this.mounted)
+      setState(() {
+        _tabIndex = index;
+        _tabController.animateTo(index);
+      });
   }
 
-  void _setPlayFabIcon(){
+  void _setPlayFabIcon() {
     setState(() {
-      _fabIcon = Icon(Icons.play_arrow);
+      _fabIcon = const Icon(Icons.play_arrow);
     });
   }
 
-  void _clearTrack(){
-    if(_mapKey.currentState != null){
+  void _clearTrack() {
+    if (_mapKey.currentState != null) {
       _mapKey.currentState!.clearTrack();
     }
-    if(_infoKey.currentState != null){
-      _infoKey.currentState!.clearScreen();
+    if (_infoKey.currentState != null) {
+      _infoKey.currentState!.clearLoaded();
     }
   }
 
@@ -93,20 +119,30 @@ class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObs
   void initState() {
     super.initState();
     WidgetsBinding.instance!.addObserver(this);
+    getOpenFileUrl();
     _tabs = <Widget>[
-      Tracks(key: _trackKey, prefs: widget.prefs, toTabIndex: _onTabItemTapped, currentTrack: _currentTrack, loadedTrack: widget.loadedTrack, clearTrack: _clearTrack),
-      Map(key: _mapKey, prefs: widget.prefs, setPlayIcon: _setPlayFabIcon, currentTrack: _currentTrack, loadedTrack: widget.loadedTrack),
-      Info(key: _infoKey, currentTrack: _currentTrack, prefs: widget.prefs, loadedTrack: widget.loadedTrack),
+      Tracks(
+          key: _trackKey,
+          prefs: widget.prefs,
+          toTabIndex: _onTabItemTapped,
+          currentTrack: _currentTrack,
+          loadedTrack: widget.loadedTrack,
+          clearTrack: _clearTrack),
+      Map(
+          key: _mapKey,
+          prefs: widget.prefs,
+          setPlayIcon: _setPlayFabIcon,
+          currentTrack: _currentTrack,
+          loadedTrack: widget.loadedTrack),
+      Info(
+          key: _infoKey,
+          currentTrack: _currentTrack,
+          prefs: widget.prefs,
+          loadedTrack: widget.loadedTrack),
       Settings(prefs: widget.prefs)
     ];
-    _tabController = TabController(vsync: this, length: _tabs.length, initialIndex: _tabIndex);
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if(state == AppLifecycleState.resumed && _tabIndex == 1 && _mapKey.currentState != null){
-      _mapKey.currentState!.getLocation();
-    }
+    _tabController = TabController(
+        vsync: this, length: _tabs.length, initialIndex: _tabIndex);
   }
 
   @override
@@ -116,66 +152,70 @@ class _Home extends State<Home> with TickerProviderStateMixin, WidgetsBindingObs
     super.dispose();
   }
 
-  _onFabPressed(index){
-    if(index == 0 && _trackKey.currentState != null){
+  _onFabPressed(index) {
+    if (index == 0 && _trackKey.currentState != null) {
       _trackKey.currentState!.openFile();
     }
-    if(index == 1 && _mapKey.currentState != null){
-      if(!_currentTrack.isRecording){
+    if (index == 1 && _mapKey.currentState != null) {
+      if (!_currentTrack.isRecording) {
         _mapKey.currentState!.startRecording();
-        if(this.mounted) setState(() {
-          _fabIcon = Icon(Icons.stop);
-        });
-      }else{
+        if (this.mounted)
+          setState(() {
+            _fabIcon = Icon(Icons.stop);
+          });
+      } else {
         _mapKey.currentState!.stopRecording();
       }
     }
   }
 
+  List<BottomNavigationBarItem> _bottomNavigationBarItems(){
+    return <BottomNavigationBarItem>[
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.timeline),
+        label: I18n.translate('appbar_tab_tracks'),
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.terrain),
+        label: I18n.translate('appbar_tab_map'),
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.insert_chart_rounded),
+        label: I18n.translate('appbar_tab_info'),
+      ),
+      BottomNavigationBarItem(
+        icon: const Icon(Icons.settings),
+        label: I18n.translate('appbar_tab_settings'),
+      )
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-            body: TabBarView(
-                physics: NeverScrollableScrollPhysics(),
-                controller: _tabController,
-                children: _tabs
-            ),
-            floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-            floatingActionButton: _tabIndex <= 1 ? FloatingActionButton(
-              heroTag: null,
-              child: _fabIcon,
-              onPressed: () => _onFabPressed(_tabIndex),
-            ):null,
-            bottomNavigationBar: BottomAppBar(
-                shape: CircularNotchedRectangle(),
-                notchMargin: 4.0,
-                clipBehavior: Clip.antiAlias,
-                child: BottomNavigationBar(
+        body: TabBarView(
+            physics: NeverScrollableScrollPhysics(),
+            controller: _tabController,
+            children: _tabs),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: _tabIndex <= 1
+            ? FloatingActionButton(
+                heroTag: null,
+                child: _fabIcon,
+                onPressed: () => _onFabPressed(_tabIndex),
+              )
+            : null,
+        bottomNavigationBar: BottomAppBar(
+            shape: CircularNotchedRectangle(),
+            notchMargin: 4.0,
+            clipBehavior: Clip.antiAlias,
+            child: BottomNavigationBar(
                 type: BottomNavigationBarType.fixed,
-                items: <BottomNavigationBarItem>[
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.timeline),
-                    label: I18n.translate('appbar_tab_tracks'),
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.terrain),
-                    label: I18n.translate('appbar_tab_map'),
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.insert_chart_rounded),
-                    label: I18n.translate('appbar_tab_info'),
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.settings),
-                    label: I18n.translate('appbar_tab_settings'),
-                  )
-                ],
+                items: _bottomNavigationBarItems(),
                 currentIndex: _tabIndex,
                 selectedFontSize: 12,
                 unselectedFontSize: 12,
                 showUnselectedLabels: true,
-                onTap: _onTabItemTapped
-            ))
-        );
+                onTap: _onTabItemTapped)));
   }
 }

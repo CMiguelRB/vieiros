@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vieiros/components/vieiros_dialog.dart';
+import 'package:vieiros/components/vieiros_notification.dart';
 import 'package:vieiros/model/current_track.dart';
 import 'package:vieiros/model/loaded_track.dart';
-import 'package:vieiros/resources/CustomColors.dart';
-import 'package:vieiros/resources/I18n.dart';
-import 'package:vieiros/resources/Themes.dart';
+import 'package:vieiros/resources/custom_colors.dart';
+import 'package:vieiros/resources/i18n.dart';
+import 'package:vieiros/resources/themes.dart';
 import 'package:xml/xml.dart';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
@@ -35,8 +37,7 @@ class Tracks extends StatefulWidget {
 
 class TracksState extends State<Tracks> {
   List<GpxFile> _files = [];
-
-  loadPrefs() async {
+  _loadPrefs() async {
     String? jsonString = widget.prefs.getString('files');
     jsonString = jsonString != null ? jsonString : '[]';
     List<GpxFile> files = json
@@ -64,36 +65,27 @@ class TracksState extends State<Tracks> {
       if (result.files.single.name
               .split('.')[result.files.single.name.split('.').length - 1] !=
           'gpx') {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(I18n.translate('tracks_file_validation_error')),
-          backgroundColor: CustomColors.error,
-          duration: const Duration(milliseconds: 1500),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4.0),
-          ),
-        ));
+        VieirosNotification().showNotification(
+            context, 'tracks_file_validation_error', NotificationType.ERROR);
         return;
       }
+      for (var i = 0; i < _files.length; i++) {
+        if (_files[i].path == result.files.single.path) return;
+      }
+      String? path = result.files.single.path;
+      final xmlFile = new File(path!);
+      Gpx gpx = GpxReader().fromString(
+          XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString());
       setState(() {
-        for (var i = 0; i < _files.length; i++) {
-          if (_files[i].path == result.files.single.path) {
-            return;
-          }
-        }
-        String? path = result.files.single.path;
-        final xmlFile = new File(path);
-        Gpx gpx = GpxReader().fromString(
-            XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString());
         String? name = gpx.trks[0].name;
-        if (name == null) name = result.files.single.name;
+        if(name == null) name = result.files.single.name;
         _files.add(GpxFile(name: name, path: result.files.single.path));
         widget.prefs.setString('files', jsonEncode(_files));
       });
     }
   }
 
-  unloadTrack(index) async {
+  _unloadTrack(index) async {
     setState(() {
       GpxFile file = _files[index];
       String? current = widget.prefs.getString('currentTrack');
@@ -102,19 +94,12 @@ class TracksState extends State<Tracks> {
         widget.clearTrack();
         widget.loadedTrack.clear();
       }
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(I18n.translate('tracks_unloaded')),
-        backgroundColor: CustomColors.ownPath,
-        duration: const Duration(milliseconds: 1500),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4.0),
-        ),
-      ));
+      VieirosNotification()
+          .showNotification(context, 'tracks_unloaded', NotificationType.INFO);
     });
   }
 
-  removeFile(context, index) async {
+  _removeFile(context, index) async {
     setState(() {
       GpxFile file = _files.removeAt(index);
       widget.prefs.setString('files', jsonEncode(_files));
@@ -133,7 +118,7 @@ class TracksState extends State<Tracks> {
     });
   }
 
-  navigate(index) async {
+  _navigate(index) async {
     String? path = _files[index].path;
     if (path == null) return;
     widget.prefs.setString('currentTrack', path);
@@ -143,7 +128,7 @@ class TracksState extends State<Tracks> {
   @override
   void initState() {
     super.initState();
-    loadPrefs();
+    _loadPrefs();
   }
 
   @override
@@ -187,7 +172,8 @@ class TracksState extends State<Tracks> {
                                     children: [
                                       _loadedElement
                                           ? IconButton(
-                                              onPressed: () => unloadTrack(index),
+                                              onPressed: () =>
+                                                  _unloadTrack(index),
                                               icon: Icon(Icons.clear))
                                           : Text(''),
                                       Flexible(
@@ -197,40 +183,22 @@ class TracksState extends State<Tracks> {
                                               overflow: TextOverflow.ellipsis)),
                                       IconButton(
                                           alignment: Alignment.centerRight,
-                                          onPressed: () => showDialog<String>(
-                                                context: context,
-                                                builder:
-                                                    (BuildContext context) =>
-                                                        AlertDialog(
-                                                  content: Text(I18n.translate(
-                                                      "common_confirm")),
-                                                  actions: <Widget>[
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Navigator.pop(
-                                                              context,
-                                                              I18n.translate(
-                                                                  "common_cancel")),
-                                                      child: Text(
-                                                          I18n.translate(
-                                                              "common_cancel"),
-                                                          style: TextStyle(color: CustomColors.accent)),
-                                                    ),
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          removeFile(
-                                                              context, index),
-                                                      child: Text(
-                                                          I18n.translate(
-                                                              "common_ok"),
-                                                          style: TextStyle(color: CustomColors.accent)),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
+                                          onPressed: () =>
+                                              VieirosDialog().infoDialog(
+                                                  context,
+                                                  'tracks_delete_route',
+                                                  {
+                                                    'common_cancel': () =>
+                                                        Navigator.pop(
+                                                            context, ''),
+                                                    'common_ok': () =>
+                                                        _removeFile(
+                                                            context, index)
+                                                  },
+                                                  bodyTag: 'common_confirm'),
                                           icon: Icon(Icons.delete))
                                     ]))),
-                        onTap: () => navigate(index),
+                        onTap: () => _navigate(index),
                       );
                     }))
       ],

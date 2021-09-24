@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:vieiros/resources/CustomColors.dart';
-import 'package:vieiros/resources/I18n.dart';
-import 'package:vieiros/resources/Themes.dart';
-
+import 'package:vieiros/components/vieiros_switch.dart';
+import 'package:vieiros/resources/custom_colors.dart';
+import 'package:vieiros/resources/i18n.dart';
+import 'package:vieiros/resources/themes.dart';
 
 class Settings extends StatefulWidget {
   final SharedPreferences prefs;
@@ -24,7 +24,8 @@ class SettingsState extends State<Settings> {
   void initState() {
     super.initState();
     _darkMode = widget.prefs.getString("dark_mode") == 'true';
-    _voiceAlerts = widget.prefs.getString("voice_alerts") == 'true' || widget.prefs.getString("voice_alerts") == null;
+    _voiceAlerts = widget.prefs.getString("voice_alerts") == 'true' ||
+        widget.prefs.getString("voice_alerts") == null;
   }
 
   @override
@@ -41,46 +42,16 @@ class SettingsState extends State<Settings> {
     });
   }
 
-  _onChangeVoiceAlerts (value) async{
-    /*FlutterTts flutterTts = FlutterTts();
-    String lang = Platform.localeName.replaceAll("_", "-");
-    await flutterTts.setLanguage(lang);
-    await flutterTts.setSpeechRate(0.5);
-    await flutterTts.setVolume(1.0);
-    await flutterTts.setPitch(0.9);
-    if(value){
-      if(lang == 'en-US'){
-        flutterTts.speak("Voice alerts enabled");
-      }else{
-        flutterTts.speak("Alertas de voz habilitadas");
-      }
-    }else{
-      if(lang == 'en-US'){
-        flutterTts.speak("Voice alerts disabled");
-      }else{
-        flutterTts.speak("Alertas de voz deshabilitadas");
-      }
-    }*/
+  _onChangeVoiceAlerts(value, context) async {
     setState(() {
       _voiceAlerts = value;
       widget.prefs.setString("voice_alerts", value.toString());
     });
   }
 
-  Color _getTextColor(Set<MaterialState> states, isTrack) {
-    const Set<MaterialState> interactiveStates = <MaterialState>{
-      MaterialState.pressed,
-      MaterialState.selected
-    };
-    if (states.any(interactiveStates.contains)) {
-      return isTrack ? CustomColors.faintedAccent : CustomColors.accent;
-    }
-    return isTrack ? CustomColors.faintedText : CustomColors.background;
-  }
-  
   void _donate() async {
     String url = 'https://www.paypal.com/donate?hosted_button_id=GGNA5HGUATFFQ';
-    if(await canLaunch(url)){
+    if (await canLaunch(url)) {
       launch(url);
     }
   }
@@ -94,30 +65,18 @@ class SettingsState extends State<Settings> {
             child: Container(
                 padding: EdgeInsets.all(10),
                 child: Column(children: [
-                  Container(
-                    padding: EdgeInsets.all(10),
-                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, mainAxisSize: MainAxisSize.max,children:[Text(I18n.translate('settings_dark_mode')),Switch(
+                  VieirosSwitch(
+                      onChanged: _onChangeDarkMode,
                       value: _darkMode,
-                      onChanged: (value) => _onChangeDarkMode(value, context),
-                      thumbColor: MaterialStateColor.resolveWith((states) => _getTextColor(states, false)),
-                      trackColor: MaterialStateColor.resolveWith((states) => _getTextColor(states, true)),
-                    )]),
-                  ),
-                  Container(
-                    padding: EdgeInsets.all(10),
-                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, mainAxisSize: MainAxisSize.max,children:[Text(I18n.translate('settings_voice_alerts')),Switch(
-                      value: _voiceAlerts,
+                      tag: 'settings_dark_mode'),
+                  VieirosSwitch(
                       onChanged: _onChangeVoiceAlerts,
-                      thumbColor: MaterialStateColor.resolveWith((states) => _getTextColor(states, false)),
-                      trackColor: MaterialStateColor.resolveWith((states) => _getTextColor(states, true)),
-                    )]),
-                  ),
+                      value: _voiceAlerts,
+                      tag: 'settings_voice_alerts'),
                   Spacer(),
-                  Container(
-                    child: ElevatedButton(
-
-                      onPressed: _donate, child: Text(I18n.translate('settings_donate')),
-                    ),
+                  ElevatedButton(
+                    onPressed: _donate,
+                    child: Text(I18n.translate('settings_donate')),
                   ),
                   Spacer()
                 ]))),

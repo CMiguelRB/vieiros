@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vieiros/main/home.dart';
 import 'package:vieiros/model/loaded_track.dart';
-import 'package:vieiros/resources/CustomColors.dart';
-import 'package:vieiros/resources/Themes.dart';
+import 'package:vieiros/resources/custom_colors.dart';
+import 'package:vieiros/resources/themes.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
@@ -27,8 +27,8 @@ void loadStatusBarTheme(prefs) {
         statusBarIconBrightness: Brightness.light));
   } else {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        systemNavigationBarColor: Colors.black,
-        systemNavigationBarIconBrightness: Brightness.light,
+        systemNavigationBarColor: CustomColors.background,
+        systemNavigationBarIconBrightness: Brightness.dark,
         statusBarColor: CustomColors.background,
         statusBarBrightness: Brightness.light,
         statusBarIconBrightness: Brightness.dark));

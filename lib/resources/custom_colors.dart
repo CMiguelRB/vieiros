@@ -10,4 +10,5 @@ class CustomColors {
   static final faintedText = Color(0xFFC3C3C3);
   static final backgroundDark = Color(0xff303030);
   static final error = Color(0xffd94d3a);
+  static final dimming = Color(0x52000000);
 }

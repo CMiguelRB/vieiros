@@ -21,7 +21,8 @@
         android:label="Vieiros"
         android:icon="@mipmap/ic_launcher"
        android:requestLegacyExternalStorage="true"
-       >
+       android:allowBackup="true"
+       android:fullBackupContent="true">
        <meta-data
            android:name="com.google.android.geo.API_KEY"
            android:value="AIzaSyCSMyVy-JynwySDyG-65Zoo8DqzEMQK6Sk" />
@@ -55,6 +56,14 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="file" android:mimeType="*/*" android:pathPattern=".*\\.gpx"/>
+                <data android:scheme="content" android:pathPattern=".*\\.gpx" android:mimeType="application/xml" />
+                <!-- <data android:host="*"/> -->
+            </intent-filter>
         </activity>
        <activity android:name="Vieiros"
            android:launchMode="singleTop"
@@ -64,7 +73,7 @@
            android:windowSoftInputMode="adjustResize"
            android:screenOrientation="portrait"
            >
-           <intent-filter>
+           <!--<intent-filter>
                <action android:name="android.intent.action.VIEW" />
                <category android:name="android.intent.category.DEFAULT" />
                <category android:name="android.intent.category.BROWSABLE" />
@@ -76,7 +85,7 @@
                    android:pathPattern=".*\\.gpx" />
                <data android:scheme="file" android:host="*"
                    android:pathPattern=".*\\.gpx" />
-           </intent-filter>
+           </intent-filter>-->
        </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
