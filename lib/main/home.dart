@@ -1,4 +1,7 @@
+import 'dart:io';
+import 'package:xml/xml.dart';
 import 'package:flutter/services.dart';
+import 'package:gpx/gpx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vieiros/components/vieiros_notification.dart';
 import 'package:vieiros/model/loaded_track.dart';
@@ -25,21 +28,13 @@ class _Home extends State<Home>
     with TickerProviderStateMixin, WidgetsBindingObserver {
 
   static const platform =
-  const MethodChannel('com.rabocorp.vieiros/open_file');
+  const MethodChannel('com.rabocorp.vieiros/opened_file');
 
-  String? openFileUrl;
-
-  void getOpenFileUrl() async {
-    dynamic url = await platform.invokeMethod("getOpenFileUrl");
-    print("getOpenFileUrl");
-    VieirosNotification().showNotification(context, url, NotificationType.INFO);
-    if (url != null && url != openFileUrl) {
-      setState(() {
-        openFileUrl = url;
-      });
-    }
+  void getOpenedFile() async {
+      String? gpxStringFile = await platform.invokeMethod("getOpenedFile");
+      if(gpxStringFile == null) return;
+      _trackKey.currentState!.openFileFromIntent(gpxStringFile);
   }
-
 
   int _tabIndex = 0;
   Icon _fabIcon = Icon(Icons.add);
@@ -119,7 +114,7 @@ class _Home extends State<Home>
   void initState() {
     super.initState();
     WidgetsBinding.instance!.addObserver(this);
-    getOpenFileUrl();
+    getOpenedFile();
     _tabs = <Widget>[
       Tracks(
           key: _trackKey,

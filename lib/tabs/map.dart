@@ -22,6 +22,7 @@ import 'package:vieiros/resources/custom_colors.dart';
 import 'package:vieiros/resources/i18n.dart';
 import 'package:vieiros/resources/themes.dart';
 import 'package:vieiros/utils/calc.dart';
+import 'package:vieiros/utils/files_handler.dart';
 import 'package:vieiros/utils/gpx_handler.dart';
 import 'package:vieiros/utils/permission_handler.dart';
 import 'package:vieiros/utils/vieiros_tts.dart';
@@ -352,7 +353,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     widget.setPlayIcon();
     Gpx gpx = GpxHandler().createGpx(widget.currentTrack, name, currentMarkers: _currentMarkers);
     final gpxString = GpxWriter().asString(gpx, pretty: true);
-    _writeFile(gpxString, name);
+    await FilesHandler().writeFile(gpxString, name, widget.prefs, true);
     if (this.mounted)
       setState(() {
         _polyline.removeWhere(
@@ -367,23 +368,6 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
             .removeWhere((element) => element.markerId.value == 'recordingPin');
         _currentMarkers = [];
       });
-  }
-
-  void _writeFile(gpxString, name) async {
-    bool hasPermission = await PermissionHandler().handleWritePermission();
-    if (hasPermission) {
-      final directory = '/storage/emulated/0/Download';
-      String path = directory + '/' + name.replaceAll(' ', '_') + '.gpx';
-      await File(path).writeAsString(gpxString);
-      String? jsonString = widget.prefs.getString('files');
-      if (jsonString != null) {
-        List<GpxFile> files = (json.decode(jsonString) as List)
-            .map((i) => GpxFile.fromJson(i))
-            .toList();
-        files.add(GpxFile(name: name, path: path));
-        widget.prefs.setString('files', jsonEncode(files));
-      }
-    }
   }
 
   void _stopAndDiscard() {

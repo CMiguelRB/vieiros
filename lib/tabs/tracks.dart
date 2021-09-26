@@ -8,6 +8,7 @@ import 'package:vieiros/model/loaded_track.dart';
 import 'package:vieiros/resources/custom_colors.dart';
 import 'package:vieiros/resources/i18n.dart';
 import 'package:vieiros/resources/themes.dart';
+import 'package:vieiros/utils/files_handler.dart';
 import 'package:xml/xml.dart';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
@@ -83,6 +84,15 @@ class TracksState extends State<Tracks> {
         widget.prefs.setString('files', jsonEncode(_files));
       });
     }
+  }
+
+  void openFileFromIntent(String gpxStringFile) async{
+    Gpx gpx = GpxReader().fromString(gpxStringFile);
+    String name = gpx.trks[0].name!;
+    String? path = await FilesHandler().writeFile(gpxStringFile, name, widget.prefs, false);
+    setState(() {
+      if(path != null) _files.add(GpxFile(name: name, path: path));
+    });
   }
 
   _unloadTrack(index) async {

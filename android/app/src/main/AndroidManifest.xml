@@ -60,6 +60,7 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.OPENABLE"/>
                 <data android:scheme="file" android:mimeType="*/*" android:pathPattern=".*\\.gpx"/>
                 <data android:scheme="content" android:pathPattern=".*\\.gpx" android:mimeType="application/xml" />
                 <!-- <data android:host="*"/> -->
@@ -73,19 +74,6 @@
            android:windowSoftInputMode="adjustResize"
            android:screenOrientation="portrait"
            >
-           <!--<intent-filter>
-               <action android:name="android.intent.action.VIEW" />
-               <category android:name="android.intent.category.DEFAULT" />
-               <category android:name="android.intent.category.BROWSABLE" />
-               <data android:scheme="http" android:host="*"
-                   android:pathPattern=".*\\.gpx" />
-               <data android:scheme="https" android:host="*"
-                   android:pathPattern=".*\\.gpx" />
-               <data android:scheme="content" android:host="gpx"
-                   android:pathPattern=".*\\.gpx" />
-               <data android:scheme="file" android:host="*"
-                   android:pathPattern=".*\\.gpx" />
-           </intent-filter>-->
        </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
