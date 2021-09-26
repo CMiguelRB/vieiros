@@ -11,14 +11,14 @@ class GpxHandler {
     gpx.creator = 'vieiros';
     if(currentMarkers != null) _setWaypoints(gpx, currentMarkers);
     List<Wpt> wpts = [];
-    currentTrack.positions.forEach((element) {
+    for (var element in currentTrack.positions) {
       wpts.add(Wpt(
           lat: element.latitude,
           lon: element.longitude,
           ele: element.altitude,
           time:
           DateTime.fromMillisecondsSinceEpoch(element.timestamp!.toInt())));
-    });
+    }
     List<Trkseg> trksegs = [];
     trksegs.add(Trkseg(trkpts: wpts));
     gpx.trks.add(Trk(name: name, trksegs: trksegs));
@@ -26,12 +26,12 @@ class GpxHandler {
   }
 
   Gpx _setWaypoints(Gpx gpx, List<Marker> currentMarkers) {
-    currentMarkers.forEach((element) {
+    for (var element in currentMarkers) {
       gpx.wpts.add(Wpt(
           lat: element.position.latitude,
           lon: element.position.longitude,
           name: element.infoWindow.title));
-    });
+    }
     return gpx;
   }
   

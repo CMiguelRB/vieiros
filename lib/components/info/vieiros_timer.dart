@@ -6,8 +6,9 @@ class TimerWidget extends StatefulWidget{
 
   final int time;
 
-  TimerWidget({Key? key, required this.time});
+  const TimerWidget({Key? key, required this.time}) : super(key: key);
 
+  @override
   _TimerState createState() => _TimerState();
 }
 
@@ -21,7 +22,7 @@ class _TimerState extends State<TimerWidget>{
   void initState() {
     super.initState();
     _baseTime = widget.time;
-    timer = Timer.periodic(Duration(seconds: 1), (Timer t) => _updateTimer());
+    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => _updateTimer());
   }
 
   _updateTimer(){
@@ -42,12 +43,9 @@ class _TimerState extends State<TimerWidget>{
 
   @override
   Widget build(BuildContext context) {
-   return Container(
-     child:
-       Text(_totalTime,
-           style: TextStyle(
-               fontSize: 35,
-               fontWeight: FontWeight.bold))
-   );
+   return Text(_totalTime,
+       style: const TextStyle(
+           fontSize: 35,
+           fontWeight: FontWeight.bold));
   }
 }

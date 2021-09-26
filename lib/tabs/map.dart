@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:location/location.dart';
@@ -11,7 +9,6 @@ import 'package:vieiros/components/vieiros_dialog.dart';
 import 'package:vieiros/components/vieiros_notification.dart';
 import 'package:vieiros/components/vieiros_text_input.dart';
 import 'package:vieiros/model/current_track.dart';
-import 'package:vieiros/model/gpx_file.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:vieiros/model/position.dart';
 import 'package:flutter/cupertino.dart';
@@ -33,7 +30,7 @@ class Map extends StatefulWidget {
   final LoadedTrack loadedTrack;
   final SharedPreferences prefs;
 
-  Map(
+  const Map(
       {Key? key,
       required this.setPlayIcon,
       required this.prefs,
@@ -41,14 +38,15 @@ class Map extends StatefulWidget {
       required this.loadedTrack})
       : super(key: key);
 
+  @override
   MapState createState() => MapState();
 }
 
 class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
-  Location _location = new Location();
-  Completer<GoogleMapController> _mapController = Completer();
-  Set<Polyline> _polyline = Set();
-  Set<Marker> _markers = Set();
+  final Location _location = Location();
+  final Completer<GoogleMapController> _mapController = Completer();
+  final Set<Polyline> _polyline = {};
+  final Set<Marker> _markers = {};
   List<Marker> _currentMarkers = [];
   final _formKey = GlobalKey<FormState>();
   final _formKeyWaypointAdd = GlobalKey<FormState>();
@@ -58,11 +56,12 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     bool _hasPermissions = await PermissionHandler().handleLocationPermission();
     if (_hasPermissions) {
       Future.delayed(const Duration(milliseconds: 500), () {
-        if (this.mounted)
+        if (mounted) {
           setState(() {
             _showMap = true;
             _showWarning = false;
           });
+        }
       });
       _location.changeNotificationOptions(
           iconName: 'ic_stat_name',
@@ -94,18 +93,18 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     if (!isWayPoint) {
       if (description == I18n.translate('map_track_pin_start')) {
         icon = await BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(size: Size(100, 100)), 'assets/loaded_pin.png');
+            const ImageConfiguration(size: Size(100, 100)), 'assets/loaded_pin.png');
       } else {
         icon = await BitmapDescriptor.fromAssetImage(
-            ImageConfiguration(size: Size(100, 100)),
+            const ImageConfiguration(size: Size(100, 100)),
             'assets/loaded_pin_end.png');
       }
     } else {
       icon = await BitmapDescriptor.fromAssetImage(
-          ImageConfiguration(size: Size(100, 100)),
+          const ImageConfiguration(size: Size(100, 100)),
           'assets/loaded_waypoint.png');
     }
-    MarkerId markerId = MarkerId(Uuid().v4());
+    MarkerId markerId = MarkerId(const Uuid().v4());
     Marker marker;
     if (description != null && description.isNotEmpty) {
       marker = Marker(
@@ -117,10 +116,11 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     } else {
       marker = Marker(markerId: markerId, position: latLng, icon: icon);
     }
-    if (this.mounted)
+    if (mounted) {
       setState(() {
         _markers.add(marker);
       });
+    }
   }
 
   loadTrack(path) async {
@@ -133,13 +133,14 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   }
 
   clearTrack() {
-    if (this.mounted)
+    if (mounted) {
       setState(() {
         _polyline.removeWhere(
                 (element) => element.polylineId.value == 'loadedTrack');
         _markers.removeWhere((element) => element.markerId.value != 'recordingPin');
-        _currentMarkers.forEach((element) {_markers.add(element);});
+        for (var element in _currentMarkers) {_markers.add(element);}
       });
+    }
   }
 
   navigateCurrentTrack() async {
@@ -156,12 +157,12 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     if (widget.loadedTrack.gpx != null) {
       List<LatLng> points = GpxHandler().getPointsFromGpx(widget.loadedTrack);
       Gpx gpx = widget.loadedTrack.gpx!;
-      gpx.wpts.forEach((element) {
+      for (var element in gpx.wpts) {
         if (element.lat == null || element.lon == null) return;
         addMarkerSet(LatLng(element.lat!, element.lon!), true, element.name, controller);
-      });
-      Polyline polyline = new Polyline(
-          polylineId: new PolylineId('loadedTrack'),
+      }
+      Polyline polyline = Polyline(
+          polylineId: const PolylineId('loadedTrack'),
           points: points,
           width: 5,
           color: CustomColors.accent);
@@ -169,11 +170,12 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
           controller);
       addMarkerSet(points.last, false, I18n.translate('map_track_pin_finish'),
           controller);
-      if (this.mounted)
+      if (mounted) {
         setState(() {
           _polyline.add(polyline);
         });
-      if (points.length == 0) return;
+      }
+      if (points.isEmpty) return;
       controller.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(target: points.first, zoom: 14.0)));
     }
@@ -181,13 +183,13 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
 
   startRecording() async {
     VieirosNotification().showNotification(
-        context, 'map_start_recording_message', NotificationType.INFO);
+        context, 'map_start_recording_message', NotificationType.info);
     widget.currentTrack.setRecording(true);
     widget.currentTrack.dateTime = DateTime.now();
     _location.enableBackgroundMode(enable: true);
     int _referenceDistance = 1000;
     BitmapDescriptor icon = await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(size: Size(100, 100)), 'assets/current_pin.png');
+        const ImageConfiguration(size: Size(100, 100)), 'assets/current_pin.png');
     Marker? _marker;
     _location.onLocationChanged.listen((event) async {
       if (widget.currentTrack.isRecording) {
@@ -201,7 +203,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         Calc().addDistance(widget.currentTrack);
         if (widget.currentTrack.positions.length == 1) {
           _marker = Marker(
-              markerId: MarkerId('recordingPin'),
+              markerId: const MarkerId('recordingPin'),
               position: LatLng(widget.currentTrack.positions.first.latitude!,
                   widget.currentTrack.positions.first.longitude!),
               icon: icon);
@@ -213,12 +215,12 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
           VieirosTts().speakDistance(dist, widget.currentTrack.dateTime!);
           _referenceDistance += 1000;
         }
-        if (this.mounted){
+        if (mounted){
           List<LatLng> points = widget.currentTrack.getPoints();
           setState(() {
             if (points.length == 1) {
               Polyline _recordingPolyline = Polyline(
-                  polylineId: PolylineId('recordingPolyline'),
+                  polylineId: const PolylineId('recordingPolyline'),
                   points: points,
                   width: 5,
                   color: CustomColors.ownPath);
@@ -261,13 +263,13 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
       Navigator.pop(context, I18n.translate('common_ok'));
     }
     BitmapDescriptor icon = await BitmapDescriptor.fromAssetImage(
-        ImageConfiguration(size: Size(100, 100)),
+        const ImageConfiguration(size: Size(100, 100)),
         'assets/current_waypoint.png');
     MarkerId mrkId;
     if (edit && markerId != null) {
       mrkId = markerId;
     } else {
-      mrkId = MarkerId(Uuid().v4());
+      mrkId = MarkerId(const Uuid().v4());
     }
     Marker marker = Marker(
         markerId: mrkId,
@@ -275,7 +277,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         icon: icon,
         infoWindow: InfoWindow(title: name),
         onTap: () => _editMarkerDialog(mrkId, latLng, name));
-    if (this.mounted)
+    if (mounted) {
       setState(() {
         if (edit) {
           _markers
@@ -286,6 +288,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         _currentMarkers.add(marker);
         _markers.add(marker);
       });
+    }
   }
 
   _editMarkerDialog(MarkerId markerId, LatLng latLng, String name) {
@@ -307,13 +310,14 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
 
   _removeMarker(MarkerId markerId) {
     Navigator.pop(context, I18n.translate('common_delete'));
-    if (this.mounted)
+    if (mounted) {
       setState(() {
         _markers
             .removeWhere((element) => element.markerId.value == markerId.value);
         _currentMarkers
             .removeWhere((element) => element.markerId.value == markerId.value);
       });
+    }
   }
 
   stopRecording() {
@@ -354,7 +358,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     Gpx gpx = GpxHandler().createGpx(widget.currentTrack, name, currentMarkers: _currentMarkers);
     final gpxString = GpxWriter().asString(gpx, pretty: true);
     await FilesHandler().writeFile(gpxString, name, widget.prefs, true);
-    if (this.mounted)
+    if (mounted) {
       setState(() {
         _polyline.removeWhere(
             (element) => element.polylineId.value == 'recordingPolyline');
@@ -368,13 +372,14 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
             .removeWhere((element) => element.markerId.value == 'recordingPin');
         _currentMarkers = [];
       });
+    }
   }
 
   void _stopAndDiscard() {
     _location.enableBackgroundMode(enable: false);
     Navigator.pop(context, 'Stop and discard');
     widget.setPlayIcon();
-    if (this.mounted)
+    if (mounted) {
       setState(() {
         _polyline.removeWhere(
             (element) => element.polylineId.value == 'recordingPolyline');
@@ -387,6 +392,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         _markers
             .removeWhere((element) => element.markerId.value == 'recordingPin');
       });
+    }
   }
 
   //Workaround for choppy Maps initialization
@@ -396,11 +402,12 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
 
   void _refreshTab() async {
     bool _hasPermission = await PermissionHandler().handleLocationPermission();
-    if (_hasPermission)
+    if (_hasPermission) {
       setState(() {
         _showMap = true;
         _showWarning = false;
       });
+    }
   }
 
   @override
@@ -422,39 +429,38 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     return SafeArea(
         child: _showWarning
             ? Container(
-                child: Container(
-                    alignment: Alignment.center,
-                    margin: EdgeInsets.all(20),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Container(
-                            margin: EdgeInsets.symmetric(vertical: 20),
-                            child: Text(
-                                I18n.translate('map_permissions_request'),
-                                style: TextStyle(
-                                    color: lightMode
-                                        ? CustomColors.subText
-                                        : CustomColors.subTextDark))),
-                        ElevatedButton(
-                            onPressed: _refreshTab,
-                            child:
-                                Text(I18n.translate('map_grant_permissions')))
-                      ],
-                    )))
+                alignment: Alignment.center,
+                margin: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Container(
+                        margin: const EdgeInsets.symmetric(vertical: 20),
+                        child: Text(
+                            I18n.translate('map_permissions_request'),
+                            style: TextStyle(
+                                color: lightMode
+                                    ? CustomColors.subText
+                                    : CustomColors.subTextDark))),
+                    ElevatedButton(
+                        onPressed: _refreshTab,
+                        child:
+                            Text(I18n.translate('map_grant_permissions')))
+                  ],
+                ))
             : _showMap
                 ? GoogleMap(
-                    gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>[
-                      new Factory<OneSequenceGestureRecognizer>(
-                        () => new EagerGestureRecognizer(),
+                    gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                      Factory<OneSequenceGestureRecognizer>(
+                        () => EagerGestureRecognizer(),
                       ),
-                    ].toSet(),
+                    },
                     mapType: MapType.hybrid,
                     mapToolbarEnabled: false,
                     buildingsEnabled: false,
-                    initialCameraPosition: CameraPosition(
-                        target: new LatLng(43.463305, -8.273529), zoom: 15.0),
+                    initialCameraPosition: const CameraPosition(
+                        target: LatLng(43.463305, -8.273529), zoom: 15.0),
                     myLocationEnabled: true,
                     myLocationButtonEnabled: true,
                     trafficEnabled: false,
@@ -468,7 +474,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                       }
                     },
                   )
-                : Center(
+                : const Center(
                     child: CircularProgressIndicator(
                     color: CustomColors.accent,
                   )));

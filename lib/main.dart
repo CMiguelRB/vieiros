@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,25 +14,41 @@ void main() async {
   final SharedPreferences _prefs = await SharedPreferences.getInstance();
   loadStatusBarTheme(_prefs);
   String? path = _prefs.getString('currentTrack');
+  String? theme = _prefs.getString('dark_mode');
+  if(theme == null) _prefs.setString('dark_mode', 'system');
   LoadedTrack loadedTrack = await LoadedTrack().loadTrack(path);
   runApp(MyApp(_prefs, loadedTrack));
 }
 
 void loadStatusBarTheme(prefs) {
-  if (prefs.getString('dark_mode') == 'true') {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        systemNavigationBarColor: Colors.black,
-        systemNavigationBarIconBrightness: Brightness.light,
-        statusBarColor: Colors.black87,
-        statusBarBrightness: Brightness.dark,
-        statusBarIconBrightness: Brightness.light));
-  } else {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+  String? value = prefs.getString('dark_mode');
+  bool light;
+  switch(value){
+    case 'light':
+      light = true;
+      break;
+    case 'dark':
+      light = false;
+      break;
+    default:
+      SchedulerBinding.instance!.window.platformBrightness == Brightness.dark ? light = false : light = true;
+  }
+  if (light) {
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
         systemNavigationBarColor: CustomColors.background,
         systemNavigationBarIconBrightness: Brightness.dark,
         statusBarColor: CustomColors.background,
         statusBarBrightness: Brightness.light,
-        statusBarIconBrightness: Brightness.dark));
+        statusBarIconBrightness: Brightness.dark
+    ));
+  } else {
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+        systemNavigationBarColor: CustomColors.backgroundDark,
+        systemNavigationBarIconBrightness: Brightness.light,
+        statusBarColor: CustomColors.backgroundDark,
+        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.light
+    ));
   }
 }
 
@@ -39,25 +56,37 @@ class MyApp extends StatelessWidget {
   final SharedPreferences _prefs;
   final LoadedTrack _loadedTrack;
 
-  MyApp(this._prefs, this._loadedTrack);
+  const MyApp(this._prefs, this._loadedTrack, {Key? key}):super(key: key);
 
   @override
   Widget build(BuildContext context) => ChangeNotifierProvider(
       create: (context) => ThemeProvider(),
       builder: (context, _) {
         final provider = Provider.of<ThemeProvider>(context);
-        bool darkMode = _prefs.getString("dark_mode") == 'true';
-        if (provider.isLightMode && darkMode) {
-          provider.setThemeMode(darkMode);
+        final currentMode = provider.isLightMode;
+        final String? currentPrefs = _prefs.getString('dark_mode');
+        final bool prefsMode;
+        switch(currentPrefs){
+          case 'light':
+            prefsMode = true;
+            break;
+          case 'dark':
+            prefsMode = false;
+            break;
+          default:
+            SchedulerBinding.instance!.window.platformBrightness == Brightness.dark ? prefsMode = false : prefsMode = true;
+        }
+        if(currentMode != prefsMode){
+          provider.setThemeMode(currentPrefs);
         }
         return MaterialApp(
             title: 'Vieiros',
-            localizationsDelegates: [
+            localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            supportedLocales: [
+            supportedLocales: const [
               Locale('en', ''),
               Locale('es', ''),
               Locale('gl', '')

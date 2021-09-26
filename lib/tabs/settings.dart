@@ -1,8 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:vieiros/components/vieiros_dropdown.dart';
 import 'package:vieiros/components/vieiros_switch.dart';
 import 'package:vieiros/resources/custom_colors.dart';
 import 'package:vieiros/resources/i18n.dart';
@@ -11,19 +11,20 @@ import 'package:vieiros/resources/themes.dart';
 class Settings extends StatefulWidget {
   final SharedPreferences prefs;
 
-  Settings({Key? key, required this.prefs});
+  const Settings({Key? key, required this.prefs}) : super(key: key);
 
+  @override
   SettingsState createState() => SettingsState();
 }
 
 class SettingsState extends State<Settings> {
-  bool _darkMode = false;
   bool _voiceAlerts = true;
+  String? _themeDropdownValue = 'system';
 
   @override
   void initState() {
     super.initState();
-    _darkMode = widget.prefs.getString("dark_mode") == 'true';
+    _themeDropdownValue = widget.prefs.getString('dark_mode');
     _voiceAlerts = widget.prefs.getString("voice_alerts") == 'true' ||
         widget.prefs.getString("voice_alerts") == null;
   }
@@ -37,8 +38,8 @@ class SettingsState extends State<Settings> {
     final provider = Provider.of<ThemeProvider>(context, listen: false);
     provider.setThemeMode(value);
     setState(() {
-      _darkMode = value;
-      widget.prefs.setString("dark_mode", value.toString());
+      _themeDropdownValue = value;
+      widget.prefs.setString("dark_mode", value);
     });
   }
 
@@ -58,42 +59,63 @@ class SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
+    bool lightMode = Provider.of<ThemeProvider>(context).isLightMode;
     return SafeArea(
         child: Column(
       children: [
         Expanded(
-            child: Container(
-                padding: EdgeInsets.all(10),
-                child: Column(children: [
-                  VieirosSwitch(
-                      onChanged: _onChangeDarkMode,
-                      value: _darkMode,
-                      tag: 'settings_dark_mode'),
-                  VieirosSwitch(
-                      onChanged: _onChangeVoiceAlerts,
-                      value: _voiceAlerts,
-                      tag: 'settings_voice_alerts'),
-                  Spacer(),
-                  ElevatedButton(
-                    onPressed: _donate,
-                    child: Text(I18n.translate('settings_donate')),
-                  ),
-                  Spacer()
-                ]))),
-        Container(
-            child: Column(
+            child: Column(children: [
+          Container(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Text(I18n.translate('settings_dark_mode')),
+                    VieirosDropdown(
+                        lightMode: lightMode,
+                        items: const [
+                          {
+                            "value": 'system',
+                            "tag": 'settings_dark_mode_item_system'
+                          },
+                          {
+                            "value": 'light',
+                            "tag": 'settings_dark_mode_item_light'
+                          },
+                          {"value": 'dark', "tag": 'settings_dark_mode_item_dark'}
+                        ],
+                        onChanged: (value) => _onChangeDarkMode(value, context),
+                        value: _themeDropdownValue!)
+                  ])),
+          /*VieirosSwitch(
+              onChanged: _onChangeDarkMode,
+              value: _darkMode,
+              tag: 'settings_dark_mode'),*/
+          VieirosSwitch(
+              onChanged: _onChangeVoiceAlerts,
+              value: _voiceAlerts,
+              tag: 'settings_voice_alerts'),
+          const Spacer(),
+          ElevatedButton(
+            onPressed: _donate,
+            child: Text(I18n.translate('settings_donate')),
+          ),
+          const Spacer()
+        ])),
+        Column(
           children: [
             Image.asset('assets/app_logo.png', scale: 6),
             Container(
-              margin: EdgeInsets.only(bottom: 10),
+              margin: const EdgeInsets.only(bottom: 10),
             ),
-            Text('Vieiros v1.0.0',
+            const Text('Vieiros v1.0.0',
                 style: TextStyle(color: CustomColors.faintedText)),
             Container(
-              margin: EdgeInsets.only(bottom: 10),
+              margin: const EdgeInsets.only(bottom: 10),
             )
           ],
-        ))
+        )
       ],
     ));
   }

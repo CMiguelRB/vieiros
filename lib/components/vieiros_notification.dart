@@ -6,7 +6,7 @@ class VieirosNotification {
 
   showNotification(BuildContext context, String tag, NotificationType type){
 
-    Color backgroundColor = type == NotificationType.INFO ? CustomColors.ownPath : CustomColors.error;
+    Color backgroundColor = type == NotificationType.info ? CustomColors.ownPath : CustomColors.error;
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(I18n.translate(tag)),
@@ -29,4 +29,4 @@ class VieirosNotification {
   }
 }
 
-enum NotificationType {INFO, ERROR}
+enum NotificationType {info, error}

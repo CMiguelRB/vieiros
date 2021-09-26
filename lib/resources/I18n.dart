@@ -58,9 +58,12 @@ class I18n {
       "info_chart_altitude": "Altitude",
       "info_chart_distance": "Distance",
 
-      "settings_dark_mode": "Dark mode",
+      "settings_dark_mode": "Theme",
       "settings_voice_alerts": "Voice alerts",
-      "settings_donate": "Donate"
+      "settings_donate": "Donate",
+      "settings_dark_mode_item_system": "System",
+      "settings_dark_mode_item_light": "Light",
+      "settings_dark_mode_item_dark": "Dark"
     },
     "es":{
       "common_ok": "Aceptar",
@@ -117,9 +120,12 @@ class I18n {
       "info_chart_altitude": "Altitud",
       "info_chart_distance": "Distancia",
 
-      "settings_dark_mode": "Modo oscuro",
+      "settings_dark_mode": "Tema",
       "settings_voice_alerts": "Alertas de voz",
-      "settings_donate": "Donar"
+      "settings_donate": "Donar",
+      "settings_dark_mode_item_system": "Sistema",
+      "settings_dark_mode_item_light": "Tema claro",
+      "settings_dark_mode_item_dark": "Tema oscuro"
     },
     "gl":{
       "common_ok": "Aceptar",
@@ -177,9 +183,12 @@ class I18n {
       "info_chart_altitude": "Altitude",
       "info_chart_distance": "Distancia",
 
-      "settings_dark_mode": "Modo escuro",
+      "settings_dark_mode": "Tema",
       "settings_voice_alerts": "Alertas de voz",
-      "settings_donate": "Doar"
+      "settings_donate": "Doar",
+      "settings_dark_mode_item_system": "Sistema",
+      "settings_dark_mode_item_light": "Tema claro",
+      "settings_dark_mode_item_dark": "Tema escuro"
     }
   };
 

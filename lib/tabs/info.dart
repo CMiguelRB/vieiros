@@ -26,13 +26,14 @@ class Info extends StatefulWidget {
   final LoadedTrack loadedTrack;
   final SharedPreferences prefs;
 
-  Info(
+  const Info(
       {Key? key,
       required this.currentTrack,
       required this.prefs,
       required this.loadedTrack})
       : super(key: key);
 
+  @override
   InfoState createState() => InfoState();
 }
 
@@ -43,12 +44,12 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   String _distance = '0';
   String _totalTime = '--:--:--';
   String _avgPace = '00:00';
-  String _paceUnit = 'min/Km';
+  final String _paceUnit = 'min/Km';
   String _altitude = '-';
   int _altitudeMin = 0;
   String _altitudeGain = '-';
   String _altitudeCurrent = '-';
-  String _altitudeUnit = 'm';
+  final String _altitudeUnit = 'm';
   bool _loadingAltitudeChart = true;
   String currentPath = '';
   DateTime? _sunset;
@@ -57,7 +58,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   Color _chartColor = CustomColors.accent;
   List<charts.Series<AltitudePoint, num>> _altitudeDataLoaded = [];
   List<charts.Series<AltitudePoint, num>> _altitudeDataCurrent = [];
-  Map<int, Widget> _tabMap = {
+  final Map<int, Widget> _tabMap = {
     0: Text(I18n.translate('info_current_track')),
     1: Text(I18n.translate('info_loaded_track'))
   };
@@ -87,7 +88,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           _slideState = 0;
         });
       }
-      if (widget.currentTrack.positions.length > 0) {
+      if (widget.currentTrack.positions.isNotEmpty) {
         _getDaylight();
         _loadTrackData();
       }
@@ -129,7 +130,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
       _avgPaceSeconds = Calc().avgPaceSecs(widget.currentTrack);
       _avgPaceMin = Calc().avgPaceMinString(_avgPaceSeconds);
       _avgPaceSec = Calc().avgPaceSecString(_avgPaceSeconds);
-      if (this.mounted)
+      if (mounted) {
         setState(() {
           _chartColor = CustomColors.ownPath;
           _avgPace = _avgPaceMin + ':' + _avgPaceSec;
@@ -140,7 +141,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           _altitude = widget.currentTrack.altitudeTop.toString();
           _altitudeMin = widget.currentTrack.altitudeMin;
           _altitudeGain = widget.currentTrack.altitudeGain.toString();
-          if (widget.currentTrack.positions.length > 0) {
+          if (widget.currentTrack.positions.isNotEmpty) {
             _altitudeCurrent =
                 widget.currentTrack.positions.last.altitude!.toInt().toString();
           }
@@ -154,6 +155,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           }
           _loadingAltitudeChart = false;
         });
+      }
     } else {
       if (widget.loadedTrack.gpx == null) return clearScreen();
       List<AltitudePoint> _altitudePoints = widget.loadedTrack.altitudePoints;
@@ -166,7 +168,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           (_totalDistance / 1000);
       _avgPaceMin = Calc().avgPaceMinString(_avgPaceSeconds);
       _avgPaceSec = Calc().avgPaceSecString(_avgPaceSeconds);
-      if (this.mounted)
+      if (mounted) {
         setState(() {
           _chartColor = CustomColors.accent;
           _avgPace = _avgPaceMin + ':' + _avgPaceSec;
@@ -185,7 +187,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
               .first
               .padLeft(8, "0");
           _altitudeDataLoaded = [
-            new charts.Series<AltitudePoint, int>(
+            charts.Series<AltitudePoint, int>(
                 id: 'altitude',
                 colorFn: (_, __) => charts.Color(
                     r: _chartColor.red,
@@ -198,6 +200,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           ];
           _loadingAltitudeChart = false;
         });
+      }
     }
   }
 
@@ -209,7 +212,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
 
   clearLoadedChart() {
     _altitudeDataLoaded = [
-      new charts.Series<AltitudePoint, int>(
+      charts.Series<AltitudePoint, int>(
           id: 'altitude',
           colorFn: (_, __) => charts.Color(
               r: _chartColor.red, g: _chartColor.green, b: _chartColor.blue),
@@ -221,7 +224,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   }
 
   void clearScreen() {
-    if (this.mounted)
+    if (mounted) {
       setState(() {
         _selectedPoint = null;
         _chartColor = CustomColors.accent;
@@ -236,7 +239,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
         _avgPace = '00:00';
         //_sunsetTime = '--:--';
         _altitudeDataCurrent = [
-          new charts.Series<AltitudePoint, int>(
+          charts.Series<AltitudePoint, int>(
               id: 'altitude',
               colorFn: (_, __) => charts.Color(
                   r: _chartColor.red,
@@ -249,10 +252,11 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
         ];
         clearLoadedChart();
       });
+    }
   }
 
   _slidingStateChanged(value) {
-    if (this.mounted) {
+    if (mounted) {
       setState(() {
         _slideState = int.parse(value!.toString());
       });
@@ -262,7 +266,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
 
   _onChangeSelectedPoint(charts.SelectionModel model) {
     final selectedDatum = model.selectedDatum;
-    if (selectedDatum.isNotEmpty && this.mounted) {
+    if (selectedDatum.isNotEmpty && mounted) {
       setState(() {
         _selectedPoint = selectedDatum.first.datum;
       });
@@ -341,14 +345,14 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
             Flexible(
                 flex: 1,
                 child: Container(
-                    margin: EdgeInsets.only(left: 10),
+                    margin: const EdgeInsets.only(left: 10),
                     child: Column(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
                           ChartPointInfoWidget(selectedPoint: _selectedPoint),
                           _loadingAltitudeChart
-                              ? CircularProgressIndicator(
+                              ? const CircularProgressIndicator(
                                   color: CustomColors.accent,
                                 )
                               : ChartWidget(

@@ -10,11 +10,11 @@ class AltitudeWidget extends StatelessWidget{
   final String altitudeCurrent;
   final String altitudeGain;
 
-  AltitudeWidget({required this.lightMode, required this.altitudeUnit, required this.altitude, required this.altitudeGain, required this.altitudeCurrent});
+  const AltitudeWidget({Key? key, required this.lightMode, required this.altitudeUnit, required this.altitude, required this.altitudeGain, required this.altitudeCurrent}):super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
         height: 80,
         child: Column(
           mainAxisSize: MainAxisSize.max,
@@ -39,7 +39,7 @@ class AltitudeWidget extends StatelessWidget{
                   mainAxisAlignment:
                   MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
+                    SizedBox(
                         width: MediaQuery.of(context)
                             .size
                             .width /
@@ -55,7 +55,7 @@ class AltitudeWidget extends StatelessWidget{
                                   .subTextDark,
                               fontSize: 12),
                         )),
-                    Container(
+                    SizedBox(
                         width: MediaQuery.of(context)
                             .size
                             .width /
@@ -71,7 +71,7 @@ class AltitudeWidget extends StatelessWidget{
                                   .subTextDark,
                               fontSize: 12),
                         )),
-                    Container(
+                    SizedBox(
                         width: MediaQuery.of(context)
                             .size
                             .width /
@@ -90,14 +90,14 @@ class AltitudeWidget extends StatelessWidget{
                   ],
                 ),
                 Container(
-                    margin: EdgeInsets.symmetric(
+                    margin: const EdgeInsets.symmetric(
                         vertical: 3)),
                 Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment:
                   MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
+                    SizedBox(
                         width: MediaQuery.of(context)
                             .size
                             .width /
@@ -112,7 +112,7 @@ class AltitudeWidget extends StatelessWidget{
                           TextBaseline.alphabetic,
                           children: [
                             Text(altitudeCurrent,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontSize: 25,
                                     fontWeight:
                                     FontWeight.bold)),
@@ -120,13 +120,13 @@ class AltitudeWidget extends StatelessWidget{
                                 altitudeCurrent != '-'
                                     ? altitudeUnit
                                     : '',
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight:
                                     FontWeight.bold))
                           ],
                         )),
-                    Container(
+                    SizedBox(
                         width: MediaQuery.of(context)
                             .size
                             .width /
@@ -141,7 +141,7 @@ class AltitudeWidget extends StatelessWidget{
                           TextBaseline.alphabetic,
                           children: [
                             Text(altitude,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontSize: 25,
                                     fontWeight:
                                     FontWeight.bold)),
@@ -149,13 +149,13 @@ class AltitudeWidget extends StatelessWidget{
                                 altitude != '-'
                                     ? altitudeUnit
                                     : '',
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight:
                                     FontWeight.bold))
                           ],
                         )),
-                    Container(
+                    SizedBox(
                         width: MediaQuery.of(context)
                             .size
                             .width /
@@ -170,7 +170,7 @@ class AltitudeWidget extends StatelessWidget{
                           TextBaseline.alphabetic,
                           children: [
                             Text(altitudeGain,
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontSize: 25,
                                     fontWeight:
                                     FontWeight.bold)),
@@ -178,7 +178,7 @@ class AltitudeWidget extends StatelessWidget{
                                 altitudeGain != '-'
                                     ? altitudeUnit
                                     : '',
-                                style: TextStyle(
+                                style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight:
                                     FontWeight.bold))

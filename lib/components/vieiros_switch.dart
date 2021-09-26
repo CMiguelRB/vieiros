@@ -8,7 +8,7 @@ class VieirosSwitch extends StatelessWidget {
   final bool value;
   final String tag;
 
-  VieirosSwitch({required this.onChanged, required this.value, required this.tag});
+  const VieirosSwitch({Key? key, required this.onChanged, required this.value, required this.tag}):super(key: key);
 
   Color _getTextColor(Set<MaterialState> states, isTrack) {
     const Set<MaterialState> interactiveStates = <MaterialState>{
@@ -24,7 +24,7 @@ class VieirosSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(10),
+      padding: const EdgeInsets.all(10),
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, mainAxisSize: MainAxisSize.max,children:[Text(I18n.translate(tag)),Switch(
         value: value,
         onChanged: (value) => onChanged(value, context),

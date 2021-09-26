@@ -8,20 +8,20 @@ class VieirosTextInput extends StatelessWidget{
   final String hintText;
   final String? initialValue;
 
-  VieirosTextInput({required this.hintText, required this.onChanged, this.initialValue});
+  const VieirosTextInput({Key? key, required this.hintText, required this.onChanged, this.initialValue}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
      return TextFormField(
          cursorColor: CustomColors.accent,
-         initialValue: initialValue != null ? initialValue : '',
+         initialValue: initialValue ?? '',
          decoration: InputDecoration(
            filled: true,
            fillColor: CustomColors.subTextDark,
            hintText: I18n.translate('common_name'),
-           contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
-           counterStyle: TextStyle(color: CustomColors.accent),
-           border: OutlineInputBorder(
+           contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+           counterStyle: const TextStyle(color: CustomColors.accent),
+           border: const OutlineInputBorder(
              borderSide: BorderSide.none,
            ),
          ),

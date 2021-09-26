@@ -8,7 +8,7 @@ class DistanceWidget extends StatelessWidget{
   final String distance;
   final String distanceUnit;
 
-  DistanceWidget({required this.lightMode, required this.distance, required this.distanceUnit});
+  const DistanceWidget({Key? key, required this.lightMode, required this.distance, required this.distanceUnit}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -34,14 +34,14 @@ class DistanceWidget extends StatelessWidget{
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(distance,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 35,
                               fontWeight:
                               FontWeight.bold)),
                       Container(
-                          margin: EdgeInsets.all(2)),
+                          margin: const EdgeInsets.all(2)),
                       Text(distanceUnit,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 17,
                               fontWeight:
                               FontWeight.bold))

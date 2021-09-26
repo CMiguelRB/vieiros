@@ -11,7 +11,7 @@ class ChartWidget extends StatelessWidget{
   final String distance;
   final Function onChangeSelected;
 
-  ChartWidget({required this.lightMode, required this.altitudeData, required this.altitude, required this.altitudeMin, required this.distance, required this.onChangeSelected});
+  const ChartWidget({Key? key, required this.lightMode, required this.altitudeData, required this.altitude, required this.altitudeMin, required this.distance, required this.onChangeSelected}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class ChartWidget extends StatelessWidget{
             charts.NumericAxisSpec(
                 renderSpec: !lightMode
                     ? charts.GridlineRendererSpec(
-                    labelStyle: new charts
+                    labelStyle: const charts
                         .TextStyleSpec(
                       color: charts
                           .MaterialPalette
@@ -75,7 +75,7 @@ class ChartWidget extends StatelessWidget{
                 renderSpec: !lightMode
                     ? charts.GridlineRendererSpec(
                     labelStyle:
-                    new charts.TextStyleSpec(
+                    const charts.TextStyleSpec(
                       color: charts
                           .MaterialPalette.white,
                     ),
@@ -90,26 +90,23 @@ class ChartWidget extends StatelessWidget{
                 tickProviderSpec: charts
                     .StaticNumericTickProviderSpec(
                   <charts.TickSpec<num>>[
-                    charts.TickSpec<num>(0),
+                    const charts.TickSpec<num>(0),
                     charts.TickSpec<num>(distance
-                        .indexOf('.') !=
-                        -1
+                        .contains('.')
                         ? double.parse(distance) *
                         1000 ~/
                         3.03
                         : double.parse(distance) ~/
                         3.03),
                     charts.TickSpec<num>(distance
-                        .indexOf('.') !=
-                        -1
+                        .contains('.')
                         ? double.parse(distance) *
                         1000 ~/
                         1.51
                         : double.parse(distance) ~/
                         1.51),
                     charts.TickSpec<num>(distance
-                        .indexOf('.') !=
-                        -1
+                        .contains('.')
                         ? double.parse(distance) *
                         1000
                         : int.parse(distance)),

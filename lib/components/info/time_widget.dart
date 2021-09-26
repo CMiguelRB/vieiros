@@ -11,7 +11,7 @@ class TimeWidget extends StatelessWidget{
   final DateTime? initDatetime;
   final String? totalTime;
 
-  TimeWidget({required this.lightMode, required this.slideState, required this.isRecording, required this.totalTime, required this.initDatetime});
+  const TimeWidget({Key? key, required this.lightMode, required this.slideState, required this.isRecording, required this.totalTime, required this.initDatetime}) : super(key: key);
 
 
   @override
@@ -33,7 +33,7 @@ class TimeWidget extends StatelessWidget{
                 ? TimerWidget(
                 time: initDatetime!.millisecondsSinceEpoch)
                 : Text(totalTime!,
-                style: TextStyle(
+                style: const TextStyle(
                     fontSize: 35,
                     fontWeight: FontWeight.bold))
           ],

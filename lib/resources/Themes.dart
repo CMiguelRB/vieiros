@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:vieiros/resources/custom_colors.dart';
 
@@ -7,11 +8,20 @@ class ThemeProvider extends ChangeNotifier{
 
   bool get isLightMode => themeMode == ThemeMode.light;
 
-  void setThemeMode(bool value){
-    value == true ? themeMode = ThemeMode.dark : themeMode = ThemeMode.light;
+  void setThemeMode(String? value){
+    switch(value){
+      case 'light':
+        themeMode = ThemeMode.light;
+        break;
+      case 'dark':
+        themeMode = ThemeMode.dark;
+        break;
+      default:
+        SchedulerBinding.instance!.window.platformBrightness == Brightness.dark ? themeMode = ThemeMode.dark : themeMode = ThemeMode.light;
+    }
 
-    if(!value){
-      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    if(themeMode == ThemeMode.light){
+      SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
           systemNavigationBarColor: CustomColors.background,
           systemNavigationBarIconBrightness: Brightness.dark,
           statusBarColor: CustomColors.background,
@@ -19,7 +29,7 @@ class ThemeProvider extends ChangeNotifier{
           statusBarIconBrightness: Brightness.dark
       ));
     }else{
-      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
           systemNavigationBarColor: CustomColors.backgroundDark,
           systemNavigationBarIconBrightness: Brightness.light,
           statusBarColor: CustomColors.backgroundDark,
@@ -43,17 +53,17 @@ class Themes{
             primary: CustomColors.accent
         )
     ),
-    floatingActionButtonTheme: FloatingActionButtonThemeData(
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
         foregroundColor: Colors.white,
         backgroundColor: CustomColors.accent,
         elevation: 2
     ),
     indicatorColor: CustomColors.accent,
-    buttonTheme: ButtonThemeData(
+    buttonTheme: const ButtonThemeData(
       buttonColor: CustomColors.accent,
       textTheme: ButtonTextTheme.primary,
     ),
-    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         selectedIconTheme: IconThemeData(
             color: CustomColors.accent
         ),
@@ -61,7 +71,7 @@ class Themes{
       unselectedItemColor: Colors.black87,
     ),
     fontFamily: 'Lato',
-    textTheme: TextTheme(
+    textTheme: const TextTheme(
       headline1: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, fontFamily: 'Rubik', color: Colors.black87),
       bodyText1: TextStyle(fontSize: 14.0, fontFamily: 'Lato', color: Colors.black87),
     ),
@@ -78,17 +88,17 @@ class Themes{
             primary: CustomColors.accent
         )
     ),
-    floatingActionButtonTheme: FloatingActionButtonThemeData(
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
         foregroundColor: Colors.white,
         backgroundColor: CustomColors.accent,
         elevation: 2
     ),
     indicatorColor: CustomColors.accent,
-    buttonTheme: ButtonThemeData(
+    buttonTheme: const ButtonThemeData(
       buttonColor: CustomColors.accent,
       textTheme: ButtonTextTheme.primary,
     ),
-    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         selectedIconTheme: IconThemeData(
             color: CustomColors.accent
         ),
@@ -97,7 +107,7 @@ class Themes{
       unselectedItemColor: Colors.white,
     ),
     fontFamily: 'Lato',
-    textTheme: TextTheme(
+    textTheme: const TextTheme(
       headline1: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, fontFamily: 'Rubik', color: Colors.white),
       bodyText1: TextStyle(fontSize: 14.0, fontFamily: 'Lato', color: Colors.white),
     ),

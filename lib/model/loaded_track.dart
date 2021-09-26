@@ -18,11 +18,11 @@ class LoadedTrack {
     this.path = path;
 
     if (path == null || path.isEmpty){
-      this.clear();
+      clear();
       return this;
     }
 
-    final xmlFile = new File(path);
+    final xmlFile = File(path);
     final String gpxString = XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString();
     this.gpxString = gpxString;
     gpx = GpxReader().fromString(gpxString);
@@ -37,30 +37,30 @@ class LoadedTrack {
   }
 
   void setTop(int top){
-    this.altitudeTop = top;
+    altitudeTop = top;
   }
 
   void setGain(int gainDiff){
-    this.altitudeGain = gainDiff;
+    altitudeGain = gainDiff;
   }
 
   void setAltitudePoint(int distance, double altitude){
-    this.altitudePoints.add(AltitudePoint(distance, altitude));
+    altitudePoints.add(AltitudePoint(distance, altitude));
   }
 
   void setMin(int min){
-    this.altitudeMin = min;
+    altitudeMin = min;
   }
 
   clear(){
-    this.path = null;
-    this.gpxString = null;
-    this.gpx = null;
-    this.distance = 0;
-    this.altitudeTop = 0;
-    this.altitudeGain = 0;
-    this.altitudeMin = 8849;
-    this.altitudePoints = [];
+    path = null;
+    gpxString = null;
+    gpx = null;
+    distance = 0;
+    altitudeTop = 0;
+    altitudeGain = 0;
+    altitudeMin = 8849;
+    altitudePoints = [];
   }
 
   LoadedTrack();

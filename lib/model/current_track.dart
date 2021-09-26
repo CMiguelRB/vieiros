@@ -14,27 +14,27 @@ class CurrentTrack {
   int altitudeMin = 8849;
   int altitudeGain = 0;
   String name = '';
-  final StreamController event = new StreamController.broadcast();
+  final StreamController event = StreamController.broadcast();
 
   setRecording(willBeRecording) {
-    this.isRecording = willBeRecording;
+    isRecording = willBeRecording;
     event.add('recording status');
   }
 
   void setTop(int top){
-    this.altitudeTop = top;
+    altitudeTop = top;
   }
 
   void setGain(int gain){
-    this.altitudeGain = gain;
+    altitudeGain = gain;
   }
 
   void setMin(int min){
-    this.altitudeMin = min;
+    altitudeMin = min;
   }
 
   void addPosition(position) {
-    this.positions.add(position);
+    positions.add(position);
     event.add('added position');
   }
 
@@ -53,15 +53,15 @@ class CurrentTrack {
   }
 
   void clear() {
-    this.positions.clear();
-    this.waypoints.clear();
-    this.name = '';
-    this.dateTime = null;
-    this.isRecording = false;
-    this.distance = 0;
-    this.altitudeTop = 0;
-    this.altitudeMin = 8849;
-    this.altitudeGain = 0;
+    positions.clear();
+    waypoints.clear();
+    name = '';
+    dateTime = null;
+    isRecording = false;
+    distance = 0;
+    altitudeTop = 0;
+    altitudeMin = 8849;
+    altitudeGain = 0;
     event.add('cleared');
   }
 

@@ -8,7 +8,7 @@ class DaytimeWidget extends StatelessWidget{
   final String toSunset;
   final String sunsetTime;
 
-  DaytimeWidget({required this.lightMode, required this.toSunset, required this.sunsetTime});
+  const DaytimeWidget({Key? key, required this.lightMode, required this.toSunset, required this.sunsetTime}) : super(key: key);
 
 
   @override
@@ -49,7 +49,7 @@ class DaytimeWidget extends StatelessWidget{
                             fontSize: 12),
                       ),
                       Text(toSunset,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 25,
                               fontWeight:
                               FontWeight.bold))
@@ -73,7 +73,7 @@ class DaytimeWidget extends StatelessWidget{
                             fontSize: 12),
                       ),
                       Text(sunsetTime,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 25,
                               fontWeight:
                               FontWeight.bold))

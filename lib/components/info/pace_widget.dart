@@ -8,11 +8,11 @@ class PaceWidget extends StatelessWidget{
   final String avgPace;
   final String paceUnit;
 
-  PaceWidget({required this.lightMode, required this.avgPace, required this.paceUnit});
+  const PaceWidget({Key? key, required this.lightMode, required this.avgPace, required this.paceUnit}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: 80,
       child: Column(
         mainAxisSize: MainAxisSize.max,
@@ -23,25 +23,24 @@ class PaceWidget extends StatelessWidget{
                   color: lightMode
                       ? CustomColors.subText
                       : CustomColors.subTextDark)),
-          Container(
-              child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment:
-                  MainAxisAlignment.center,
-                  crossAxisAlignment:
-                  CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(avgPace,
-                        style: TextStyle(
-                            fontSize: 35,
-                            fontWeight: FontWeight.bold)),
-                    Container(margin: EdgeInsets.all(2)),
-                    Text(paceUnit,
-                        style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.bold))
-                  ]))
+          Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment:
+              MainAxisAlignment.center,
+              crossAxisAlignment:
+              CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(avgPace,
+                    style: const TextStyle(
+                        fontSize: 35,
+                        fontWeight: FontWeight.bold)),
+                Container(margin: const EdgeInsets.all(2)),
+                Text(paceUnit,
+                    style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold))
+              ])
         ],
       ),
       width: MediaQuery.of(context).size.width / 2,

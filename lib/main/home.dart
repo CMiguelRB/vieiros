@@ -1,9 +1,5 @@
-import 'dart:io';
-import 'package:xml/xml.dart';
 import 'package:flutter/services.dart';
-import 'package:gpx/gpx.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vieiros/components/vieiros_notification.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:flutter/material.dart';
 import 'package:vieiros/model/current_track.dart';
@@ -17,7 +13,7 @@ class Home extends StatefulWidget {
   final SharedPreferences prefs;
   final LoadedTrack loadedTrack;
 
-  Home({Key? key, required this.prefs, required this.loadedTrack})
+  const Home({Key? key, required this.prefs, required this.loadedTrack})
       : super(key: key);
 
   @override
@@ -28,7 +24,7 @@ class _Home extends State<Home>
     with TickerProviderStateMixin, WidgetsBindingObserver {
 
   static const platform =
-  const MethodChannel('com.rabocorp.vieiros/opened_file');
+  MethodChannel('com.rabocorp.vieiros/opened_file');
 
   void getOpenedFile() async {
       String? gpxStringFile = await platform.invokeMethod("getOpenedFile");
@@ -37,11 +33,11 @@ class _Home extends State<Home>
   }
 
   int _tabIndex = 0;
-  Icon _fabIcon = Icon(Icons.add);
+  Icon _fabIcon = const Icon(Icons.add);
 
   late List<Widget> _tabs;
   late TabController _tabController;
-  late CurrentTrack _currentTrack = CurrentTrack();
+  late final CurrentTrack _currentTrack = CurrentTrack();
 
   final _mapKey = GlobalKey<MapState>();
   final _trackKey = GlobalKey<TracksState>();
@@ -63,11 +59,12 @@ class _Home extends State<Home>
         }
         if (_currentTrack.isRecording) {
           _fabIcon = const Icon(Icons.stop);
-          if (this.mounted)
+          if (mounted) {
             setState(() {
               _tabIndex = index;
               _tabController.animateTo(index);
             });
+          }
           return;
         }
       } else {
@@ -88,11 +85,12 @@ class _Home extends State<Home>
     } else {
       _fabIcon = const Icon(Icons.add);
     }
-    if (this.mounted)
+    if (mounted) {
       setState(() {
         _tabIndex = index;
         _tabController.animateTo(index);
       });
+    }
   }
 
   void _setPlayFabIcon() {
@@ -154,10 +152,11 @@ class _Home extends State<Home>
     if (index == 1 && _mapKey.currentState != null) {
       if (!_currentTrack.isRecording) {
         _mapKey.currentState!.startRecording();
-        if (this.mounted)
+        if (mounted) {
           setState(() {
-            _fabIcon = Icon(Icons.stop);
+            _fabIcon = const Icon(Icons.stop);
           });
+        }
       } else {
         _mapKey.currentState!.stopRecording();
       }
@@ -189,7 +188,7 @@ class _Home extends State<Home>
   Widget build(BuildContext context) {
     return Scaffold(
         body: TabBarView(
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             controller: _tabController,
             children: _tabs),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -201,7 +200,7 @@ class _Home extends State<Home>
               )
             : null,
         bottomNavigationBar: BottomAppBar(
-            shape: CircularNotchedRectangle(),
+            shape: const CircularNotchedRectangle(),
             notchMargin: 4.0,
             clipBehavior: Clip.antiAlias,
             child: BottomNavigationBar(

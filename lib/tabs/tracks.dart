@@ -24,7 +24,7 @@ class Tracks extends StatefulWidget {
   final SharedPreferences prefs;
   final LoadedTrack loadedTrack;
 
-  Tracks(
+  const Tracks(
       {Key? key,
       required this.toTabIndex,
       required this.prefs,
@@ -33,6 +33,7 @@ class Tracks extends StatefulWidget {
       required this.clearTrack})
       : super(key: key);
 
+  @override
   TracksState createState() => TracksState();
 }
 
@@ -40,7 +41,7 @@ class TracksState extends State<Tracks> {
   List<GpxFile> _files = [];
   _loadPrefs() async {
     String? jsonString = widget.prefs.getString('files');
-    jsonString = jsonString != null ? jsonString : '[]';
+    jsonString = jsonString ?? '[]';
     List<GpxFile> files = json
         .decode(jsonString)
         .map<GpxFile>((file) => GpxFile.fromJson(file))
@@ -67,19 +68,19 @@ class TracksState extends State<Tracks> {
               .split('.')[result.files.single.name.split('.').length - 1] !=
           'gpx') {
         VieirosNotification().showNotification(
-            context, 'tracks_file_validation_error', NotificationType.ERROR);
+            context, 'tracks_file_validation_error', NotificationType.error);
         return;
       }
       for (var i = 0; i < _files.length; i++) {
         if (_files[i].path == result.files.single.path) return;
       }
       String? path = result.files.single.path;
-      final xmlFile = new File(path!);
+      final xmlFile = File(path!);
       Gpx gpx = GpxReader().fromString(
           XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString());
       setState(() {
         String? name = gpx.trks[0].name;
-        if(name == null) name = result.files.single.name;
+        name ??= result.files.single.name;
         _files.add(GpxFile(name: name, path: result.files.single.path));
         widget.prefs.setString('files', jsonEncode(_files));
       });
@@ -105,7 +106,7 @@ class TracksState extends State<Tracks> {
         widget.loadedTrack.clear();
       }
       VieirosNotification()
-          .showNotification(context, 'tracks_unloaded', NotificationType.INFO);
+          .showNotification(context, 'tracks_unloaded', NotificationType.info);
     });
   }
 
@@ -121,7 +122,7 @@ class TracksState extends State<Tracks> {
       }
       String? path = file.path;
       if (path != null) {
-        File deleteFile = new File(path);
+        File deleteFile = File(path);
         deleteFile.delete();
       }
       Navigator.pop(context, I18n.translate("common_ok"));
@@ -153,7 +154,7 @@ class TracksState extends State<Tracks> {
         child: Column(
       children: [
         Expanded(
-            child: _files.length == 0
+            child: _files.isEmpty
                 ? Container(
                     alignment: Alignment.center,
                     child: Text(I18n.translate('tracks_background_tip'),
@@ -184,8 +185,8 @@ class TracksState extends State<Tracks> {
                                           ? IconButton(
                                               onPressed: () =>
                                                   _unloadTrack(index),
-                                              icon: Icon(Icons.clear))
-                                          : Text(''),
+                                              icon: const Icon(Icons.clear))
+                                          : const Text(''),
                                       Flexible(
                                           fit: FlexFit.tight,
                                           child: Text(_files[index].name,
@@ -206,7 +207,7 @@ class TracksState extends State<Tracks> {
                                                             context, index)
                                                   },
                                                   bodyTag: 'common_confirm'),
-                                          icon: Icon(Icons.delete))
+                                          icon: const Icon(Icons.delete))
                                     ]))),
                         onTap: () => _navigate(index),
                       );

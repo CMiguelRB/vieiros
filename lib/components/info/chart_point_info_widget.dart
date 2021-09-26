@@ -6,7 +6,7 @@ class ChartPointInfoWidget extends StatelessWidget{
 
   final AltitudePoint? selectedPoint;
 
-  ChartPointInfoWidget({required this.selectedPoint});
+  const ChartPointInfoWidget({Key? key, required this.selectedPoint}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class ChartPointInfoWidget extends StatelessWidget{
               ' m.'
               : ''),
           Container(
-            margin: EdgeInsets.only(right: 20),
+            margin: const EdgeInsets.only(right: 20),
           )
         ]);
   }

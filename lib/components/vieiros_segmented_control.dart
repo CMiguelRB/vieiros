@@ -6,12 +6,12 @@ class VieirosSegmentedControl extends StatelessWidget{
   final int slideState;
   final Function onValueChanged;
 
-  VieirosSegmentedControl({required this.tabMap, required this.slideState, required this.onValueChanged});
+  const VieirosSegmentedControl({Key? key, required this.tabMap, required this.slideState, required this.onValueChanged}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: EdgeInsets.only(top: 20),
+        padding: const EdgeInsets.only(top: 20),
         child: CupertinoSlidingSegmentedControl(
             children: tabMap,
             groupValue: slideState,

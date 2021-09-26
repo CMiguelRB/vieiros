@@ -39,7 +39,7 @@ dependencies:
       path: charts_flutter
   intl: ^0.17.0
   sunrise_sunset_calc: ^2.1.0
-  provider: ^6.0.0
+  provider: ^6.0.1
   flutter_tts: ^3.2.2
   url_launcher: ^6.0.12
   flutter_localizations:
@@ -49,6 +49,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^1.0.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

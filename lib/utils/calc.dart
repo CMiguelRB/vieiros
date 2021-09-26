@@ -28,13 +28,15 @@ class Calc {
   }
 
   void setTop(CurrentTrack currentTrack) {
-    if (currentTrack.positions.last.altitude! > currentTrack.altitudeTop)
+    if (currentTrack.positions.last.altitude! > currentTrack.altitudeTop) {
       currentTrack.setTop(currentTrack.positions.last.altitude!.toInt());
+    }
   }
 
   void setMin(CurrentTrack currentTrack) {
-    if (currentTrack.positions.last.altitude! < currentTrack.altitudeMin)
+    if (currentTrack.positions.last.altitude! < currentTrack.altitudeMin) {
       currentTrack.setMin(currentTrack.positions.last.altitude!.toInt());
+    }
   }
 
   double altitudeDiff(CurrentTrack currentTrack) {
@@ -108,8 +110,9 @@ class Calc {
         double gainDiff = trackPoints[i].ele! - trackPoints[i-1].ele!;
         if (gainDiff > 0) loadedTrack.setGain(loadedTrack.altitudeGain+gainDiff.toInt());
       }
-      if (trackPoints[i].ele! > loadedTrack.altitudeTop)
+      if (trackPoints[i].ele! > loadedTrack.altitudeTop) {
         loadedTrack.setTop(trackPoints[i].ele!.toInt());
+      }
       if(trackPoints[i].ele! < loadedTrack.altitudeMin){
         loadedTrack.setMin(trackPoints[i].ele!.toInt());
       }
