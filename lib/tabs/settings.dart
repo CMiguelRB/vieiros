@@ -67,6 +67,7 @@ class SettingsState extends State<Settings> {
             child: Column(children: [
           Container(
               padding: const EdgeInsets.all(10),
+              margin: const EdgeInsets.only(left: 10, top: 40),
               child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   mainAxisSize: MainAxisSize.max,
@@ -88,10 +89,6 @@ class SettingsState extends State<Settings> {
                         onChanged: (value) => _onChangeDarkMode(value, context),
                         value: _themeDropdownValue!)
                   ])),
-          /*VieirosSwitch(
-              onChanged: _onChangeDarkMode,
-              value: _darkMode,
-              tag: 'settings_dark_mode'),*/
           VieirosSwitch(
               onChanged: _onChangeVoiceAlerts,
               value: _voiceAlerts,
