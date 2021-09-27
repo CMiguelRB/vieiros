@@ -193,10 +193,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     Marker? _marker;
     _location.onLocationChanged.listen((event) async {
       if (widget.currentTrack.isRecording) {
-        double? lat = event.latitude;
-        double? lon = event.longitude;
         widget.currentTrack.addPosition(
-            RecordedPosition(lat, lon, event.altitude, event.time));
+            RecordedPosition(event.latitude, event.longitude, event.altitude, event.time));
         Calc().setGain(widget.currentTrack);
         Calc().setTop(widget.currentTrack);
         Calc().setMin(widget.currentTrack);

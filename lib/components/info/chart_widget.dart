@@ -57,7 +57,7 @@ class ChartWidget extends StatelessWidget{
                         : altitude) -
                         altitudeMin) ~/
                         1.51) +
-                        altitudeMin.toInt()),
+                        altitudeMin.round()),
                     charts.TickSpec<num>(
                         int.parse(altitude == '-'
                             ? '0'

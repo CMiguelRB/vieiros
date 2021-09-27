@@ -143,7 +143,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           _altitudeGain = widget.currentTrack.altitudeGain.toString();
           if (widget.currentTrack.positions.isNotEmpty) {
             _altitudeCurrent =
-                widget.currentTrack.positions.last.altitude!.toInt().toString();
+                widget.currentTrack.positions.last.altitude!.round().toString();
           }
           List<AltitudePoint> data = _altitudeDataCurrent.first.data;
           if (data.isEmpty) {
