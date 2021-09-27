@@ -19,7 +19,7 @@ class ChartPointInfoWidget extends StatelessWidget{
               ? I18n.translate('info_chart_altitude') +
               ': ' +
               selectedPoint!.altitude
-                  .toInt()
+                  .round()
                   .toString() +
               ' m.'
               : ''),

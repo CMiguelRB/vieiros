@@ -13,8 +13,7 @@ class Calc {
             currentTrack
                 .positions[currentTrack.positions.length - 2].longitude!,
             currentTrack.positions.last.latitude!,
-            currentTrack.positions.last.longitude!)
-        .toInt();
+            currentTrack.positions.last.longitude!).round();
     currentTrack.setDistance(_totalDistance + _distance);
   }
 
@@ -23,19 +22,19 @@ class Calc {
     int gain = currentTrack.altitudeGain;
     double gainDiff = currentTrack.positions.last.altitude! -
         currentTrack.positions[currentTrack.positions.length - 2].altitude!;
-    if (gainDiff > 0) gain += gainDiff.toInt();
+    if (gainDiff > 0) gain += gainDiff.round();
     currentTrack.setGain(gain);
   }
 
   void setTop(CurrentTrack currentTrack) {
     if (currentTrack.positions.last.altitude! > currentTrack.altitudeTop) {
-      currentTrack.setTop(currentTrack.positions.last.altitude!.toInt());
+      currentTrack.setTop(currentTrack.positions.last.altitude!.round());
     }
   }
 
   void setMin(CurrentTrack currentTrack) {
     if (currentTrack.positions.last.altitude! < currentTrack.altitudeMin) {
-      currentTrack.setMin(currentTrack.positions.last.altitude!.toInt());
+      currentTrack.setMin(currentTrack.positions.last.altitude!.round());
     }
   }
 
@@ -105,16 +104,16 @@ class Calc {
             trackPoints[i-1].lon!,
             trackPoints[i].lat!,
             trackPoints[i].lon!)
-            .toInt();
+            .round();
         distance += _distance;
         double gainDiff = trackPoints[i].ele! - trackPoints[i-1].ele!;
-        if (gainDiff > 0) loadedTrack.setGain(loadedTrack.altitudeGain+gainDiff.toInt());
+        if (gainDiff > 0) loadedTrack.setGain(loadedTrack.altitudeGain+gainDiff.round());
       }
       if (trackPoints[i].ele! > loadedTrack.altitudeTop) {
-        loadedTrack.setTop(trackPoints[i].ele!.toInt());
+        loadedTrack.setTop(trackPoints[i].ele!.round());
       }
       if(trackPoints[i].ele! < loadedTrack.altitudeMin){
-        loadedTrack.setMin(trackPoints[i].ele!.toInt());
+        loadedTrack.setMin(trackPoints[i].ele!.round());
       }
       if (((trackPoints.length > 500 && i % 2 != 0) ||
           (trackPoints.length > 1000 && i % 3 != 0) ||
