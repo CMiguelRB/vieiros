@@ -81,13 +81,13 @@ class Calc {
     return '--:--';
   }
 
-  String getDaylight(CurrentTrack currentTrack, DateTime sunset) {
-    int toSunsetH = (sunset.hour - DateTime.now().hour);
-    if(toSunsetH < 0) return '00:00';
-    String toSunsetSH = toSunsetH.toString();
+  String getDaylight(DateTime sunset) {
+    int minutesToSunset = sunset.difference(DateTime.now()).inMinutes;
+    if(minutesToSunset <= 0) return '00:00';
+    int toSunsetH = minutesToSunset~/60;
+    String toSunsetSH = (toSunsetH - 1).toString();
     toSunsetSH = toSunsetSH.length > 1 ? toSunsetSH : '0' + toSunsetSH;
-    int toSunsetM = (sunset.minute - DateTime.now().minute);
-    if(toSunsetM < 0) return '00:00';
+    int toSunsetM = minutesToSunset - toSunsetH * 60;
     String toSunsetSM = toSunsetM.toString();
     toSunsetSM = toSunsetSM.length > 1 ? toSunsetSM : '0' + toSunsetSM;
     return toSunsetSH + ':' + toSunsetSM;
@@ -123,7 +123,6 @@ class Calc {
       loadedTrack.setAltitudePoint(distance, trackPoints[i].ele!);
     }
     loadedTrack.setDistance(distance);
-
   }
 
   //Singleton pattern. No need to call an instance getter, just instantiate the class Calc calc = Calc();

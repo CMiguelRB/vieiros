@@ -11,7 +11,6 @@ import 'package:vieiros/resources/themes.dart';
 import 'package:vieiros/utils/files_handler.dart';
 import 'package:xml/xml.dart';
 import 'dart:io';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:gpx/gpx.dart';

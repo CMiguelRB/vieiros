@@ -4,16 +4,17 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/android.iml" filepath="$PROJECT_DIR$/.idea/modules/android.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/android.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/android.app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1936571081/android.device_info.iml" filepath="$PROJECT_DIR$/.idea/modules/1936571081/android.device_info.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-1304189499/android.file_picker.iml" filepath="$PROJECT_DIR$/.idea/modules/-1304189499/android.file_picker.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-1810001674/android.flutter_plugin_android_lifecycle.iml" filepath="$PROJECT_DIR$/.idea/modules/-1810001674/android.flutter_plugin_android_lifecycle.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/53529957/android.flutter_tts.iml" filepath="$PROJECT_DIR$/.idea/modules/53529957/android.flutter_tts.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1048063544/android.geolocator_android.iml" filepath="$PROJECT_DIR$/.idea/modules/1048063544/android.geolocator_android.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-1525061883/android.google_maps_flutter.iml" filepath="$PROJECT_DIR$/.idea/modules/-1525061883/android.google_maps_flutter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-428997432/android.device_info_plus.iml" filepath="$PROJECT_DIR$/.idea/modules/-428997432/android.device_info_plus.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/76933449/android.file_picker.iml" filepath="$PROJECT_DIR$/.idea/modules/76933449/android.file_picker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-1129943304/android.flutter_plugin_android_lifecycle.iml" filepath="$PROJECT_DIR$/.idea/modules/-1129943304/android.flutter_plugin_android_lifecycle.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/744091431/android.flutter_tts.iml" filepath="$PROJECT_DIR$/.idea/modules/744091431/android.flutter_tts.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/461257530/android.geolocator_android.iml" filepath="$PROJECT_DIR$/.idea/modules/461257530/android.geolocator_android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1247952908/android.google_maps_flutter.iml" filepath="$PROJECT_DIR$/.idea/modules/1247952908/android.google_maps_flutter.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/-1737824612/android.location.iml" filepath="$PROJECT_DIR$/.idea/modules/-1737824612/android.location.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/688126537/android.permission_handler.iml" filepath="$PROJECT_DIR$/.idea/modules/688126537/android.permission_handler.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1372024008/android.shared_preferences.iml" filepath="$PROJECT_DIR$/.idea/modules/1372024008/android.shared_preferences.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1321449595/android.url_launcher.iml" filepath="$PROJECT_DIR$/.idea/modules/1321449595/android.url_launcher.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1841690981/android.path_provider_android.iml" filepath="$PROJECT_DIR$/.idea/modules/1841690981/android.path_provider_android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-650983995/android.permission_handler.iml" filepath="$PROJECT_DIR$/.idea/modules/-650983995/android.permission_handler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1095287583/android.shared_preferences_android.iml" filepath="$PROJECT_DIR$/.idea/modules/1095287583/android.shared_preferences_android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-1250202547/android.url_launcher_android.iml" filepath="$PROJECT_DIR$/.idea/modules/-1250202547/android.url_launcher_android.iml" />
     </modules>
   </component>
 </project>

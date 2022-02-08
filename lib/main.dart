@@ -16,7 +16,12 @@ void main() async {
   String? path = _prefs.getString('currentTrack');
   String? theme = _prefs.getString('dark_mode');
   if(theme == null) _prefs.setString('dark_mode', 'system');
-  LoadedTrack loadedTrack = await LoadedTrack().loadTrack(path);
+  LoadedTrack loadedTrack;
+  try{
+     loadedTrack = await LoadedTrack().loadTrack(path);
+  } on Exception {
+    loadedTrack = LoadedTrack();
+  }
   runApp(MyApp(_prefs, loadedTrack));
 }
 

@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vieiros/resources/custom_colors.dart';
@@ -6,14 +5,14 @@ import 'package:vieiros/resources/i18n.dart';
 import 'package:vieiros/resources/themes.dart';
 
 class VieirosDialog {
-  infoDialog(
+  infoDialog (
       BuildContext context, String titleTag, Map<String, Function> actions,
-      {String? bodyTag}) {
+      {String? bodyTag}) async {
     Color _bodyTextColor =
         Provider.of<ThemeProvider>(context, listen: false).isLightMode
             ? CustomColors.subText
             : CustomColors.subTextDark;
-    showDialog(
+    return showDialog(
         context: context,
         barrierColor: CustomColors.dimming,
         builder: (BuildContext context) => Dialog(

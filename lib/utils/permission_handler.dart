@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:device_info/device_info.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class PermissionHandler {
@@ -17,7 +17,7 @@ class PermissionHandler {
     if (_hasPermission) return true;
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    if (Platform.isAndroid && androidInfo.version.sdkInt >= 30) {
+    if (Platform.isAndroid && androidInfo.version.sdkInt! >= 30) {
       final status = await Permission.location.request();
       if (status == PermissionStatus.permanentlyDenied) {
         return await openAppSettings();

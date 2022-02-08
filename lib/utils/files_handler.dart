@@ -32,6 +32,7 @@ class FilesHandler {
       prefs.setString('files', jsonEncode(files));
       return path;
     }
+    return null;
   }
 
   FilesHandler._privateConstructor();

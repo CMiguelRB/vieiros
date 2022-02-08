@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vieiros/components/vieiros_dialog.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:flutter/material.dart';
 import 'package:vieiros/model/current_track.dart';
@@ -184,9 +185,28 @@ class _Home extends State<Home>
     ];
   }
 
+  Future<bool> _onWillPop(BuildContext context) async {
+    if(_currentTrack.isRecording){
+      bool? exitResult = await VieirosDialog().infoDialog(
+          context,
+          'app_close_warning_title',
+          {
+            'common_cancel': () => Navigator.of(context).pop(false),
+            'common_ok': () => Navigator.of(context).pop(true)
+          },
+          bodyTag: 'app_close_warning');
+      return exitResult ?? false;
+    }else{
+      return true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return WillPopScope(
+        onWillPop: () => _onWillPop(context),
+        child:
+      Scaffold(
         body: TabBarView(
             physics: const NeverScrollableScrollPhysics(),
             controller: _tabController,
@@ -210,6 +230,6 @@ class _Home extends State<Home>
                 selectedFontSize: 12,
                 unselectedFontSize: 12,
                 showUnselectedLabels: true,
-                onTap: _onTabItemTapped)));
+                onTap: _onTabItemTapped))));
   }
 }

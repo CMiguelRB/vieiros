@@ -11,7 +11,6 @@ import 'package:vieiros/components/vieiros_text_input.dart';
 import 'package:vieiros/model/current_track.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:vieiros/model/position.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gpx/gpx.dart';
@@ -354,7 +353,9 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     _location.enableBackgroundMode(enable: false);
     widget.setPlayIcon();
     Gpx gpx = GpxHandler().createGpx(widget.currentTrack, name, currentMarkers: _currentMarkers);
-    final gpxString = GpxWriter().asString(gpx, pretty: true);
+    String gpxString = GpxWriter().asString(gpx, pretty: true);
+    //add namespaces
+    gpxString = gpxString.replaceFirst(RegExp('creator="vieiros"'), 'creator="vieiros" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"');
     await FilesHandler().writeFile(gpxString, name, widget.prefs, true);
     if (mounted) {
       setState(() {

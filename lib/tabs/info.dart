@@ -1,3 +1,4 @@
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sunrise_sunset_calc/sunrise_sunset_calc.dart';
@@ -10,7 +11,6 @@ import 'package:vieiros/components/info/pace_widget.dart';
 import 'package:vieiros/components/info/time_widget.dart';
 import 'package:vieiros/components/vieiros_segmented_control.dart';
 import 'package:vieiros/model/altitude_point.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gpx/gpx.dart';
 import 'package:vieiros/model/current_track.dart';
@@ -110,7 +110,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
         .sunset;
     setState(() {
       _sunsetTime = Calc().getSunsetTime(widget.currentTrack, _sunset!);
-      _toSunset = Calc().getDaylight(widget.currentTrack, _sunset!);
+      _toSunset = Calc().getDaylight(_sunset!);
     });
   }
 
@@ -147,6 +147,14 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           }
           List<AltitudePoint> data = _altitudeDataCurrent.first.data;
           if (data.isEmpty) {
+            int _totalDistanceDataCurrent = 0;
+            for(int i = 0; i < widget.currentTrack.positions.length; i++){
+              _altitudeDataCurrent.first.data.add(AltitudePoint(
+                  _totalDistanceDataCurrent, widget.currentTrack.positions[i].altitude!));
+              if(i > 0){
+                _totalDistanceDataCurrent = _totalDistanceDataCurrent + Geolocator.distanceBetween(widget.currentTrack.positions[(i-1)].latitude!, widget.currentTrack.positions[(i-1)].longitude!, widget.currentTrack.positions[i].latitude!, widget.currentTrack.positions[i].longitude!).toInt();
+              }
+            }
             _altitudeDataCurrent.first.data.add(AltitudePoint(
                 _totalDistance, widget.currentTrack.positions.last.altitude!));
           } else if (data.last.totalDistance != _totalDistance) {
