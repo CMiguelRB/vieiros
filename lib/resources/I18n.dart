@@ -19,6 +19,9 @@ class I18n {
       "appbar_tab_info": "Info",
       "appbar_tab_settings": "Settings",
 
+      "app_close_warning_title": "Warning",
+      "app_close_warning": "Do you really want to close the app?",
+
       "tracks_background_tip": "Press + to load a gpx track file",
       "tracks_file_validation_error": "Not a valid gpx file",
       "tracks_unloaded": "Track cleared from the map",
@@ -83,6 +86,9 @@ class I18n {
       "appbar_tab_map": "Mapa",
       "appbar_tab_info": "Info",
       "appbar_tab_settings": "Configuración",
+
+      "app_close_warning_title": "Aviso",
+      "app_close_warning": "¿Quieres cerrar la apliación?",
 
       "tracks_background_tip": "Presiona + para cargar archivo de ruta gpx",
       "tracks_file_validation_error": "Archivo gpx no válido",
@@ -150,6 +156,9 @@ class I18n {
       "appbar_tab_info": "Info",
       "appbar_tab_settings": "Configuración",
 
+      "app_close_warning_title": "Aviso",
+      "app_close_warning": "¿Queres pechar a apliación?",
+
       "tracks_background_tip": "Presiona + para cargares un arquivo de ruta gpx",
       "tracks_file_validation_error": "Arquivo gpx non válido.",
       "tracks_unloaded": "Ruta limpada do mapa",
@@ -166,9 +175,9 @@ class I18n {
       "map_voice_notification_s": "segundos",
       "map_voice_notification_in": " en ",
       "map_voice_notification_pace": "Ritmo: ",
-      "map_stop_save": "¿Rematar de gravar e garda-la ruta?",
+      "map_stop_save": "¿Rematar de gravar e gardar a ruta?",
       "map_track_name": "Nome da ruta",
-      "map_permissions_request": "Esta app require permisos de ubicación en todo momento para obter-la túa ubicación incluso cando a teñas en segundo plano.",
+      "map_permissions_request": "Esta app require permisos de ubicación en todo momento para obter a túa ubicación incluso cando a teñas en segundo plano.",
       "map_grant_permissions": "Conceder permisos",
       "map_finish_tracking": "Rematar gravación",
       "map_track_pin_start": "Comezo",
