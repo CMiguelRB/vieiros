@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:vieiros/components/vieiros_dropdown.dart';
+import 'package:vieiros/components/vieiros_select.dart';
 import 'package:vieiros/components/vieiros_switch.dart';
 import 'package:vieiros/resources/custom_colors.dart';
 import 'package:vieiros/resources/i18n.dart';
@@ -19,12 +19,32 @@ class Settings extends StatefulWidget {
 
 class SettingsState extends State<Settings> {
   bool _voiceAlerts = true;
-  String? _themeDropdownValue = 'system';
+  String? _themeSelectValue = 'system';
+  String? _themeSelectTag = '';
+  final List<Map<String, String>> _themes = [
+    {
+      "value": 'system',
+      "tag": 'settings_dark_mode_item_system'
+    },
+    {
+      "value": 'light',
+      "tag": 'settings_dark_mode_item_light'
+    },
+    {
+      "value": 'dark',
+      "tag": 'settings_dark_mode_item_dark'
+    }
+  ];
 
   @override
   void initState() {
     super.initState();
-    _themeDropdownValue = widget.prefs.getString('dark_mode');
+    _themeSelectValue = widget.prefs.getString('dark_mode');
+    for(int i = 0; i<_themes.length; i++){
+      if(_themes[i]['value'] == _themeSelectValue){
+        _themeSelectTag = _themes[i]['tag'];
+      }
+    }
     _voiceAlerts = widget.prefs.getString("voice_alerts") == 'true' ||
         widget.prefs.getString("voice_alerts") == null;
   }
@@ -34,12 +54,13 @@ class SettingsState extends State<Settings> {
     super.dispose();
   }
 
-  _onChangeDarkMode(value, context) {
+  _onChangeDarkMode(Map<String, String> element, context) {
     final provider = Provider.of<ThemeProvider>(context, listen: false);
-    provider.setThemeMode(value);
+    provider.setThemeMode(element['value']);
     setState(() {
-      _themeDropdownValue = value;
-      widget.prefs.setString("dark_mode", value);
+      _themeSelectValue = element['value'];
+      widget.prefs.setString("dark_mode", element['value']!);
+      _themeSelectTag = element['tag'];
     });
   }
 
@@ -65,34 +86,39 @@ class SettingsState extends State<Settings> {
       children: [
         Expanded(
             child: Column(children: [
-          Container(
-              padding: const EdgeInsets.all(10),
-              margin: const EdgeInsets.only(left: 10, top: 40),
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Text(I18n.translate('settings_dark_mode')),
-                    VieirosDropdown(
-                        lightMode: lightMode,
-                        items: const [
-                          {
-                            "value": 'system',
-                            "tag": 'settings_dark_mode_item_system'
-                          },
-                          {
-                            "value": 'light',
-                            "tag": 'settings_dark_mode_item_light'
-                          },
-                          {"value": 'dark', "tag": 'settings_dark_mode_item_dark'}
-                        ],
-                        onChanged: (value) => _onChangeDarkMode(value, context),
-                        value: _themeDropdownValue!)
-                  ])),
-          VieirosSwitch(
-              onChanged: _onChangeVoiceAlerts,
-              value: _voiceAlerts,
-              tag: 'settings_voice_alerts'),
+          Column(children: [
+            Container(
+                margin: const EdgeInsets.only(left: 20, top: 40),
+                alignment: Alignment.centerLeft,
+                child: Text(I18n.translate('settings_appearance'),
+                    style:
+                        const TextStyle(fontSize: 14, color: CustomColors.accent))),
+            Container(
+                padding: const EdgeInsets.all(10),
+                margin: const EdgeInsets.only(left: 10, top: 5),
+                child:
+                      VieirosSelect(lightMode: lightMode,
+                          onChanged: (element) => _onChangeDarkMode(element, context),
+                          titleTag: 'settings_dark_mode',
+                          valueTag: _themeSelectTag!,
+                          value: _themeSelectValue!,
+                          items: _themes, context: context)
+                    )
+          ]),
+          Column(children: [
+            Container(
+                margin: const EdgeInsets.only(left: 20, top: 40),
+                alignment: Alignment.centerLeft,
+                child: Text(I18n.translate('settings_alerts'),
+                    style:
+                        const TextStyle(fontSize: 14, color: CustomColors.accent))),
+            VieirosSwitch(
+                lightMode: lightMode,
+                onChanged: _onChangeVoiceAlerts,
+                value: _voiceAlerts,
+                titleTag: 'settings_voice_alerts',
+                descTag: 'settings_voice_alerts_desc')
+          ]),
           const Spacer(),
           ElevatedButton(
             onPressed: _donate,
@@ -102,7 +128,7 @@ class SettingsState extends State<Settings> {
         ])),
         Column(
           children: [
-            Image.asset('assets/app_logo.png', scale: 6),
+            //Image.asset('assets/app_logo.png', scale: 6),
             Container(
               margin: const EdgeInsets.only(bottom: 10),
             ),
