@@ -17,7 +17,7 @@ class I18n {
       "appbar_tab_tracks": "Tracks",
       "appbar_tab_map": "Map",
       "appbar_tab_info": "Info",
-      "appbar_tab_settings": "Settings",
+      "appbar_tab_settings": "Configuration",
 
       "app_close_warning_title": "Warning",
       "app_close_warning": "Do you really want to close the app?",
@@ -61,6 +61,7 @@ class I18n {
       "info_chart_altitude": "Altitude",
       "info_chart_distance": "Distance",
 
+      "settings_title": "Settings",
       "settings_appearance": "Appearance",
       "settings_dark_mode": "Theme",
       "settings_alerts": "Alerts",
@@ -129,6 +130,7 @@ class I18n {
       "info_chart_altitude": "Altitud",
       "info_chart_distance": "Distancia",
 
+      "settings_title": "Ajustes",
       "settings_appearance": "Aspecto",
       "settings_dark_mode": "Tema",
       "settings_voice_alerts": "Alertas de voz",
@@ -198,6 +200,7 @@ class I18n {
       "info_chart_altitude": "Altitude",
       "info_chart_distance": "Distancia",
 
+      "settings_title": "Axustes",
       "settings_appearance": "Aspecto",
       "settings_dark_mode": "Tema",
       "settings_voice_alerts": "Alertas de voz",

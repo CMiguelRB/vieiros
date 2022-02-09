@@ -349,14 +349,15 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
 
   _stopAndSave(name) async {
     if (!_formKey.currentState!.validate()) return;
-    Navigator.pop(context, I18n.translate('common_ok'));
     _location.enableBackgroundMode(enable: false);
     widget.setPlayIcon();
     Gpx gpx = GpxHandler().createGpx(widget.currentTrack, name, currentMarkers: _currentMarkers);
     String gpxString = GpxWriter().asString(gpx, pretty: true);
     //add namespaces
     gpxString = gpxString.replaceFirst(RegExp('creator="vieiros"'), 'creator="vieiros" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"');
-    await FilesHandler().writeFile(gpxString, name, widget.prefs, true);
+    String? result = await FilesHandler().writeFile(gpxString, name, widget.prefs, true);
+    if(result == '###file_exists') return VieirosNotification().showNotification(context, 'File exists', NotificationType.error);
+    Navigator.pop(context, I18n.translate('common_ok'));
     if (mounted) {
       setState(() {
         _polyline.removeWhere(
@@ -443,6 +444,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                                     ? CustomColors.subText
                                     : CustomColors.subTextDark))),
                     ElevatedButton(
+                        style: ElevatedButton.styleFrom(shape: const StadiumBorder(), elevation: 0),
                         onPressed: _refreshTab,
                         child:
                             Text(I18n.translate('map_grant_permissions')))

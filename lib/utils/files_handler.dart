@@ -20,6 +20,8 @@ class FilesHandler {
       String path = directory + '/' + name.replaceAll(' ', '_') + '.gpx';
       if(!(await File(path).exists())){
         await File(path).writeAsString(gpxString);
+      }else{
+        return '###file_exists';
       }
       String? jsonString = prefs.getString('files');
       List<GpxFile> files = [];

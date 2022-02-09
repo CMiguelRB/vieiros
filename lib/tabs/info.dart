@@ -56,6 +56,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   String _sunsetTime = '--:--';
   String _toSunset = '--:--';
   Color _chartColor = CustomColors.accent;
+  bool _started = false;
   List<charts.Series<AltitudePoint, num>> _altitudeDataLoaded = [];
   List<charts.Series<AltitudePoint, num>> _altitudeDataCurrent = [];
   final Map<int, Widget> _tabMap = {
@@ -83,14 +84,15 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
 
   void recordingListener() {
     if (widget.currentTrack.isRecording) {
-      if (widget.currentTrack.positions.length == 1) {
-        setState(() {
-          _slideState = 0;
-        });
-      }
       if (widget.currentTrack.positions.isNotEmpty) {
         _getDaylight();
         _loadTrackData();
+        if(!_started){
+          setState(() {
+            _slideState = 0;
+            _started = true;
+          });
+        }
       }
     } else {
       clearScreen();
@@ -106,7 +108,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
             widget.currentTrack.positions.last.latitude!,
             widget.currentTrack.positions.last.longitude!,
             DateTime.now().timeZoneOffset.inHours,
-            DateTime.now())
+            DateTime.now().toLocal())
         .sunset;
     setState(() {
       _sunsetTime = Calc().getSunsetTime(widget.currentTrack, _sunset!);
@@ -155,8 +157,6 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                 _totalDistanceDataCurrent = _totalDistanceDataCurrent + Geolocator.distanceBetween(widget.currentTrack.positions[(i-1)].latitude!, widget.currentTrack.positions[(i-1)].longitude!, widget.currentTrack.positions[i].latitude!, widget.currentTrack.positions[i].longitude!).toInt();
               }
             }
-            _altitudeDataCurrent.first.data.add(AltitudePoint(
-                _totalDistance, widget.currentTrack.positions.last.altitude!));
           } else if (data.last.totalDistance != _totalDistance) {
             _altitudeDataCurrent.first.data.add(AltitudePoint(
                 _totalDistance, widget.currentTrack.positions.last.altitude!));
@@ -244,6 +244,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
         _altitudeMin = 0;
         _altitudeGain = '-';
         _altitudeCurrent = '-';
+        _started = false;
         _avgPace = '00:00';
         //_sunsetTime = '--:--';
         _altitudeDataCurrent = [

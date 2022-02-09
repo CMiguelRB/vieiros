@@ -86,6 +86,7 @@ class SettingsState extends State<Settings> {
       children: [
         Expanded(
             child: Column(children: [
+              Container(alignment: Alignment.centerLeft, margin: const EdgeInsets.only(top: 40, left: 20), child: Text(I18n.translate('settings_title'), style: const TextStyle(fontSize: 25),)),
           Column(children: [
             Container(
                 margin: const EdgeInsets.only(left: 20, top: 40),
@@ -121,8 +122,9 @@ class SettingsState extends State<Settings> {
           ]),
           const Spacer(),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(shape: const StadiumBorder(), elevation: 0),
             onPressed: _donate,
-            child: Text(I18n.translate('settings_donate')),
+            child: Row( mainAxisSize: MainAxisSize.min, children:  [Container(margin: const EdgeInsets.only(right: 10) ,child: const Icon(Icons.euro)), Text(I18n.translate('settings_donate'))]),
           ),
           const Spacer()
         ])),

@@ -76,6 +76,10 @@ class Themes{
       bodyText1: TextStyle(fontSize: 14.0, fontFamily: 'Lato', color: Colors.black87),
     ),
     visualDensity: VisualDensity.adaptivePlatformDensity,
+    dialogTheme: const DialogTheme(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10.0))),
+      )
   );
 
 
@@ -112,5 +116,9 @@ class Themes{
       bodyText1: TextStyle(fontSize: 14.0, fontFamily: 'Lato', color: Colors.white),
     ),
     visualDensity: VisualDensity.adaptivePlatformDensity,
+      dialogTheme: const DialogTheme(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10.0))),
+      )
   );
 }

@@ -28,6 +28,7 @@ class VieirosSelect extends StatelessWidget {
         builder: (BuildContext context) {
           return AlertDialog(
               title: Text(I18n.translate('settings_dark_mode')),
+              contentPadding: const EdgeInsets.only(top: 10),
               actions: [
                 TextButton(
                   child: Text(
@@ -44,6 +45,7 @@ class VieirosSelect extends StatelessWidget {
                   child: ListBody(
                       children: items.map((element) {
                 return ListTile(
+                  contentPadding: const EdgeInsets.only(left: 20),
                     title: Text(I18n.translate(element['tag']!)),
                     leading: Radio(
                         value: element['value']!,
