@@ -45,6 +45,7 @@ class VieirosSelect extends StatelessWidget {
                   child: ListBody(
                       children: items.map((element) {
                 return ListTile(
+                  onTap: () => _onElementPressed(element),
                   contentPadding: const EdgeInsets.only(left: 20),
                     title: Text(I18n.translate(element['tag']!)),
                     leading: Radio(

@@ -68,9 +68,9 @@ class I18n {
       "settings_voice_alerts": "Voice alerts",
       "settings_voice_alerts_desc": "Turns on voice alerts for every kilometer",
       "settings_donate": "Donate",
-      "settings_dark_mode_item_system": "System",
-      "settings_dark_mode_item_light": "Light",
-      "settings_dark_mode_item_dark": "Dark"
+      "settings_dark_mode_item_system": "System default",
+      "settings_dark_mode_item_light": "Light theme",
+      "settings_dark_mode_item_dark": "Dark theme"
     },
     "es":{
       "common_ok": "Aceptar",
@@ -137,7 +137,7 @@ class I18n {
       "settings_alerts": "Alertas",
       "settings_voice_alerts_desc": "Activa alertas de voz por cada kilómetro",
       "settings_donate": "Donar",
-      "settings_dark_mode_item_system": "Sistema",
+      "settings_dark_mode_item_system": "Predeterminado del sistema",
       "settings_dark_mode_item_light": "Tema claro",
       "settings_dark_mode_item_dark": "Tema oscuro"
     },
@@ -207,7 +207,7 @@ class I18n {
       "settings_alerts": "Alertas",
       "settings_voice_alerts_desc": "Activa alertas de voz por cada quilómetro",
       "settings_donate": "Doar",
-      "settings_dark_mode_item_system": "Sistema",
+      "settings_dark_mode_item_system": "Predeterminado do sistema",
       "settings_dark_mode_item_light": "Tema claro",
       "settings_dark_mode_item_dark": "Tema escuro"
     }

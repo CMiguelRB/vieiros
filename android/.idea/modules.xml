@@ -14,7 +14,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/1841690981/android.path_provider_android.iml" filepath="$PROJECT_DIR$/.idea/modules/1841690981/android.path_provider_android.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/-650983995/android.permission_handler.iml" filepath="$PROJECT_DIR$/.idea/modules/-650983995/android.permission_handler.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/1095287583/android.shared_preferences_android.iml" filepath="$PROJECT_DIR$/.idea/modules/1095287583/android.shared_preferences_android.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-1250202547/android.url_launcher_android.iml" filepath="$PROJECT_DIR$/.idea/modules/-1250202547/android.url_launcher_android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/1237310286/io.flutter.plugins.urllauncher.android.url_launcher_android.iml" filepath="$PROJECT_DIR$/.idea/modules/1237310286/io.flutter.plugins.urllauncher.android.url_launcher_android.iml" />
     </modules>
   </component>
 </project>

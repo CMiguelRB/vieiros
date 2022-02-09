@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:vieiros/model/altitude_point.dart';
 import 'package:vieiros/utils/calc.dart';
 import 'package:xml/xml.dart';
@@ -22,10 +23,17 @@ class LoadedTrack {
       return this;
     }
 
-    final xmlFile = File(path);
-    final String gpxString = XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString();
-    this.gpxString = gpxString;
-    gpx = GpxReader().fromString(gpxString);
+    try{
+      final xmlFile = File(path);
+      final String gpxString = XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString();
+      this.gpxString = gpxString;
+      gpx = GpxReader().fromString(gpxString);
+    }on Exception catch (exception){
+      if (kDebugMode) {
+        print(exception);
+      }
+    }
+
 
     if(gpx != null) Calc().loadedTrackValues(this);
 
