@@ -45,13 +45,13 @@ class VieirosSelect extends StatelessWidget {
                   child: ListBody(
                       children: items.map((element) {
                 return ListTile(
-                    onTap: () => _onElementPressed(element),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 40),
+                  onTap: () => _onElementPressed(element),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 40),
                     title: Text(I18n.translate(element['tag']!)),
                     leading: Radio(
                         value: element['value']!,
                         groupValue: value,
-                        activeColor: CustomColors.accent,
+                        activeColor:  CustomColors.accent,
                         onChanged: (value) => _onElementPressed(element)));
               }).toList())));
         });
@@ -75,7 +75,7 @@ class VieirosSelect extends StatelessWidget {
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   Text(I18n.translate(titleTag),
-                      style: const TextStyle(fontSize: 15)),
+                      style: const TextStyle(fontSize: 16)),
                   Container(
                       margin: const EdgeInsets.only(top: 5),
                       child: Text(I18n.translate(valueTag),

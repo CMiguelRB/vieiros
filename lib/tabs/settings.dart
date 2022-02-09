@@ -92,8 +92,7 @@ class SettingsState extends State<Settings> {
                     style: const TextStyle(
                         fontSize: 14, color: CustomColors.accent))),
             Container(
-                padding: const EdgeInsets.all(10),
-                margin: const EdgeInsets.only(left: 10, top: 5),
+                margin: const EdgeInsets.only(left: 15, top: 5),
                 child: VieirosSelect(
                     lightMode: lightMode,
                     onChanged: (element) => _onChangeDarkMode(element, context),
@@ -105,7 +104,7 @@ class SettingsState extends State<Settings> {
           ]),
           Column(children: [
             Container(
-                margin: const EdgeInsets.only(left: 20, top: 40),
+                margin: const EdgeInsets.only(left: 20, top: 30),
                 alignment: Alignment.centerLeft,
                 child: Text(I18n.translate('settings_alerts'),
                     style: const TextStyle(
