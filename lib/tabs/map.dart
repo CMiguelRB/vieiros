@@ -92,7 +92,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     if (!isWayPoint) {
       if (description == I18n.translate('map_track_pin_start')) {
         icon = await BitmapDescriptor.fromAssetImage(
-            const ImageConfiguration(size: Size(100, 100)), 'assets/loaded_pin.png');
+            const ImageConfiguration(size: Size(100, 100)),
+            'assets/loaded_pin.png');
       } else {
         icon = await BitmapDescriptor.fromAssetImage(
             const ImageConfiguration(size: Size(100, 100)),
@@ -135,16 +136,21 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     if (mounted) {
       setState(() {
         _polyline.removeWhere(
-                (element) => element.polylineId.value == 'loadedTrack');
-        _markers.removeWhere((element) => element.markerId.value != 'recordingPin');
-        for (var element in _currentMarkers) {_markers.add(element);}
+            (element) => element.polylineId.value == 'loadedTrack');
+        _markers
+            .removeWhere((element) => element.markerId.value != 'recordingPin');
+        for (var element in _currentMarkers) {
+          _markers.add(element);
+        }
       });
     }
   }
 
   navigateCurrentTrack() async {
     final GoogleMapController controller = await _mapController.future;
-    if (widget.loadedTrack.gpx != null && _polyline.isNotEmpty && _polyline.first.points.isNotEmpty) {
+    if (widget.loadedTrack.gpx != null &&
+        _polyline.isNotEmpty &&
+        _polyline.first.points.isNotEmpty) {
       controller.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(target: _polyline.first.points.first, zoom: 14.0)));
     }
@@ -158,7 +164,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
       Gpx gpx = widget.loadedTrack.gpx!;
       for (var element in gpx.wpts) {
         if (element.lat == null || element.lon == null) return;
-        addMarkerSet(LatLng(element.lat!, element.lon!), true, element.name, controller);
+        addMarkerSet(
+            LatLng(element.lat!, element.lon!), true, element.name, controller);
       }
       Polyline polyline = Polyline(
           polylineId: const PolylineId('loadedTrack'),
@@ -188,12 +195,13 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     _location.enableBackgroundMode(enable: true);
     int _referenceDistance = 1000;
     BitmapDescriptor icon = await BitmapDescriptor.fromAssetImage(
-        const ImageConfiguration(size: Size(100, 100)), 'assets/current_pin.png');
+        const ImageConfiguration(size: Size(100, 100)),
+        'assets/current_pin.png');
     Marker? _marker;
     _location.onLocationChanged.listen((event) async {
       if (widget.currentTrack.isRecording) {
-        widget.currentTrack.addPosition(
-            RecordedPosition(event.latitude, event.longitude, event.altitude, event.time));
+        widget.currentTrack.addPosition(RecordedPosition(
+            event.latitude, event.longitude, event.altitude, event.time));
         Calc().setGain(widget.currentTrack);
         Calc().setTop(widget.currentTrack);
         Calc().setMin(widget.currentTrack);
@@ -212,7 +220,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
           VieirosTts().speakDistance(dist, widget.currentTrack.dateTime!);
           _referenceDistance += 1000;
         }
-        if (mounted){
+        if (mounted) {
           List<LatLng> points = widget.currentTrack.getPoints();
           setState(() {
             if (points.length == 1) {
@@ -223,8 +231,12 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                   color: CustomColors.ownPath);
               _polyline.add(_recordingPolyline);
               _markers.add(_marker!);
-            }else{
-              _polyline.singleWhere((element) => element.polylineId.value == 'recordingPolyline').points.add(points.last);
+            } else {
+              _polyline
+                  .singleWhere((element) =>
+                      element.polylineId.value == 'recordingPolyline')
+                  .points
+                  .add(points.last);
             }
           });
         }
@@ -351,12 +363,17 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     if (!_formKey.currentState!.validate()) return;
     _location.enableBackgroundMode(enable: false);
     widget.setPlayIcon();
-    Gpx gpx = GpxHandler().createGpx(widget.currentTrack, name, currentMarkers: _currentMarkers);
+    Gpx gpx = GpxHandler()
+        .createGpx(widget.currentTrack, name, currentMarkers: _currentMarkers);
     String gpxString = GpxWriter().asString(gpx, pretty: true);
     //add namespaces
-    gpxString = gpxString.replaceFirst(RegExp('creator="vieiros"'), 'creator="vieiros" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"');
-    String? result = await FilesHandler().writeFile(gpxString, name, widget.prefs, true);
-    if(result == '###file_exists') return VieirosNotification().showNotification(context, 'File exists', NotificationType.error);
+    gpxString = gpxString.replaceFirst(RegExp('creator="vieiros"'),
+        'creator="vieiros" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"');
+    String? result =
+        await FilesHandler().writeFile(gpxString, name, widget.prefs, true);
+    if (result == '###file_exists')
+      return VieirosNotification()
+          .showNotification(context, 'File exists', NotificationType.error);
     Navigator.pop(context, I18n.translate('common_ok'));
     if (mounted) {
       setState(() {
@@ -437,17 +454,16 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                   children: [
                     Container(
                         margin: const EdgeInsets.symmetric(vertical: 20),
-                        child: Text(
-                            I18n.translate('map_permissions_request'),
+                        child: Text(I18n.translate('map_permissions_request'),
                             style: TextStyle(
                                 color: lightMode
                                     ? CustomColors.subText
                                     : CustomColors.subTextDark))),
                     ElevatedButton(
-                        style: ElevatedButton.styleFrom(shape: const StadiumBorder(), elevation: 0),
+                        style: ElevatedButton.styleFrom(
+                            shape: const StadiumBorder(), elevation: 0),
                         onPressed: _refreshTab,
-                        child:
-                            Text(I18n.translate('map_grant_permissions')))
+                        child: Text(I18n.translate('map_grant_permissions')))
                   ],
                 ))
             : _showMap

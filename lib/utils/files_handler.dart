@@ -6,26 +6,26 @@ import 'package:vieiros/model/gpx_file.dart';
 import 'package:vieiros/utils/permission_handler.dart';
 
 class FilesHandler {
-
-  Future<String?> writeFile(String gpxString, String name, SharedPreferences prefs, bool downloads) async {
+  Future<String?> writeFile(String gpxString, String name,
+      SharedPreferences prefs, bool downloads) async {
     bool hasPermission = await PermissionHandler().handleWritePermission();
     if (hasPermission) {
       String directory;
-      if(downloads){
+      if (downloads) {
         directory = '/storage/emulated/0/Download';
-      }else{
+      } else {
         Directory d = await getApplicationDocumentsDirectory();
         directory = d.path;
       }
       String path = directory + '/' + name.replaceAll(' ', '_') + '.gpx';
-      if(!(await File(path).exists())){
+      if (!(await File(path).exists())) {
         await File(path).writeAsString(gpxString);
-      }else{
+      } else {
         return '###file_exists';
       }
       String? jsonString = prefs.getString('files');
       List<GpxFile> files = [];
-      if(jsonString != null){
+      if (jsonString != null) {
         files = (json.decode(jsonString) as List)
             .map((i) => GpxFile.fromJson(i))
             .toList();
@@ -41,7 +41,7 @@ class FilesHandler {
 
   static final FilesHandler _instance = FilesHandler._privateConstructor();
 
-  factory FilesHandler(){
+  factory FilesHandler() {
     return _instance;
   }
 }

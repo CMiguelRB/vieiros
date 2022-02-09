@@ -23,14 +23,12 @@ class Home extends StatefulWidget {
 
 class _Home extends State<Home>
     with TickerProviderStateMixin, WidgetsBindingObserver {
-
-  static const platform =
-  MethodChannel('com.rabocorp.vieiros/opened_file');
+  static const platform = MethodChannel('com.rabocorp.vieiros/opened_file');
 
   void getOpenedFile() async {
-      String? gpxStringFile = await platform.invokeMethod("getOpenedFile");
-      if(gpxStringFile == null) return;
-      _trackKey.currentState!.openFileFromIntent(gpxStringFile);
+    String? gpxStringFile = await platform.invokeMethod("getOpenedFile");
+    if (gpxStringFile == null) return;
+    _trackKey.currentState!.openFileFromIntent(gpxStringFile);
   }
 
   int _tabIndex = 0;
@@ -164,7 +162,7 @@ class _Home extends State<Home>
     }
   }
 
-  List<BottomNavigationBarItem> _bottomNavigationBarItems(){
+  List<BottomNavigationBarItem> _bottomNavigationBarItems() {
     return <BottomNavigationBarItem>[
       BottomNavigationBarItem(
         icon: const Icon(Icons.timeline),
@@ -186,7 +184,7 @@ class _Home extends State<Home>
   }
 
   Future<bool> _onWillPop(BuildContext context) async {
-    if(_currentTrack.isRecording){
+    if (_currentTrack.isRecording) {
       bool? exitResult = await VieirosDialog().infoDialog(
           context,
           'app_close_warning_title',
@@ -196,7 +194,7 @@ class _Home extends State<Home>
           },
           bodyTag: 'app_close_warning');
       return exitResult ?? false;
-    }else{
+    } else {
       return true;
     }
   }
@@ -205,31 +203,31 @@ class _Home extends State<Home>
   Widget build(BuildContext context) {
     return WillPopScope(
         onWillPop: () => _onWillPop(context),
-        child:
-      Scaffold(
-        body: TabBarView(
-            physics: const NeverScrollableScrollPhysics(),
-            controller: _tabController,
-            children: _tabs),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: _tabIndex <= 1
-            ? FloatingActionButton(
-                heroTag: null,
-                child: _fabIcon,
-                onPressed: () => _onFabPressed(_tabIndex),
-              )
-            : null,
-        bottomNavigationBar: BottomAppBar(
-            shape: const CircularNotchedRectangle(),
-            notchMargin: 4.0,
-            clipBehavior: Clip.antiAlias,
-            child: BottomNavigationBar(
-                type: BottomNavigationBarType.fixed,
-                items: _bottomNavigationBarItems(),
-                currentIndex: _tabIndex,
-                selectedFontSize: 12,
-                unselectedFontSize: 12,
-                showUnselectedLabels: true,
-                onTap: _onTabItemTapped))));
+        child: Scaffold(
+            body: TabBarView(
+                physics: const NeverScrollableScrollPhysics(),
+                controller: _tabController,
+                children: _tabs),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
+            floatingActionButton: _tabIndex <= 1
+                ? FloatingActionButton(
+                    heroTag: null,
+                    child: _fabIcon,
+                    onPressed: () => _onFabPressed(_tabIndex),
+                  )
+                : null,
+            bottomNavigationBar: BottomAppBar(
+                shape: const CircularNotchedRectangle(),
+                notchMargin: 4.0,
+                clipBehavior: Clip.antiAlias,
+                child: BottomNavigationBar(
+                    type: BottomNavigationBarType.fixed,
+                    items: _bottomNavigationBarItems(),
+                    currentIndex: _tabIndex,
+                    selectedFontSize: 12,
+                    unselectedFontSize: 12,
+                    showUnselectedLabels: true,
+                    onTap: _onTabItemTapped))));
   }
 }

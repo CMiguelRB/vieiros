@@ -87,7 +87,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
       if (widget.currentTrack.positions.isNotEmpty) {
         _getDaylight();
         _loadTrackData();
-        if(!_started){
+        if (!_started) {
           setState(() {
             _slideState = 0;
             _started = true;
@@ -150,11 +150,18 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           List<AltitudePoint> data = _altitudeDataCurrent.first.data;
           if (data.isEmpty) {
             int _totalDistanceDataCurrent = 0;
-            for(int i = 0; i < widget.currentTrack.positions.length; i++){
+            for (int i = 0; i < widget.currentTrack.positions.length; i++) {
               _altitudeDataCurrent.first.data.add(AltitudePoint(
-                  _totalDistanceDataCurrent, widget.currentTrack.positions[i].altitude!));
-              if(i > 0){
-                _totalDistanceDataCurrent = _totalDistanceDataCurrent + Geolocator.distanceBetween(widget.currentTrack.positions[(i-1)].latitude!, widget.currentTrack.positions[(i-1)].longitude!, widget.currentTrack.positions[i].latitude!, widget.currentTrack.positions[i].longitude!).toInt();
+                  _totalDistanceDataCurrent,
+                  widget.currentTrack.positions[i].altitude!));
+              if (i > 0) {
+                _totalDistanceDataCurrent = _totalDistanceDataCurrent +
+                    Geolocator.distanceBetween(
+                            widget.currentTrack.positions[(i - 1)].latitude!,
+                            widget.currentTrack.positions[(i - 1)].longitude!,
+                            widget.currentTrack.positions[i].latitude!,
+                            widget.currentTrack.positions[i].longitude!)
+                        .toInt();
               }
             }
           } else if (data.last.totalDistance != _totalDistance) {

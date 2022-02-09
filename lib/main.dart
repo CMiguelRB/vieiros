@@ -15,10 +15,10 @@ void main() async {
   loadStatusBarTheme(_prefs);
   String? path = _prefs.getString('currentTrack');
   String? theme = _prefs.getString('dark_mode');
-  if(theme == null) _prefs.setString('dark_mode', 'system');
+  if (theme == null) _prefs.setString('dark_mode', 'system');
   LoadedTrack loadedTrack;
-  try{
-     loadedTrack = await LoadedTrack().loadTrack(path);
+  try {
+    loadedTrack = await LoadedTrack().loadTrack(path);
   } on Exception {
     loadedTrack = LoadedTrack();
   }
@@ -28,7 +28,7 @@ void main() async {
 void loadStatusBarTheme(prefs) {
   String? value = prefs.getString('dark_mode');
   bool light;
-  switch(value){
+  switch (value) {
     case 'light':
       light = true;
       break;
@@ -36,7 +36,9 @@ void loadStatusBarTheme(prefs) {
       light = false;
       break;
     default:
-      SchedulerBinding.instance!.window.platformBrightness == Brightness.dark ? light = false : light = true;
+      SchedulerBinding.instance!.window.platformBrightness == Brightness.dark
+          ? light = false
+          : light = true;
   }
   if (light) {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -44,16 +46,14 @@ void loadStatusBarTheme(prefs) {
         systemNavigationBarIconBrightness: Brightness.dark,
         statusBarColor: CustomColors.background,
         statusBarBrightness: Brightness.light,
-        statusBarIconBrightness: Brightness.dark
-    ));
+        statusBarIconBrightness: Brightness.dark));
   } else {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
         systemNavigationBarColor: CustomColors.backgroundDark,
         systemNavigationBarIconBrightness: Brightness.light,
         statusBarColor: CustomColors.backgroundDark,
         statusBarBrightness: Brightness.dark,
-        statusBarIconBrightness: Brightness.light
-    ));
+        statusBarIconBrightness: Brightness.light));
   }
 }
 
@@ -61,7 +61,7 @@ class MyApp extends StatelessWidget {
   final SharedPreferences _prefs;
   final LoadedTrack _loadedTrack;
 
-  const MyApp(this._prefs, this._loadedTrack, {Key? key}):super(key: key);
+  const MyApp(this._prefs, this._loadedTrack, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => ChangeNotifierProvider(
@@ -71,7 +71,7 @@ class MyApp extends StatelessWidget {
         final currentMode = provider.isLightMode;
         final String? currentPrefs = _prefs.getString('dark_mode');
         final bool prefsMode;
-        switch(currentPrefs){
+        switch (currentPrefs) {
           case 'light':
             prefsMode = true;
             break;
@@ -79,9 +79,12 @@ class MyApp extends StatelessWidget {
             prefsMode = false;
             break;
           default:
-            SchedulerBinding.instance!.window.platformBrightness == Brightness.dark ? prefsMode = false : prefsMode = true;
+            SchedulerBinding.instance!.window.platformBrightness ==
+                    Brightness.dark
+                ? prefsMode = false
+                : prefsMode = true;
         }
-        if(currentMode != prefsMode){
+        if (currentMode != prefsMode) {
           provider.setThemeMode(currentPrefs);
         }
         return MaterialApp(

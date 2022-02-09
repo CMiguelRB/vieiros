@@ -18,49 +18,49 @@ class LoadedTrack {
   Future<LoadedTrack> loadTrack(path) async {
     this.path = path;
 
-    if (path == null || path.isEmpty){
+    if (path == null || path.isEmpty) {
       clear();
       return this;
     }
 
-    try{
+    try {
       final xmlFile = File(path);
-      final String gpxString = XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString();
+      final String gpxString =
+          XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString();
       this.gpxString = gpxString;
       gpx = GpxReader().fromString(gpxString);
-    }on Exception catch (exception){
+    } on Exception catch (exception) {
       if (kDebugMode) {
         print(exception);
       }
     }
 
-
-    if(gpx != null) Calc().loadedTrackValues(this);
+    if (gpx != null) Calc().loadedTrackValues(this);
 
     return this;
   }
 
-  void setDistance(int distance){
+  void setDistance(int distance) {
     this.distance = distance;
   }
 
-  void setTop(int top){
+  void setTop(int top) {
     altitudeTop = top;
   }
 
-  void setGain(int gainDiff){
+  void setGain(int gainDiff) {
     altitudeGain = gainDiff;
   }
 
-  void setAltitudePoint(int distance, double altitude){
+  void setAltitudePoint(int distance, double altitude) {
     altitudePoints.add(AltitudePoint(distance, altitude));
   }
 
-  void setMin(int min){
+  void setMin(int min) {
     altitudeMin = min;
   }
 
-  clear(){
+  clear() {
     path = null;
     gpxString = null;
     gpx = null;

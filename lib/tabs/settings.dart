@@ -22,26 +22,17 @@ class SettingsState extends State<Settings> {
   String? _themeSelectValue = 'system';
   String? _themeSelectTag = '';
   final List<Map<String, String>> _themes = [
-    {
-      "value": 'system',
-      "tag": 'settings_dark_mode_item_system'
-    },
-    {
-      "value": 'light',
-      "tag": 'settings_dark_mode_item_light'
-    },
-    {
-      "value": 'dark',
-      "tag": 'settings_dark_mode_item_dark'
-    }
+    {"value": 'system', "tag": 'settings_dark_mode_item_system'},
+    {"value": 'light', "tag": 'settings_dark_mode_item_light'},
+    {"value": 'dark', "tag": 'settings_dark_mode_item_dark'}
   ];
 
   @override
   void initState() {
     super.initState();
     _themeSelectValue = widget.prefs.getString('dark_mode');
-    for(int i = 0; i<_themes.length; i++){
-      if(_themes[i]['value'] == _themeSelectValue){
+    for (int i = 0; i < _themes.length; i++) {
+      if (_themes[i]['value'] == _themeSelectValue) {
         _themeSelectTag = _themes[i]['tag'];
       }
     }
@@ -86,33 +77,39 @@ class SettingsState extends State<Settings> {
       children: [
         Expanded(
             child: Column(children: [
-              Container(alignment: Alignment.centerLeft, margin: const EdgeInsets.only(top: 40, left: 20), child: Text(I18n.translate('settings_title'), style: const TextStyle(fontSize: 25),)),
+          Container(
+              alignment: Alignment.centerLeft,
+              margin: const EdgeInsets.only(top: 40, left: 20),
+              child: Text(
+                I18n.translate('settings_title'),
+                style: const TextStyle(fontSize: 25),
+              )),
           Column(children: [
             Container(
                 margin: const EdgeInsets.only(left: 20, top: 40),
                 alignment: Alignment.centerLeft,
                 child: Text(I18n.translate('settings_appearance'),
-                    style:
-                        const TextStyle(fontSize: 14, color: CustomColors.accent))),
+                    style: const TextStyle(
+                        fontSize: 14, color: CustomColors.accent))),
             Container(
                 padding: const EdgeInsets.all(10),
                 margin: const EdgeInsets.only(left: 10, top: 5),
-                child:
-                      VieirosSelect(lightMode: lightMode,
-                          onChanged: (element) => _onChangeDarkMode(element, context),
-                          titleTag: 'settings_dark_mode',
-                          valueTag: _themeSelectTag!,
-                          value: _themeSelectValue!,
-                          items: _themes, context: context)
-                    )
+                child: VieirosSelect(
+                    lightMode: lightMode,
+                    onChanged: (element) => _onChangeDarkMode(element, context),
+                    titleTag: 'settings_dark_mode',
+                    valueTag: _themeSelectTag!,
+                    value: _themeSelectValue!,
+                    items: _themes,
+                    context: context))
           ]),
           Column(children: [
             Container(
                 margin: const EdgeInsets.only(left: 20, top: 40),
                 alignment: Alignment.centerLeft,
                 child: Text(I18n.translate('settings_alerts'),
-                    style:
-                        const TextStyle(fontSize: 14, color: CustomColors.accent))),
+                    style: const TextStyle(
+                        fontSize: 14, color: CustomColors.accent))),
             VieirosSwitch(
                 lightMode: lightMode,
                 onChanged: _onChangeVoiceAlerts,
@@ -122,9 +119,15 @@ class SettingsState extends State<Settings> {
           ]),
           const Spacer(),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(shape: const StadiumBorder(), elevation: 0),
+            style: ElevatedButton.styleFrom(
+                shape: const StadiumBorder(), elevation: 0),
             onPressed: _donate,
-            child: Row( mainAxisSize: MainAxisSize.min, children:  [Container(margin: const EdgeInsets.only(right: 10) ,child: const Icon(Icons.euro)), Text(I18n.translate('settings_donate'))]),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Container(
+                  margin: const EdgeInsets.only(right: 10),
+                  child: const Icon(Icons.euro)),
+              Text(I18n.translate('settings_donate'))
+            ]),
           ),
           const Spacer()
         ])),
