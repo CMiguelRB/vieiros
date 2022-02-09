@@ -23,6 +23,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   google_maps_flutter: ^2.1.1
   geolocator: ^8.1.1
   file_picker: ^4.3.3
@@ -39,8 +41,6 @@ dependencies:
   provider: ^6.0.2
   flutter_tts: ^3.3.3
   url_launcher: ^6.0.18
-  flutter_localizations:
-    sdk: flutter
   device_info_plus: ^3.2.1
   flutter_native_splash: ^2.0.2
 

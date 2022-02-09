@@ -82,10 +82,10 @@ class Calc {
   }
 
   String getDaylight(DateTime sunset) {
-    int minutesToSunset = sunset.difference(DateTime.now()).inMinutes;
+    int minutesToSunset = sunset.toUtc().difference(DateTime.now().toUtc()).inMinutes;
     if(minutesToSunset <= 0) return '00:00';
     int toSunsetH = minutesToSunset~/60;
-    String toSunsetSH = (toSunsetH - 1).toString();
+    String toSunsetSH = toSunsetH.toString();
     toSunsetSH = toSunsetSH.length > 1 ? toSunsetSH : '0' + toSunsetSH;
     int toSunsetM = minutesToSunset - toSunsetH * 60;
     String toSunsetSM = toSunsetM.toString();
