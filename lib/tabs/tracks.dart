@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vieiros/components/vieiros_dialog.dart';
 import 'package:vieiros/components/vieiros_notification.dart';
+import 'package:vieiros/components/vieiros_text_input.dart';
 import 'package:vieiros/model/current_track.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:vieiros/resources/custom_colors.dart';
@@ -38,7 +39,9 @@ class Tracks extends StatefulWidget {
 
 class TracksState extends State<Tracks> {
   List<GpxFile> _files = [];
-  _loadPrefs() async {
+  final TextEditingController _controller = TextEditingController(text: '');
+
+  _loadPrefs(String value) async {
     String? jsonString = widget.prefs.getString('files');
     jsonString = jsonString ?? '[]';
     List<GpxFile> files = json
@@ -50,6 +53,11 @@ class TracksState extends State<Tracks> {
       bool exists = false;
       if (path != null) exists = await File(path).exists();
       if (!exists) {
+        files.removeAt(i);
+      }
+      if (value != '' &&
+          !files[i].name.toLowerCase()
+              .contains(value.toLowerCase())) {
         files.removeAt(i);
       }
     }
@@ -86,12 +94,13 @@ class TracksState extends State<Tracks> {
     }
   }
 
-  void openFileFromIntent(String gpxStringFile) async{
+  void openFileFromIntent(String gpxStringFile) async {
     Gpx gpx = GpxReader().fromString(gpxStringFile);
     String name = gpx.trks[0].name!;
-    String? path = await FilesHandler().writeFile(gpxStringFile, name, widget.prefs, false);
+    String? path = await FilesHandler()
+        .writeFile(gpxStringFile, name, widget.prefs, false);
     setState(() {
-      if(path != null) _files.add(GpxFile(name: name, path: path));
+      if (path != null) _files.add(GpxFile(name: name, path: path));
     });
   }
 
@@ -138,12 +147,21 @@ class TracksState extends State<Tracks> {
   @override
   void initState() {
     super.initState();
-    _loadPrefs();
+    _loadPrefs('');
   }
 
   @override
   void dispose() {
     super.dispose();
+  }
+
+  _onChanged(value) {
+    _loadPrefs(_controller.value.text);
+  }
+
+  _clearValue() {
+      _controller.clear();
+      _loadPrefs(_controller.value.text);
   }
 
   @override
@@ -152,6 +170,15 @@ class TracksState extends State<Tracks> {
     return SafeArea(
         child: Column(
       children: [
+        Container(
+            margin: const EdgeInsets.all(20),
+            child: VieirosTextInput(
+                hintText: 'Search tracks',
+                onChanged: _onChanged,
+                controller: _controller,
+                suffix: IconButton(
+                    icon: Icon(_controller.value.text == '' ? Icons.search : Icons.clear, color: CustomColors.subText),
+                    onPressed: _controller.value.text == '' ? null : _clearValue))),
         Expanded(
             child: _files.isEmpty
                 ? Container(

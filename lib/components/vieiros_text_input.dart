@@ -6,20 +6,27 @@ class VieirosTextInput extends StatelessWidget {
   final Function onChanged;
   final String hintText;
   final String? initialValue;
+  final Widget? suffix;
+  final TextEditingController? controller;
 
   const VieirosTextInput(
       {Key? key,
       required this.hintText,
       required this.onChanged,
-      this.initialValue})
+      this.initialValue,
+        this.suffix,
+        this.controller
+      })
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
         cursorColor: CustomColors.accent,
-        initialValue: initialValue ?? '',
+        initialValue: initialValue,
+        controller: controller,
         decoration: InputDecoration(
+            suffixIcon: suffix,
             filled: true,
             fillColor: CustomColors.subTextDark,
             hintText: I18n.translate(hintText),
