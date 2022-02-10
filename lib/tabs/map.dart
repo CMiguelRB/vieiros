@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -50,6 +52,9 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   final _formKey = GlobalKey<FormState>();
   final _formKeyWaypointAdd = GlobalKey<FormState>();
   final _formKeyWaypointEdit = GlobalKey<FormState>();
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  bool offTrack = false;
 
   getLocation() async {
     bool _hasPermissions = await PermissionHandler().handleLocationPermission();
@@ -65,6 +70,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
       _location.changeNotificationOptions(
           iconName: 'ic_stat_name',
           color: CustomColors.accent,
+          channelName: I18n.translate('map_channel_name_location'),
           onTapBringToFront: true,
           title: I18n.translate('map_notification_title'),
           description: I18n.translate('map_notification_desc'));
@@ -200,6 +206,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     Marker? _marker;
     _location.onLocationChanged.listen((event) async {
       if (widget.currentTrack.isRecording) {
+        _checkOffTrack(event);
         widget.currentTrack.addPosition(RecordedPosition(
             event.latitude, event.longitude, event.altitude, event.time));
         Calc().setGain(widget.currentTrack);
@@ -242,6 +249,28 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         }
       }
     });
+  }
+
+  _checkOffTrack(LocationData event) {
+    List<Wpt> trackPoints = widget.loadedTrack.gpx!.trks[0].trksegs[0].trkpts;
+    if (widget.loadedTrack.gpx != null &&
+        widget.currentTrack.positions.isNotEmpty) {
+      for (int i = 0; i < trackPoints.length; i++) {
+        double _distance = Geolocator.distanceBetween(
+            widget.currentTrack.positions.last.latitude!,
+            widget.currentTrack.positions.last.longitude!,
+            trackPoints[i].lat!,
+            trackPoints[i].lon!);
+        if (_distance < 30) {
+          offTrack = false;
+          return;
+        }
+      }
+      if (offTrack != true) {
+        offTrack = true;
+        _showNotification();
+      }
+    }
   }
 
   _currentMarkerDialog(LatLng latLng) {
@@ -373,6 +402,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
               element.markerId.value == _currentMarkers[i].markerId.value);
         }
         _currentMarkers = [];
+        offTrack = false;
         _markers
             .removeWhere((element) => element.markerId.value == 'recordingPin');
         _currentMarkers = [];
@@ -389,6 +419,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         _polyline.removeWhere(
             (element) => element.polylineId.value == 'recordingPolyline');
         widget.currentTrack.clear();
+        offTrack = false;
         for (var i = 0; i < _currentMarkers.length; i++) {
           _markers.removeWhere((element) =>
               element.markerId.value == _currentMarkers[i].markerId.value);
@@ -420,6 +451,38 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     super.initState();
     loadCurrentTrack();
     getLocation();
+    _initializeNotifications();
+  }
+
+  _initializeNotifications() async {
+    AndroidInitializationSettings initializationSettingsAndroid =
+        const AndroidInitializationSettings('ic_stat_name');
+    final InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: (payload) => {});
+  }
+
+  _showNotification() async {
+    setState(() {
+      offTrack = true;
+    });
+
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails('vieiros_notification_id', 'Vieiros',
+            channelDescription: 'Vieiros notifications',
+            importance: Importance.max,
+            priority: Priority.high,
+            color: CustomColors.accent,
+            ticker: 'ticker');
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+    await _flutterLocalNotificationsPlugin.show(
+        0,
+        I18n.translate('map_off_track_notification_title'),
+        I18n.translate('map_off_track_notification_desc'),
+        platformChannelSpecifics,
+        payload: 'off track');
   }
 
   @override
