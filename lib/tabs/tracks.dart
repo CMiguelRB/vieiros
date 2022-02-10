@@ -171,7 +171,7 @@ class TracksState extends State<Tracks> {
         child: Column(
       children: [
         Container(
-            margin: const EdgeInsets.all(20),
+            margin: const EdgeInsets.all(12),
             child: VieirosTextInput(
                 hintText: 'Search tracks',
                 onChanged: _onChanged,

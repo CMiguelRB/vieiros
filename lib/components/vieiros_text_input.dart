@@ -22,6 +22,7 @@ class VieirosTextInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+        autofocus: false,
         cursorColor: CustomColors.accent,
         initialValue: initialValue,
         controller: controller,
