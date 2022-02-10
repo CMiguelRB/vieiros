@@ -330,26 +330,13 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   }
 
   stopRecording() {
-    VieirosDialog().infoDialog(
-        context,
-        'map_finish_tracking',
-        {
-          'common_cancel': () => Navigator.pop(context, ''),
-          'common_discard': () => _stopAndDiscard(),
-          'common_save': () => _insertName()
-        },
-        bodyTag: 'map_stop_save');
-  }
-
-  _insertName() {
-    Navigator.pop(context, 'Stop and save');
     String name = '';
     VieirosDialog().inputDialog(
         context,
         'map_track_name',
         {
-          'common_cancel': () => Navigator.pop(context, ''),
-          'common_ok': () => _stopAndSave(name),
+          'common_discard': () => _stopAndDiscard(),
+          'common_save': () => _stopAndSave(name),
         },
         form: Form(
             key: _formKey,
@@ -371,9 +358,10 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         'creator="vieiros" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"');
     String? result =
         await FilesHandler().writeFile(gpxString, name, widget.prefs, true);
-    if (result == '###file_exists')
+    if (result == '###file_exists') {
       return VieirosNotification()
           .showNotification(context, 'File exists', NotificationType.error);
+    }
     Navigator.pop(context, I18n.translate('common_ok'));
     if (mounted) {
       setState(() {
