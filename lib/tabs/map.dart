@@ -251,8 +251,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         context,
         'map_waypoint',
         {
+          'common_save': () => _addCurrentMarker(latLng, name, false, null),
           'common_cancel': () => Navigator.pop(context, 'map_waypoint'),
-          'common_ok': () => _addCurrentMarker(latLng, name, false, null)
         },
         form: Form(
             key: _formKeyWaypointAdd,

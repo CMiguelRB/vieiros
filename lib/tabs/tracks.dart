@@ -173,7 +173,7 @@ class TracksState extends State<Tracks> {
         Container(
             margin: const EdgeInsets.all(12),
             child: VieirosTextInput(
-                hintText: 'Search tracks',
+                hintText: I18n.translate('tracks_search_hint'),
                 onChanged: _onChanged,
                 controller: _controller,
                 suffix: IconButton(

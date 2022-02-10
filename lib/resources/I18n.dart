@@ -22,6 +22,7 @@ class I18n {
       "app_close_warning_title": "Warning",
       "app_close_warning": "Do you really want to close the app?",
 
+      "tracks_search_hint": "Search tracks",
       "tracks_background_tip": "Press + to load a gpx track file",
       "tracks_file_validation_error": "Not a valid gpx file",
       "tracks_unloaded": "Track cleared from the map",
@@ -91,6 +92,7 @@ class I18n {
       "app_close_warning_title": "Aviso",
       "app_close_warning": "¿Quieres cerrar la apliación?",
 
+      "tracks_search_hint": "Buscar rutas",
       "tracks_background_tip": "Presiona + para cargar archivo de ruta gpx",
       "tracks_file_validation_error": "Archivo gpx no válido",
       "tracks_unloaded": "Ruta limpiada del mapa",
@@ -161,6 +163,7 @@ class I18n {
       "app_close_warning_title": "Aviso",
       "app_close_warning": "¿Queres pechar a apliación?",
 
+      "tracks_search_hint": "Buscar rutas",
       "tracks_background_tip": "Presiona + para cargares un arquivo de ruta gpx",
       "tracks_file_validation_error": "Arquivo gpx non válido.",
       "tracks_unloaded": "Ruta limpada do mapa",

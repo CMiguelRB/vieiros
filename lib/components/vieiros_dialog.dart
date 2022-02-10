@@ -68,16 +68,21 @@ class VieirosDialog {
               insetPadding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
                 padding: const EdgeInsets.only(
-                    left: 20, top: 20, right: 20, bottom: 2),
+                    left: 20, top: 10, right: 20, bottom: 2),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                        alignment: Alignment.topLeft,
-                        child: IconButton(
+                        alignment: Alignment.topCenter,
+                        padding: EdgeInsets.zero,
+                        margin: EdgeInsets.zero,
+                        child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [Text(I18n.translate(titleTag), style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),IconButton(
+                            padding: EdgeInsets.zero,
+                            alignment: Alignment.centerRight,
                             onPressed: () => Navigator.pop(context, ''),
-                            icon: const Icon(Icons.close))),
+                            icon: const Icon(Icons.close))])),
                     Container(
                       padding: const EdgeInsets.symmetric(vertical: 40),
                       alignment: Alignment.center,
