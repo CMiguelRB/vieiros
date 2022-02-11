@@ -40,10 +40,10 @@ dependencies:
   sunrise_sunset_calc: ^2.2.0
   provider: ^6.0.2
   flutter_tts: ^3.3.3
-  url_launcher: ^6.0.19
+  url_launcher: ^6.0.20
   device_info_plus: ^3.2.1
   flutter_native_splash: ^2.0.2
-  flutter_local_notifications: ^9.2.0
+  flutter_local_notifications: ^9.3.0
 
 dev_dependencies:
   flutter_test:
