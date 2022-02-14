@@ -1,10 +1,12 @@
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vieiros/components/vieiros_dialog.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:flutter/material.dart';
 import 'package:vieiros/model/current_track.dart';
 import 'package:vieiros/resources/i18n.dart';
+import 'package:vieiros/resources/themes.dart';
 import 'package:vieiros/tabs/info.dart';
 import 'package:vieiros/tabs/settings.dart';
 import '../tabs/map.dart';
@@ -48,6 +50,7 @@ class _Home extends State<Home>
       if (_mapKey.currentState != null) {
         String? path = widget.prefs.getString('currentTrack');
         if (path != null && widget.loadedTrack.path != path) {
+          widget.loadedTrack.clear();
           _mapKey.currentState!.loadTrack(path);
           if (_infoKey.currentState != null) {
             _infoKey.currentState!.clearScreen();
@@ -144,7 +147,7 @@ class _Home extends State<Home>
     super.dispose();
   }
 
-  _onFabPressed(index) {
+  _onFabPressed(index, lightMode) {
     if (index == 0 && _trackKey.currentState != null) {
       _trackKey.currentState!.openFile();
     }
@@ -157,7 +160,7 @@ class _Home extends State<Home>
           });
         }
       } else {
-        _mapKey.currentState!.stopRecording();
+        _mapKey.currentState!.stopRecording(lightMode);
       }
     }
   }
@@ -201,6 +204,7 @@ class _Home extends State<Home>
 
   @override
   Widget build(BuildContext context) {
+    bool lightMode = Provider.of<ThemeProvider>(context).isLightMode;
     return WillPopScope(
         onWillPop: () => _onWillPop(context),
         child: Scaffold(
@@ -214,7 +218,7 @@ class _Home extends State<Home>
                 ? FloatingActionButton(
                     heroTag: null,
                     child: _fabIcon,
-                    onPressed: () => _onFabPressed(_tabIndex),
+                    onPressed: () => _onFabPressed(_tabIndex, lightMode),
                   )
                 : null,
             bottomNavigationBar: BottomAppBar(

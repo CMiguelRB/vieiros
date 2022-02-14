@@ -8,16 +8,17 @@ class VieirosTextInput extends StatelessWidget {
   final String? initialValue;
   final Widget? suffix;
   final TextEditingController? controller;
+  final bool lightMode;
 
-  const VieirosTextInput(
-      {Key? key,
-      required this.hintText,
-      required this.onChanged,
-      this.initialValue,
-        this.suffix,
-        this.controller
-      })
-      : super(key: key);
+  const VieirosTextInput({
+    Key? key,
+    required this.hintText,
+    required this.onChanged,
+    required this.lightMode,
+    this.initialValue,
+    this.suffix,
+    this.controller,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,7 @@ class VieirosTextInput extends StatelessWidget {
         decoration: InputDecoration(
             suffixIcon: suffix,
             filled: true,
-            fillColor: CustomColors.subTextDark,
+            fillColor: lightMode ? CustomColors.subTextDark : CustomColors.subText,
             hintText: I18n.translate(hintText),
             contentPadding:
                 const EdgeInsets.symmetric(vertical: 0, horizontal: 10),

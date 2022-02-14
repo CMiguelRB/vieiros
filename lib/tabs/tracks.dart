@@ -173,11 +173,12 @@ class TracksState extends State<Tracks> {
         Container(
             margin: const EdgeInsets.all(12),
             child: VieirosTextInput(
+                lightMode: lightMode,
                 hintText: I18n.translate('tracks_search_hint'),
                 onChanged: _onChanged,
                 controller: _controller,
                 suffix: IconButton(
-                    icon: Icon(_controller.value.text == '' ? Icons.search : Icons.clear, color: CustomColors.subText),
+                    icon: Icon(_controller.value.text == '' ? Icons.search : Icons.clear, color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
                     onPressed: _controller.value.text == '' ? null : _clearValue))),
         Expanded(
             child: _files.isEmpty
@@ -211,7 +212,7 @@ class TracksState extends State<Tracks> {
                                           ? IconButton(
                                               onPressed: () =>
                                                   _unloadTrack(index),
-                                              icon: const Icon(Icons.clear))
+                                              icon: const Icon(Icons.map))
                                           : const Text(''),
                                       Flexible(
                                           fit: FlexFit.tight,

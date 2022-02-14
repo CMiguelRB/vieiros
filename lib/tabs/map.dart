@@ -273,26 +273,27 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  _currentMarkerDialog(LatLng latLng) {
+  _currentMarkerDialog(LatLng latLng, bool lightMode) {
     if (!widget.currentTrack.isRecording) return;
     String name = '';
     VieirosDialog().inputDialog(
         context,
         'map_waypoint',
         {
-          'common_save': () => _addCurrentMarker(latLng, name, false, null),
+          'common_save': () => _addCurrentMarker(latLng, name, false, lightMode, null),
           'common_cancel': () => Navigator.pop(context, 'map_waypoint'),
         },
         form: Form(
             key: _formKeyWaypointAdd,
             child: VieirosTextInput(
+              lightMode: lightMode,
               hintText: 'common_name',
               onChanged: (value) => {name = value},
             )));
   }
 
   _addCurrentMarker(
-      LatLng latLng, String name, bool edit, MarkerId? markerId) async {
+      LatLng latLng, String name, bool edit,bool lightMode, MarkerId? markerId) async {
     if (edit) {
       if (!_formKeyWaypointEdit.currentState!.validate()) return;
       Navigator.pop(context, I18n.translate('common_edit'));
@@ -314,7 +315,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         position: latLng,
         icon: icon,
         infoWindow: InfoWindow(title: name),
-        onTap: () => _editMarkerDialog(mrkId, latLng, name));
+        onTap: () => _editMarkerDialog(mrkId, latLng, name, lightMode));
     if (mounted) {
       setState(() {
         if (edit) {
@@ -329,18 +330,19 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  _editMarkerDialog(MarkerId markerId, LatLng latLng, String name) {
+  _editMarkerDialog(MarkerId markerId, LatLng latLng, String name, bool lightMode) {
     VieirosDialog().inputDialog(
         context,
         'map_waypoint',
         {
           'common_cancel': () => Navigator.pop(context, 'map_waypoint'),
           'common_delete': () => _removeMarker(markerId),
-          'common_edit': () => _addCurrentMarker(latLng, name, true, markerId)
+          'common_edit': () => _addCurrentMarker(latLng, name, true, lightMode, markerId)
         },
         form: Form(
             key: _formKeyWaypointEdit,
             child: VieirosTextInput(
+                lightMode: lightMode,
                 hintText: 'common_name',
                 initialValue: name,
                 onChanged: (value) => {name = value})));
@@ -358,7 +360,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  stopRecording() {
+  stopRecording(bool lightMode) {
     String name = '';
     VieirosDialog().inputDialog(
         context,
@@ -370,6 +372,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         form: Form(
             key: _formKey,
             child: VieirosTextInput(
+              lightMode: lightMode,
               hintText: 'common_name',
               onChanged: (value) => {name = value},
             )));
@@ -535,7 +538,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                     compassEnabled: true,
                     polylines: _polyline,
                     markers: _markers,
-                    onLongPress: _currentMarkerDialog,
+                    onLongPress: (latLng) => _currentMarkerDialog(latLng, lightMode),
                     onMapCreated: (GoogleMapController controller) {
                       if (!_mapController.isCompleted) {
                         _mapController.complete(controller);
