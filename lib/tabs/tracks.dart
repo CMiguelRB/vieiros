@@ -200,7 +200,7 @@ class TracksState extends State<Tracks> {
                       return InkWell(
                         child: Card(
                             elevation: 0,
-                            color: Colors.black12,
+                            color: _loadedElement ? (lightMode ? CustomColors.trackBackgroundLight : CustomColors.trackBackgroundDark ) : Colors.black12,
                             child: Padding(
                                 padding: EdgeInsets.only(
                                     left: _loadedElement ? 0 : 16, right: 8),
@@ -212,7 +212,7 @@ class TracksState extends State<Tracks> {
                                           ? IconButton(
                                               onPressed: () =>
                                                   _unloadTrack(index),
-                                              icon: const Icon(Icons.map))
+                                              icon: const Icon(Icons.landscape))
                                           : const Text(''),
                                       Flexible(
                                           fit: FlexFit.tight,

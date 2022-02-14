@@ -11,4 +11,6 @@ class CustomColors {
   static const backgroundDark = Color(0xff303030);
   static const error = Color(0xffd94d3a);
   static const dimming = Color(0x52000000);
+  static const trackBackgroundLight = Color(0xFFE2E3D5);
+  static const trackBackgroundDark = Color(0xFF4E4E3D);
 }
