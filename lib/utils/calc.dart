@@ -76,7 +76,7 @@ class Calc {
     double? lat = currentTrack.positions.last.latitude;
     double? lon = currentTrack.positions.last.longitude;
     if (lat != null && lon != null) {
-      return sunset.hour.toString() + ':' + sunset.minute.toString();
+      return sunset.hour.toString() + ':' + (sunset.minute.toString().length > 1 ? sunset.minute.toString() : "0"+sunset.minute.toString());
     }
     return '--:--';
   }
