@@ -25,7 +25,7 @@
        android:fullBackupContent="true">
        <meta-data
            android:name="com.google.android.geo.API_KEY"
-           android:value="AIzaSyCSMyVy-JynwySDyG-65Zoo8DqzEMQK6Sk" />
+           android:value="AIzaSyAQfUhmiVuHzLgBnevwZE0EiCsJTVZ4OV0" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
