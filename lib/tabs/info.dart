@@ -59,6 +59,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   bool _started = false;
   List<charts.Series<AltitudePoint, num>> _altitudeDataLoaded = [];
   List<charts.Series<AltitudePoint, num>> _altitudeDataCurrent = [];
+
   final Map<int, Widget> _tabMap = {
     0: Text(I18n.translate('info_current_track')),
     1: Text(I18n.translate('info_loaded_track'))
@@ -75,6 +76,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
     clearScreen();
     _loadTrackData();
     widget.currentTrack.eventListener.listen((_) => recordingListener());
+    widget.loadedTrack.eventListener.listen((_) => loadedClearListener());
   }
 
   @override
@@ -101,6 +103,12 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
         _slideState = 1;
       });
     }
+  }
+
+  void loadedClearListener(){
+    setState(() {
+      _slideState = 0;
+    });
   }
 
   _getDaylight() {
@@ -171,7 +179,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           _loadingAltitudeChart = false;
         });
       }
-    } else {
+    }else{
       if (widget.loadedTrack.gpx == null) return clearScreen();
       List<AltitudePoint> _altitudePoints = widget.loadedTrack.altitudePoints;
       Gpx _gpx = widget.loadedTrack.gpx as Gpx;

@@ -299,3 +299,4 @@ hs_err_pid*
 ### AndroidStudio Patch ###
 
 !/gradle/wrapper/gradle-wrapper.jar
+lib/firebase_options.dart

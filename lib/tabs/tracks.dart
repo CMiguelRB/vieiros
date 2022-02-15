@@ -104,7 +104,7 @@ class TracksState extends State<Tracks> {
     });
   }
 
-  _unloadTrack(index) async {
+  _unloadTrack(int index, bool showNotification) async {
     setState(() {
       GpxFile file = _files[index];
       String? current = widget.prefs.getString('currentTrack');
@@ -113,9 +113,11 @@ class TracksState extends State<Tracks> {
         widget.clearTrack();
         widget.loadedTrack.clear();
       }
+    });
+    if(showNotification){
       VieirosNotification()
           .showNotification(context, 'tracks_unloaded', NotificationType.info);
-    });
+    }
   }
 
   _removeFile(context, index) async {
@@ -138,6 +140,7 @@ class TracksState extends State<Tracks> {
   }
 
   _navigate(index) async {
+    _unloadTrack(index, false);
     String? path = _files[index].path;
     if (path == null) return;
     widget.prefs.setString('currentTrack', path);
@@ -211,7 +214,7 @@ class TracksState extends State<Tracks> {
                                       _loadedElement
                                           ? IconButton(
                                               onPressed: () =>
-                                                  _unloadTrack(index),
+                                                  _unloadTrack(index, true),
                                               icon: const Icon(Icons.landscape))
                                           : const Text(''),
                                       Flexible(
