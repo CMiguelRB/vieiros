@@ -208,6 +208,7 @@ class _Home extends State<Home>
     return WillPopScope(
         onWillPop: () => _onWillPop(context),
         child: Scaffold(
+          resizeToAvoidBottomInset: false,
             body: TabBarView(
                 physics: const NeverScrollableScrollPhysics(),
                 controller: _tabController,
