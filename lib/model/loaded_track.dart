@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:vieiros/model/altitude_point.dart';
@@ -14,6 +15,7 @@ class LoadedTrack {
   int altitudeMin = 8849;
   int altitudeGain = 0;
   List<AltitudePoint> altitudePoints = [];
+  final StreamController event = StreamController.broadcast();
 
   Future<LoadedTrack> loadTrack(path) async {
     this.path = path;
@@ -69,7 +71,10 @@ class LoadedTrack {
     altitudeGain = 0;
     altitudeMin = 8849;
     altitudePoints = [];
+    event.add('loaded cleared');
   }
+
+  Stream get eventListener => event.stream;
 
   LoadedTrack();
 }

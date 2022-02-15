@@ -50,7 +50,6 @@ class _Home extends State<Home>
       if (_mapKey.currentState != null) {
         String? path = widget.prefs.getString('currentTrack');
         if (path != null && widget.loadedTrack.path != path) {
-          widget.loadedTrack.clear();
           _mapKey.currentState!.loadTrack(path);
           if (_infoKey.currentState != null) {
             _infoKey.currentState!.clearScreen();

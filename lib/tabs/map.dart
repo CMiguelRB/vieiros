@@ -252,23 +252,25 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   }
 
   _checkOffTrack(LocationData event) {
-    List<Wpt> trackPoints = widget.loadedTrack.gpx!.trks[0].trksegs[0].trkpts;
-    if (widget.loadedTrack.gpx != null &&
-        widget.currentTrack.positions.isNotEmpty) {
-      for (int i = 0; i < trackPoints.length; i++) {
-        double _distance = Geolocator.distanceBetween(
-            widget.currentTrack.positions.last.latitude!,
-            widget.currentTrack.positions.last.longitude!,
-            trackPoints[i].lat!,
-            trackPoints[i].lon!);
-        if (_distance < 30) {
-          offTrack = false;
-          return;
+    if(widget.loadedTrack.gpx != null){
+      List<Wpt> trackPoints = widget.loadedTrack.gpx!.trks[0].trksegs[0].trkpts;
+      if (widget.loadedTrack.gpx != null &&
+          widget.currentTrack.positions.isNotEmpty) {
+        for (int i = 0; i < trackPoints.length; i++) {
+          double _distance = Geolocator.distanceBetween(
+              widget.currentTrack.positions.last.latitude!,
+              widget.currentTrack.positions.last.longitude!,
+              trackPoints[i].lat!,
+              trackPoints[i].lon!);
+          if (_distance < 30) {
+            offTrack = false;
+            return;
+          }
         }
-      }
-      if (offTrack != true) {
-        offTrack = true;
-        _showNotification();
+        if (offTrack != true) {
+          offTrack = true;
+          _showNotification();
+        }
       }
     }
   }
