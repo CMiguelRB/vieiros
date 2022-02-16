@@ -9,13 +9,12 @@ class VieirosNotification {
     Color backgroundColor = type == NotificationType.info ? CustomColors.ownPath : CustomColors.error;
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(I18n.translate(tag)),
+      content: Text(I18n.translate(tag), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
+      margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
       backgroundColor: backgroundColor,
       duration: const Duration(milliseconds: 1500),
       behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(4.0),
-      ),
+      shape: const StadiumBorder()
     ));
   }
 
