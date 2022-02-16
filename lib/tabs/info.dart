@@ -76,7 +76,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
     clearScreen();
     _loadTrackData();
     widget.currentTrack.eventListener.listen((_) => recordingListener());
-    widget.loadedTrack.eventListener.listen((_) => loadedClearListener());
+    widget.loadedTrack.eventListener.listen((_) => clearLoadedListener());
   }
 
   @override
@@ -105,10 +105,13 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  void loadedClearListener(){
+  void clearLoadedListener(){
     setState(() {
       _slideState = 0;
     });
+    if(!widget.currentTrack.isRecording){
+      clearScreen();
+    }
   }
 
   _getDaylight() {
