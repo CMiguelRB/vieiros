@@ -1,0 +1,53 @@
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:name="vieiros"
+            android:width="50dp"
+            android:height="52dp"
+            android:viewportWidth="50"
+            android:viewportHeight="52">
+            <group
+                android:pivotX="25"
+                android:pivotY="25"
+                android:scaleX=".4"
+                android:scaleY=".405">
+                <path
+                    android:name="blue_stroke"
+                    android:pathData="M 0 6 C 12.5 6 18.75 17.153 25 28.307"
+                    android:strokeColor="#2280c2"
+                    android:strokeWidth="10"
+                    android:strokeMiterLimit="10"/>
+                <path
+                    android:name="green_stroke"
+                    android:pathData="M 0 50.613 C 12.5 50.613 18.75 39.46 25 28.306 C 31.25 17.152 37.5 6 50 6"
+                    android:strokeColor="#afb42b"
+                    android:strokeWidth="10"
+                    android:strokeMiterLimit="10"/>
+            </group>
+        </vector>
+    </aapt:attr>
+    <target android:name="blue_stroke">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="trimPathEnd"
+                android:duration="500"
+                android:valueFrom="0"
+                android:valueTo="1"
+                android:valueType="floatType"
+                android:interpolator="@android:anim/accelerate_interpolator"/>
+        </aapt:attr>
+    </target>
+    <target android:name="green_stroke">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="trimPathEnd"
+                android:duration="500"
+                android:valueFrom="0"
+                android:valueTo="1"
+                android:valueType="floatType"
+                android:interpolator="@android:anim/decelerate_interpolator"/>
+        </aapt:attr>
+    </target>
+</animated-vector>

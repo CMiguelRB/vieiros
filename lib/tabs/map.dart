@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -69,12 +69,12 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
       });
       _location.changeNotificationOptions(
           iconName: 'ic_stat_name',
-          color: CustomColors.accent,
+          color: CustomColors.faintedFaintedAccent,
           channelName: I18n.translate('map_channel_name_location'),
           onTapBringToFront: true,
           title: I18n.translate('map_notification_title'),
           description: I18n.translate('map_notification_desc'));
-      _location.changeSettings(interval: 5000, distanceFilter: 10);
+      _location.changeSettings(interval: 2000, distanceFilter: 5, accuracy: LocationAccuracy.high);
       LocationData _locationData;
       final GoogleMapController controller = await _mapController.future;
 
@@ -208,7 +208,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
       if (widget.currentTrack.isRecording) {
         _checkOffTrack(event);
         widget.currentTrack.addPosition(RecordedPosition(
-            event.latitude, event.longitude, event.altitude, event.time));
+            event.latitude, event.longitude, event.altitude, event.time!.toInt()));
         Calc().setGain(widget.currentTrack);
         Calc().setTop(widget.currentTrack);
         Calc().setMin(widget.currentTrack);
@@ -257,7 +257,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
       if (widget.loadedTrack.gpx != null &&
           widget.currentTrack.positions.isNotEmpty) {
         for (int i = 0; i < trackPoints.length; i++) {
-          double _distance = Geolocator.distanceBetween(
+          double _distance = geolocator.Geolocator.distanceBetween(
               widget.currentTrack.positions.last.latitude!,
               widget.currentTrack.positions.last.longitude!,
               trackPoints[i].lat!,

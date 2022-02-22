@@ -27,10 +27,10 @@ class VieirosSelect extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
+            elevation: 2,
               title: Text(I18n.translate('settings_dark_mode')),
-              contentPadding: const EdgeInsets.only(top: 10),
               actions: [
-                TextButton(
+                Container(margin: const EdgeInsets.only(right: 24, bottom: 10), child: TextButton(
                   child: Text(
                     I18n.translate('common_cancel'),
                     style: const TextStyle(
@@ -39,14 +39,13 @@ class VieirosSelect extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                ),
+                )),
               ],
               content: SingleChildScrollView(
                   child: ListBody(
                       children: items.map((element) {
                 return ListTile(
                   onTap: () => _onElementPressed(element),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 40),
                     title: Text(I18n.translate(element['tag']!)),
                     leading: Radio(
                         value: element['value']!,

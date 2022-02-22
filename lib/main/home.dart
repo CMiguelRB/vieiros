@@ -5,12 +5,16 @@ import 'package:vieiros/components/vieiros_dialog.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:flutter/material.dart';
 import 'package:vieiros/model/current_track.dart';
+import 'package:vieiros/resources/custom_colors.dart';
 import 'package:vieiros/resources/i18n.dart';
 import 'package:vieiros/resources/themes.dart';
 import 'package:vieiros/tabs/info.dart';
 import 'package:vieiros/tabs/settings.dart';
-import '../tabs/map.dart';
+import 'package:vieiros/tabs/map.dart';
 import 'package:vieiros/tabs/tracks.dart';
+
+//import 'package:google_sign_in/google_sign_in.dart';
+//import 'package:googleapis/drive/v3.dart';
 
 class Home extends StatefulWidget {
   final SharedPreferences prefs;
@@ -148,6 +152,10 @@ class _Home extends State<Home>
 
   _onFabPressed(index, lightMode) {
     if (index == 0 && _trackKey.currentState != null) {
+      /*GoogleSignIn _googleSignIn = GoogleSignIn(
+        scopes: [DriveApi.driveFileScope],
+      );
+      await _googleSignIn.signIn();*/
       _trackKey.currentState!.openFile();
     }
     if (index == 1 && _mapKey.currentState != null) {
@@ -164,22 +172,82 @@ class _Home extends State<Home>
     }
   }
 
-  List<BottomNavigationBarItem> _bottomNavigationBarItems() {
+  List<BottomNavigationBarItem> _bottomNavigationBarItems(bool lightMode) {
     return <BottomNavigationBarItem>[
       BottomNavigationBarItem(
-        icon: const Icon(Icons.timeline),
+        activeIcon: Container(
+            child: const Icon(Icons.timeline),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+            decoration: const BoxDecoration(
+                color: CustomColors.faintedAccent,
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.all(Radius.circular(20)))),
+        icon: Container(
+            child: const Icon(Icons.timeline_outlined),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+            decoration: BoxDecoration(
+                color: lightMode
+                    ? CustomColors.background
+                    : CustomColors.backgroundDark,
+                shape: BoxShape.rectangle,
+                borderRadius: const BorderRadius.all(Radius.circular(20)))),
         label: I18n.translate('appbar_tab_tracks'),
       ),
       BottomNavigationBarItem(
-        icon: const Icon(Icons.terrain),
+        activeIcon: Container(
+            child: const Icon(Icons.terrain),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+            decoration: const BoxDecoration(
+                color: CustomColors.faintedAccent,
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.all(Radius.circular(20)))),
+        icon: Container(
+            child: const Icon(Icons.terrain_outlined),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+            decoration: BoxDecoration(
+                color: lightMode
+                    ? CustomColors.background
+                    : CustomColors.backgroundDark,
+                shape: BoxShape.rectangle,
+                borderRadius: const BorderRadius.all(Radius.circular(20)))),
         label: I18n.translate('appbar_tab_map'),
       ),
       BottomNavigationBarItem(
-        icon: const Icon(Icons.insert_chart_rounded),
+        activeIcon: Container(
+            child: const Icon(Icons.insert_chart),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+            decoration: const BoxDecoration(
+                color: CustomColors.faintedAccent,
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.all(Radius.circular(20)))),
+        icon: Container(
+            child: const Icon(Icons.insert_chart_outlined),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+            decoration: BoxDecoration(
+                color: lightMode
+                    ? CustomColors.background
+                    : CustomColors.backgroundDark,
+                shape: BoxShape.rectangle,
+                borderRadius: const BorderRadius.all(Radius.circular(20)))),
         label: I18n.translate('appbar_tab_info'),
       ),
       BottomNavigationBarItem(
-        icon: const Icon(Icons.settings),
+        activeIcon: Container(
+            child: const Icon(Icons.settings),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+            decoration: const BoxDecoration(
+                color: CustomColors.faintedAccent,
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.all(Radius.circular(20)))),
+        icon: Container(
+            child: const Icon(Icons.settings_outlined),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+            decoration: BoxDecoration(
+                color: lightMode
+                    ? CustomColors.background
+                    : CustomColors.backgroundDark,
+                shape: BoxShape.rectangle,
+                borderRadius: const BorderRadius.all(Radius.circular(20)))),
         label: I18n.translate('appbar_tab_settings'),
       )
     ];
@@ -191,8 +259,8 @@ class _Home extends State<Home>
           context,
           'app_close_warning_title',
           {
+            'common_ok': () => Navigator.of(context).pop(true),
             'common_cancel': () => Navigator.of(context).pop(false),
-            'common_ok': () => Navigator.of(context).pop(true)
           },
           bodyTag: 'app_close_warning');
       return exitResult ?? false;
@@ -207,7 +275,7 @@ class _Home extends State<Home>
     return WillPopScope(
         onWillPop: () => _onWillPop(context),
         child: Scaffold(
-          resizeToAvoidBottomInset: false,
+            resizeToAvoidBottomInset: false,
             body: TabBarView(
                 physics: const NeverScrollableScrollPhysics(),
                 controller: _tabController,
@@ -227,11 +295,10 @@ class _Home extends State<Home>
                 clipBehavior: Clip.antiAlias,
                 child: BottomNavigationBar(
                     type: BottomNavigationBarType.fixed,
-                    items: _bottomNavigationBarItems(),
+                    items: _bottomNavigationBarItems(lightMode),
                     currentIndex: _tabIndex,
-                    selectedFontSize: 12,
-                    unselectedFontSize: 12,
-                    showUnselectedLabels: true,
+                    selectedFontSize: 14,
+                    unselectedFontSize: 14,
                     onTap: _onTabItemTapped))));
   }
 }

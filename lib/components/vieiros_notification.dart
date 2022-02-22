@@ -6,7 +6,7 @@ class VieirosNotification {
 
   showNotification(BuildContext context, String tag, NotificationType type){
 
-    Color backgroundColor = type == NotificationType.info ? CustomColors.ownPath : CustomColors.error;
+    Color backgroundColor = type == NotificationType.info ? CustomColors.info : CustomColors.error;
 
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(I18n.translate(tag), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),

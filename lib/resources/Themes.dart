@@ -47,6 +47,7 @@ class Themes {
       brightness: Brightness.light,
       primaryColor: CustomColors.background,
       backgroundColor: CustomColors.background,
+      bottomAppBarColor: CustomColors.background,
       elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(primary: CustomColors.accent)),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
@@ -58,10 +59,15 @@ class Themes {
         buttonColor: CustomColors.accent,
         textTheme: ButtonTextTheme.primary,
       ),
+      scaffoldBackgroundColor: CustomColors.background,
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        selectedIconTheme: IconThemeData(color: CustomColors.accent),
-        selectedItemColor: CustomColors.accent,
-        unselectedItemColor: Colors.black87,
+        backgroundColor: CustomColors.background,
+        selectedLabelStyle: TextStyle(color: CustomColors.backgroundDark),
+        unselectedItemColor: CustomColors.backgroundDark,
+        selectedItemColor: CustomColors.backgroundDark,
+        selectedIconTheme: IconThemeData(color: CustomColors.backgroundDark),
+        unselectedIconTheme: IconThemeData(color: CustomColors.backgroundDark),
+        showUnselectedLabels: true,
       ),
       fontFamily: 'Lato',
       textTheme: const TextTheme(
@@ -75,11 +81,12 @@ class Themes {
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
       dialogTheme: const DialogTheme(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(10.0)))
-      ),
-      snackBarTheme:
-          const SnackBarThemeData(contentTextStyle: TextStyle(color:CustomColors.background)));
+          backgroundColor: CustomColors.background,
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(24)))),
+      snackBarTheme: const SnackBarThemeData(
+          contentTextStyle: TextStyle(color: CustomColors.background)));
 
   static final darkTheme = ThemeData(
       brightness: Brightness.dark,
@@ -97,10 +104,12 @@ class Themes {
         textTheme: ButtonTextTheme.primary,
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        selectedIconTheme: IconThemeData(color: CustomColors.accent),
-        unselectedIconTheme: IconThemeData(color: Colors.white),
-        selectedItemColor: CustomColors.accent,
+        selectedLabelStyle: TextStyle(color: Colors.white),
         unselectedItemColor: Colors.white,
+        selectedItemColor: Colors.white,
+        selectedIconTheme: IconThemeData(color: CustomColors.backgroundDark),
+        unselectedIconTheme: IconThemeData(color: Colors.white),
+        showUnselectedLabels: true,
       ),
       fontFamily: 'Lato',
       textTheme: const TextTheme(
@@ -114,8 +123,10 @@ class Themes {
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
       dialogTheme: const DialogTheme(
+          backgroundColor: CustomColors.backgroundDark,
+          elevation: 2,
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10.0)))),
-      snackBarTheme:
-          const SnackBarThemeData(contentTextStyle: TextStyle(color:CustomColors.background)));
+              borderRadius: BorderRadius.all(Radius.circular(24)))),
+      snackBarTheme: const SnackBarThemeData(
+          contentTextStyle: TextStyle(color: CustomColors.background)));
 }
