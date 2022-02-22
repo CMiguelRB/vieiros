@@ -4,7 +4,7 @@
     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:forceDarkAllowed">false</item>
         <item name="android:windowFullscreen">false</item>
-        <item name="android:windowSplashScreenBackground">#FAFAFA</item>
+        <item name="android:windowSplashScreenBackground">#F1F1EE</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/vieiros_anim_splash</item>
         <item name="android:windowSplashScreenAnimationDuration">600</item>
     </style>
