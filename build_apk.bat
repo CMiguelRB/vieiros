@@ -1,2 +1,3 @@
 @echo off
-flutter clean & flutter build apk --no-shrink
+REM flutter clean &
+flutter build apk --split-per-abi

@@ -16,6 +16,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await Future.delayed(const Duration(milliseconds: 250));
   final SharedPreferences _prefs = await SharedPreferences.getInstance();
   loadStatusBarTheme(_prefs);
   String? path = _prefs.getString('currentTrack');

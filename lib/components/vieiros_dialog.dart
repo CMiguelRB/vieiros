@@ -16,19 +16,15 @@ class VieirosDialog {
         context: context,
         barrierColor: CustomColors.dimming,
         builder: (BuildContext context) => Dialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              elevation: 2,
               child: Container(
-                padding: const EdgeInsets.only(
-                    left: 20, top: 20, right: 20, bottom: 2),
+                padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
                       alignment: Alignment.centerLeft,
-                      margin: const EdgeInsets.only(bottom: 20),
+                      margin: const EdgeInsets.only(bottom: 16),
                       child: Text(
                         I18n.translate(titleTag),
                         style: const TextStyle(
@@ -38,7 +34,7 @@ class VieirosDialog {
                     bodyTag != null
                         ? Container(
                             alignment: Alignment.centerLeft,
-                            margin: const EdgeInsets.only(bottom: 10),
+                            margin: const EdgeInsets.only(bottom: 24),
                             child: Text(
                               I18n.translate(bodyTag),
                               style: TextStyle(color: _bodyTextColor),
@@ -46,7 +42,7 @@ class VieirosDialog {
                         : Container(),
                     Row(
                       mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: _dialogActions(actions),
                     )
                   ],
@@ -62,21 +58,15 @@ class VieirosDialog {
         context: context,
         barrierColor: CustomColors.dimming,
         builder: (BuildContext context) => Dialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              elevation: 2,
-              insetPadding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
-                padding: const EdgeInsets.only(
-                    left: 20, top: 10, right: 20, bottom: 2),
+                padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
+                        margin: const EdgeInsets.only(bottom: 16),
                         alignment: Alignment.topCenter,
-                        padding: EdgeInsets.zero,
-                        margin: EdgeInsets.zero,
                         child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [Text(I18n.translate(titleTag), style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold)),IconButton(
                             padding: EdgeInsets.zero,
@@ -84,9 +74,8 @@ class VieirosDialog {
                             onPressed: () => Navigator.pop(context, ''),
                             icon: const Icon(Icons.close))])),
                     Container(
-                      padding: const EdgeInsets.symmetric(vertical: 40),
                       alignment: Alignment.center,
-                      margin: const EdgeInsets.only(bottom: 10),
+                      margin: const EdgeInsets.only(bottom: 24),
                       child: form ?? Container(),
                     ),
                     Row(
@@ -104,17 +93,14 @@ class VieirosDialog {
     List<Widget> _dialogActions = [];
 
     actions.forEach((tag, function) {
-      _dialogActions.add(Container(
-        margin: const EdgeInsets.only(bottom: 5),
-        child: TextButton(
-          style: ButtonStyle(
-            overlayColor: MaterialStateColor.resolveWith(
-                (states) => CustomColors.subTextDark),
-          ),
-          onPressed: () => function(),
-          child: Text(I18n.translate(tag),
-              style: const TextStyle(color: CustomColors.accent, fontSize: 15)),
+      _dialogActions.add(TextButton(
+        style: ButtonStyle(
+          overlayColor: MaterialStateColor.resolveWith(
+              (states) => CustomColors.subTextDark),
         ),
+        onPressed: () => function(),
+        child: Text(I18n.translate(tag),
+            style: const TextStyle(color: CustomColors.accent, fontSize: 15)),
       ));
     });
 

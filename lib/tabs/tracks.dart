@@ -229,12 +229,12 @@ class TracksState extends State<Tracks> {
                                                   context,
                                                   'tracks_delete_route',
                                                   {
-                                                    'common_cancel': () =>
-                                                        Navigator.pop(
-                                                            context, ''),
                                                     'common_ok': () =>
                                                         _removeFile(
-                                                            context, index)
+                                                            context, index),
+                                                    'common_cancel': () =>
+                                                        Navigator.pop(
+                                                            context, '')
                                                   },
                                                   bodyTag: 'common_confirm'),
                                           icon: const Icon(Icons.delete))

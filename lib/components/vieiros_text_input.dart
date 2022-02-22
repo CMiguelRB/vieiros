@@ -30,20 +30,24 @@ class VieirosTextInput extends StatelessWidget {
         decoration: InputDecoration(
             suffixIcon: suffix,
             filled: true,
-            fillColor: lightMode ? CustomColors.subTextDark : CustomColors.subText,
+            fillColor: lightMode ? CustomColors.faintedFaintedAccent : CustomColors.subText,
             hintText: I18n.translate(hintText),
             contentPadding:
-                const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+                const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
             counterStyle: const TextStyle(color: CustomColors.accent),
             enabledBorder: const OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(24)),
                 borderSide: BorderSide(color: CustomColors.subTextDark)),
             focusedBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(24)),
               borderSide: BorderSide(color: CustomColors.accent),
             ),
             focusedErrorBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(24)),
               borderSide: BorderSide(color: CustomColors.error),
             ),
             errorBorder: const OutlineInputBorder(
+              borderRadius: BorderRadius.all(Radius.circular(24)),
               borderSide: BorderSide(color: CustomColors.error),
             )),
         onChanged: (value) => onChanged(value),
