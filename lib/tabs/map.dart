@@ -74,7 +74,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
           onTapBringToFront: true,
           title: I18n.translate('map_notification_title'),
           description: I18n.translate('map_notification_desc'));
-      _location.changeSettings(interval: 2000, distanceFilter: 5, accuracy: LocationAccuracy.high);
+      _location.changeSettings(
+          interval: 2000, distanceFilter: 5, accuracy: LocationAccuracy.high);
       LocationData _locationData;
       final GoogleMapController controller = await _mapController.future;
 
@@ -134,10 +135,6 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     loadCurrentTrack();
   }
 
-  navigateTrack(path) async {
-    navigateCurrentTrack();
-  }
-
   clearTrack() {
     if (mounted) {
       setState(() {
@@ -153,12 +150,14 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   }
 
   navigateCurrentTrack() async {
-    final GoogleMapController controller = await _mapController.future;
-    if (widget.loadedTrack.gpx != null &&
-        _polyline.isNotEmpty &&
-        _polyline.first.points.isNotEmpty) {
-      controller.animateCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(target: _polyline.first.points.first, zoom: 14.0)));
+    if(!widget.currentTrack.isRecording){
+      final GoogleMapController controller = await _mapController.future;
+      if (widget.loadedTrack.gpx != null &&
+          _polyline.isNotEmpty &&
+          _polyline.first.points.isNotEmpty) {
+        controller.animateCamera(CameraUpdate.newCameraPosition(
+            CameraPosition(target: _polyline.first.points.first, zoom: 14.0)));
+      }
     }
   }
 
@@ -188,8 +187,17 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         });
       }
       if (points.isEmpty) return;
+      if(widget.currentTrack.isRecording) return;
       controller.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(target: points.first, zoom: 14.0)));
+    }
+  }
+
+  centerMapView() async {
+    final GoogleMapController controller = await _mapController.future;
+    if (widget.currentTrack.positions.isNotEmpty) {
+      controller.animateCamera(CameraUpdate.newCameraPosition(
+          CameraPosition(target: LatLng(widget.currentTrack.positions.last.latitude!, widget.currentTrack.positions.last.longitude!), zoom: 14.0)));
     }
   }
 
@@ -207,8 +215,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     _location.onLocationChanged.listen((event) async {
       if (widget.currentTrack.isRecording) {
         _checkOffTrack(event);
-        widget.currentTrack.addPosition(RecordedPosition(
-            event.latitude, event.longitude, event.altitude, event.time!.toInt()));
+        widget.currentTrack.addPosition(RecordedPosition(event.latitude,
+            event.longitude, event.altitude, event.time!.toInt()));
         Calc().setGain(widget.currentTrack);
         Calc().setTop(widget.currentTrack);
         Calc().setMin(widget.currentTrack);
@@ -252,7 +260,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   }
 
   _checkOffTrack(LocationData event) {
-    if(widget.loadedTrack.gpx != null){
+    if (widget.loadedTrack.gpx != null) {
       List<Wpt> trackPoints = widget.loadedTrack.gpx!.trks[0].trksegs[0].trkpts;
       if (widget.loadedTrack.gpx != null &&
           widget.currentTrack.positions.isNotEmpty) {
@@ -282,7 +290,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         context,
         'map_waypoint',
         {
-          'common_save': () => _addCurrentMarker(latLng, name, false, lightMode, null),
+          'common_save': () =>
+              _addCurrentMarker(latLng, name, false, lightMode, null),
           'common_cancel': () => Navigator.pop(context, 'map_waypoint'),
         },
         form: Form(
@@ -294,8 +303,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
             )));
   }
 
-  _addCurrentMarker(
-      LatLng latLng, String name, bool edit,bool lightMode, MarkerId? markerId) async {
+  _addCurrentMarker(LatLng latLng, String name, bool edit, bool lightMode,
+      MarkerId? markerId) async {
     if (edit) {
       if (!_formKeyWaypointEdit.currentState!.validate()) return;
       Navigator.pop(context, I18n.translate('common_edit'));
@@ -332,14 +341,16 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  _editMarkerDialog(MarkerId markerId, LatLng latLng, String name, bool lightMode) {
+  _editMarkerDialog(
+      MarkerId markerId, LatLng latLng, String name, bool lightMode) {
     VieirosDialog().inputDialog(
         context,
         'map_waypoint',
         {
           'common_cancel': () => Navigator.pop(context, 'map_waypoint'),
           'common_delete': () => _removeMarker(markerId),
-          'common_edit': () => _addCurrentMarker(latLng, name, true, lightMode, markerId)
+          'common_edit': () =>
+              _addCurrentMarker(latLng, name, true, lightMode, markerId)
         },
         form: Form(
             key: _formKeyWaypointEdit,
@@ -540,7 +551,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                     compassEnabled: true,
                     polylines: _polyline,
                     markers: _markers,
-                    onLongPress: (latLng) => _currentMarkerDialog(latLng, lightMode),
+                    onLongPress: (latLng) =>
+                        _currentMarkerDialog(latLng, lightMode),
                     onMapCreated: (GoogleMapController controller) {
                       if (!_mapController.isCompleted) {
                         _mapController.complete(controller);
