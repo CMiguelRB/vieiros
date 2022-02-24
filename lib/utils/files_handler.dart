@@ -17,8 +17,8 @@ class FilesHandler {
         directory = d.path;
       }
       String path = directory + '/' + name.replaceAll(' ', '_') + '.gpx';
-      if (!(await File(path).exists())) {
-        await File(path).writeAsString(gpxString);
+      if (!File(path).existsSync()) {
+        File(path).writeAsStringSync(gpxString);
       } else {
         return '###file_exists';
       }

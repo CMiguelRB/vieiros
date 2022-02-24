@@ -7,10 +7,9 @@ class VieirosNotification {
   showNotification(BuildContext context, String tag, NotificationType type){
 
     Color backgroundColor = type == NotificationType.info ? CustomColors.info : CustomColors.error;
-
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(I18n.translate(tag), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
-      margin: const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+      margin: MediaQuery.of(context).viewInsets.bottom > 0 ? EdgeInsets.only(left: 30, right: 30, bottom: MediaQuery.of(context).size.height - 250) : const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
       backgroundColor: backgroundColor,
       duration: const Duration(milliseconds: 1500),
       behavior: SnackBarBehavior.floating,
