@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vieiros/main/home.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:vieiros/resources/custom_colors.dart';
@@ -18,9 +17,8 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await Future.delayed(const Duration(milliseconds: 250));
-  final SharedPreferences _prefs = await SharedPreferences.getInstance();
-  loadStatusBarTheme(_prefs);
-  String? path = _prefs.getString('currentTrack');
+  loadStatusBarTheme();
+  String? path = await Preferences().get('currentTrack');
   String? theme = await Preferences().get("dark_mode");
   if (theme == null) Preferences().set('dark_mode', 'system');
   LoadedTrack loadedTrack;
@@ -29,10 +27,10 @@ void main() async {
   } on Exception {
     loadedTrack = LoadedTrack();
   }
-  runApp(MyApp(_prefs, loadedTrack));
+  runApp(MyApp(loadedTrack));
 }
 
-void loadStatusBarTheme(prefs) async {
+void loadStatusBarTheme() async {
   String? value = await Preferences().get("dark_mode");
   bool light;
   switch (value) {
@@ -65,10 +63,9 @@ void loadStatusBarTheme(prefs) async {
 }
 
 class MyApp extends StatelessWidget {
-  final SharedPreferences _prefs;
   final LoadedTrack _loadedTrack;
 
-  const MyApp(this._prefs, this._loadedTrack, {Key? key}) : super(key: key);
+  const MyApp(this._loadedTrack, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => ChangeNotifierProvider(
@@ -110,6 +107,6 @@ class MyApp extends StatelessWidget {
             theme: Themes.lightTheme,
             darkTheme: Themes.darkTheme,
             debugShowCheckedModeBanner: false,
-            home: Home(prefs: _prefs, loadedTrack: _loadedTrack));
+            home: Home(loadedTrack: _loadedTrack));
       });
 }

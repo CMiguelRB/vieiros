@@ -28,7 +28,6 @@ dependencies:
   google_maps_flutter: ^2.1.1
   geolocator: ^8.2.0
   file_picker: ^4.4.0
-  shared_preferences: ^2.0.13
   cupertino_icons: ^1.0.4
   gpx: ^2.1.0
   uuid: ^3.0.6
@@ -44,7 +43,7 @@ dependencies:
   flutter_native_splash: ^2.0.5
   flutter_local_notifications: ^9.3.2
   firebase_crashlytics: ^2.5.1
-  googleapis: ^8.0.0
+  googleapis: ^8.1.0
   google_sign_in: ^5.2.4
   location: ^4.3.0
 

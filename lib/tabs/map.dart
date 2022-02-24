@@ -5,7 +5,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:vieiros/components/vieiros_dialog.dart';
 import 'package:vieiros/components/vieiros_notification.dart';
@@ -23,18 +22,17 @@ import 'package:vieiros/utils/calc.dart';
 import 'package:vieiros/utils/files_handler.dart';
 import 'package:vieiros/utils/gpx_handler.dart';
 import 'package:vieiros/utils/permission_handler.dart';
+import 'package:vieiros/utils/preferences.dart';
 import 'package:vieiros/utils/vieiros_tts.dart';
 
 class Map extends StatefulWidget {
   final Function setPlayIcon;
   final CurrentTrack currentTrack;
   final LoadedTrack loadedTrack;
-  final SharedPreferences prefs;
 
   const Map(
       {Key? key,
       required this.setPlayIcon,
-      required this.prefs,
       required this.currentTrack,
       required this.loadedTrack})
       : super(key: key);
@@ -229,9 +227,10 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
               icon: icon);
         }
         int dist = widget.currentTrack.distance;
+        String? voiceAlerts = await Preferences().get("voice_alerts");
         if (dist > _referenceDistance &&
-            (widget.prefs.getString("voice_alerts") == null ||
-                widget.prefs.getString("voice_alerts") == 'true')) {
+            (voiceAlerts == null ||
+                voiceAlerts == 'true')) {
           VieirosTts().speakDistance(dist, widget.currentTrack.dateTime!);
           _referenceDistance += 1000;
         }
@@ -402,7 +401,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     gpxString = gpxString.replaceFirst(RegExp('creator="vieiros"'),
         'creator="vieiros" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"');
     String? result =
-        await FilesHandler().writeFile(gpxString, name, widget.prefs, true);
+        await FilesHandler().writeFile(gpxString, name, true);
     if (result == '###file_exists') {
       return VieirosNotification()
           .showNotification(context, 'File exists', NotificationType.error);
