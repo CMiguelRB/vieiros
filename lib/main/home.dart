@@ -60,10 +60,11 @@ class _Home extends State<Home>
           }
         }
         if (path != null && widget.loadedTrack.path == path) {
-          _mapKey.currentState!.navigateTrack(path);
+          _mapKey.currentState!.navigateCurrentTrack();
         }
         if (_currentTrack.isRecording) {
           _fabIcon = const Icon(Icons.stop);
+          _mapKey.currentState!.centerMapView();
           if (mounted) {
             setState(() {
               _tabIndex = index;
