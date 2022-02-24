@@ -29,18 +29,13 @@ class SettingsState extends State<Settings> {
   @override
   void initState() {
     super.initState();
-    _loadPreferences();
-  }
 
-  _loadPreferences() async {
-    String? voiceValue = await Preferences().get("voice_alerts");
-    String? themeValue = await Preferences().get('dark_mode');
-    if(themeValue != null){
-      _themeSelectValue = themeValue;
+    if(Preferences().get('dark_mode') != null){
+      _themeSelectValue = Preferences().get('dark_mode');
     }
     setState(() {
-      _voiceAlerts = voiceValue == 'true' ||
-          voiceValue == null;
+      _voiceAlerts = Preferences().get("voice_alerts") == 'true' ||
+          Preferences().get("voice_alerts") == null;
       for (int i = 0; i < _themes.length; i++) {
         if (_themes[i]['value'] == _themeSelectValue) {
           _themeSelectTag = _themes[i]['tag'];
@@ -64,7 +59,7 @@ class SettingsState extends State<Settings> {
     });
   }
 
-  _onChangeVoiceAlerts(value, context) async {
+  _onChangeVoiceAlerts(value, context) {
     setState(() {
       _voiceAlerts = value;
       Preferences().set("voice_alerts", value.toString());

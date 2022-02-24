@@ -227,7 +227,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
               icon: icon);
         }
         int dist = widget.currentTrack.distance;
-        String? voiceAlerts = await Preferences().get("voice_alerts");
+        String? voiceAlerts = Preferences().get("voice_alerts");
         if (dist > _referenceDistance &&
             (voiceAlerts == null ||
                 voiceAlerts == 'true')) {

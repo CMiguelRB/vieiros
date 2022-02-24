@@ -51,7 +51,7 @@ class _Home extends State<Home>
     if (index == 1) {
       widget.loadedTrack.clear();
       if (_mapKey.currentState != null) {
-        String? path = await Preferences().get('currentTrack');
+        String? path = Preferences().get('currentTrack');
         if (path != null && widget.loadedTrack.path != path) {
           _mapKey.currentState!.loadTrack(path);
           if (_infoKey.currentState != null) {
@@ -73,7 +73,7 @@ class _Home extends State<Home>
           return;
         }
       } else {
-        String? path = await Preferences().get('currentTrack');
+        String? path = Preferences().get('currentTrack');
         if (path != null && widget.loadedTrack.path != path) {
           await widget.loadedTrack.loadTrack(path);
         }
@@ -81,7 +81,7 @@ class _Home extends State<Home>
       _fabIcon = const Icon(Icons.play_arrow);
     } else if (index == 2) {
       if (_infoKey.currentState != null) {
-        String? path = await Preferences().get('currentTrack');
+        String? path = Preferences().get('currentTrack');
         if (path != null && _infoKey.currentState!.currentPath != path) {
           widget.loadedTrack.clear();
           _infoKey.currentState!.loadTrack(path);

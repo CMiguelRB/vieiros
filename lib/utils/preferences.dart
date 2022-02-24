@@ -6,52 +6,37 @@ import 'package:path_provider/path_provider.dart';
 class Preferences {
   final _fileName = 'preferences';
 
-  String themeCurrent = "";
+  Map<String, dynamic> preferences = {};
 
-  setThemeCurrent(String current) {
-    themeCurrent = current;
-  }
-
-  String getThemeCurrent() {
-    return themeCurrent;
+  Future<void> loadPreferences() async {
+    final file = File(
+        '${(await getApplicationDocumentsDirectory()).path}/$_fileName.json');
+    if (!await file.exists()) {
+      return;
+    }
+    String str = file.readAsStringSync();
+    if(str.isNotEmpty) {
+      Map<String, dynamic> map = json.decode(str);
+      preferences = map;
+    }
   }
 
   Future<void> set(String key, String value) async {
-    if (key == 'dark_mode') {
-      setThemeCurrent(value);
-    }
+    preferences[key] = value;
     final file = File(
         '${(await getApplicationDocumentsDirectory()).path}/$_fileName.json');
-    Map<String, dynamic> prefs;
-    if (!await file.exists()) {
-      prefs = {};
-    } else {
-      prefs = json.decode(file.readAsStringSync());
-    }
-    prefs[key] = value;
-    file.writeAsStringSync(json.encode(prefs));
+    file.writeAsString(json.encode(preferences));
   }
 
-  Future<String?> get(String key) async {
-    final file = File(
-        '${(await getApplicationDocumentsDirectory()).path}/$_fileName.json');
-    if (!await file.exists()) {
-      return null;
-    }
-    Map<String, dynamic> map = json.decode(file.readAsStringSync());
-    String? value = map[key];
-    if (key == 'dark_mode' && value != null) {
-      setThemeCurrent(value);
-    }
-    return value;
+  String? get(String key) {
+    return preferences[key];
   }
 
   Future<void> remove(String key) async {
+    preferences.remove(key);
     final file = File(
         '${(await getApplicationDocumentsDirectory()).path}/$_fileName.json');
-    Map<String, dynamic> prefs = json.decode(file.readAsStringSync());
-    prefs.remove(key);
-    file.writeAsStringSync(json.encode(prefs));
+    file.writeAsStringSync(json.encode(preferences));
   }
 
   //Singleton pattern. No need to call an instance getter, just instantiate the class Calc calc = Calc();
