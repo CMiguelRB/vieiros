@@ -136,9 +136,8 @@ class _Home extends State<Home>
       Info(
           key: _infoKey,
           currentTrack: _currentTrack,
-          prefs: widget.prefs,
           loadedTrack: widget.loadedTrack),
-      Settings(prefs: widget.prefs)
+      const Settings()
     ];
     _tabController = TabController(
         vsync: this, length: _tabs.length, initialIndex: _tabIndex);

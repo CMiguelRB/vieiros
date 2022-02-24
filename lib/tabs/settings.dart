@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vieiros/components/vieiros_select.dart';
 import 'package:vieiros/components/vieiros_switch.dart';
 import 'package:vieiros/resources/custom_colors.dart';
 import 'package:vieiros/resources/i18n.dart';
 import 'package:vieiros/resources/themes.dart';
+import 'package:vieiros/utils/preferences.dart';
 
 class Settings extends StatefulWidget {
-  final SharedPreferences prefs;
 
-  const Settings({Key? key, required this.prefs}) : super(key: key);
+  const Settings({Key? key}) : super(key: key);
 
   @override
   SettingsState createState() => SettingsState();
@@ -30,14 +29,24 @@ class SettingsState extends State<Settings> {
   @override
   void initState() {
     super.initState();
-    _themeSelectValue = widget.prefs.getString('dark_mode');
-    for (int i = 0; i < _themes.length; i++) {
-      if (_themes[i]['value'] == _themeSelectValue) {
-        _themeSelectTag = _themes[i]['tag'];
-      }
+    _loadPreferences();
+  }
+
+  _loadPreferences() async {
+    String? voiceValue = await Preferences().get("voice_alerts");
+    String? themeValue = await Preferences().get('dark_mode');
+    if(themeValue != null){
+      _themeSelectValue = themeValue;
     }
-    _voiceAlerts = widget.prefs.getString("voice_alerts") == 'true' ||
-        widget.prefs.getString("voice_alerts") == null;
+    setState(() {
+      _voiceAlerts = voiceValue == 'true' ||
+          voiceValue == null;
+      for (int i = 0; i < _themes.length; i++) {
+        if (_themes[i]['value'] == _themeSelectValue) {
+          _themeSelectTag = _themes[i]['tag'];
+        }
+      }
+    });
   }
 
   @override
@@ -46,11 +55,11 @@ class SettingsState extends State<Settings> {
   }
 
   _onChangeDarkMode(Map<String, String> element, context) {
+    Preferences().set("dark_mode", element['value']!);
     final provider = Provider.of<ThemeProvider>(context, listen: false);
     provider.setThemeMode(element['value']);
     setState(() {
       _themeSelectValue = element['value'];
-      widget.prefs.setString("dark_mode", element['value']!);
       _themeSelectTag = element['tag'];
     });
   }
@@ -58,7 +67,7 @@ class SettingsState extends State<Settings> {
   _onChangeVoiceAlerts(value, context) async {
     setState(() {
       _voiceAlerts = value;
-      widget.prefs.setString("voice_alerts", value.toString());
+      Preferences().set("voice_alerts", value.toString());
     });
   }
 

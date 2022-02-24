@@ -9,6 +9,7 @@ import 'package:vieiros/main/home.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:vieiros/resources/custom_colors.dart';
 import 'package:vieiros/resources/themes.dart';
+import 'package:vieiros/utils/preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
@@ -20,8 +21,8 @@ void main() async {
   final SharedPreferences _prefs = await SharedPreferences.getInstance();
   loadStatusBarTheme(_prefs);
   String? path = _prefs.getString('currentTrack');
-  String? theme = _prefs.getString('dark_mode');
-  if (theme == null) _prefs.setString('dark_mode', 'system');
+  String? theme = await Preferences().get("dark_mode");
+  if (theme == null) Preferences().set('dark_mode', 'system');
   LoadedTrack loadedTrack;
   try {
     loadedTrack = await LoadedTrack().loadTrack(path);
@@ -31,8 +32,8 @@ void main() async {
   runApp(MyApp(_prefs, loadedTrack));
 }
 
-void loadStatusBarTheme(prefs) {
-  String? value = prefs.getString('dark_mode');
+void loadStatusBarTheme(prefs) async {
+  String? value = await Preferences().get("dark_mode");
   bool light;
   switch (value) {
     case 'light':
@@ -75,7 +76,7 @@ class MyApp extends StatelessWidget {
       builder: (context, _) {
         final provider = Provider.of<ThemeProvider>(context);
         final currentMode = provider.isLightMode;
-        final String? currentPrefs = _prefs.getString('dark_mode');
+        final String? currentPrefs = Preferences().getThemeCurrent();
         final bool prefsMode;
         switch (currentPrefs) {
           case 'light':

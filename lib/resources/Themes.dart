@@ -103,6 +103,7 @@ class Themes {
         buttonColor: CustomColors.accent,
         textTheme: ButtonTextTheme.primary,
       ),
+      scaffoldBackgroundColor: CustomColors.backgroundDark,
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         selectedLabelStyle: TextStyle(color: Colors.white),
         unselectedItemColor: Colors.white,
