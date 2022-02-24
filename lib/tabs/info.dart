@@ -1,6 +1,5 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sunrise_sunset_calc/sunrise_sunset_calc.dart';
 import 'package:vieiros/components/info/altitude_widget.dart';
 import 'package:vieiros/components/info/chart_point_info_widget.dart';
@@ -24,12 +23,10 @@ import 'package:charts_flutter/flutter.dart' as charts;
 class Info extends StatefulWidget {
   final CurrentTrack currentTrack;
   final LoadedTrack loadedTrack;
-  final SharedPreferences prefs;
 
   const Info(
       {Key? key,
       required this.currentTrack,
-      required this.prefs,
       required this.loadedTrack})
       : super(key: key);
 
