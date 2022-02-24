@@ -404,7 +404,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         await FilesHandler().writeFile(gpxString, name, true);
     if (result == '###file_exists') {
       return VieirosNotification()
-          .showNotification(context, 'File exists', NotificationType.error);
+          .showNotification(context, I18n.translate('map_save_error_file_exists'), NotificationType.error);
     }
     Navigator.pop(context, I18n.translate('common_ok'));
     if (mounted) {

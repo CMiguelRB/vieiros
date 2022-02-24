@@ -83,12 +83,12 @@ class TracksState extends State<Tracks> {
       final xmlFile = File(path!);
       Gpx gpx = GpxReader().fromString(
           XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString());
-      await Preferences().set('files', json.encode(_files));
       setState(() {
         String? name = gpx.trks[0].name;
         name ??= result.files.single.name;
         _files.add(GpxFile(name: name, path: result.files.single.path));
       });
+      await Preferences().set('files', json.encode(_files));
     }
   }
 
@@ -142,12 +142,9 @@ class TracksState extends State<Tracks> {
   }
 
   _navigate(index) async {
-    //_unloadTrack(index, false);
     String? path = _files[index].path;
     if (path == null) return;
     await Preferences().set('currentTrack', path);
-    var current = await Preferences().get("currentTrack");
-    print(current);
     widget.toTabIndex(1);
   }
 

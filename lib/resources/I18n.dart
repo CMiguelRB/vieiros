@@ -49,6 +49,7 @@ class I18n {
       "map_finish_tracking": "Finish tracking",
       "map_track_pin_start": "Start",
       "map_track_pin_finish": "Finish",
+      "map_save_error_file_exists": "File already exists!",
 
       "info_current_track": "Current track",
       "info_loaded_track": "Loaded track",
@@ -122,6 +123,7 @@ class I18n {
       "map_finish_tracking": "Terminar grabación",
       "map_track_pin_start": "Comienzo",
       "map_track_pin_finish": "Fin",
+      "map_save_error_file_exists": "¡El fichero ya existe!",
 
       "info_current_track": "Ruta actual",
       "info_loaded_track": "Ruta cargada",
@@ -196,6 +198,7 @@ class I18n {
       "map_finish_tracking": "Rematar gravación",
       "map_track_pin_start": "Comezo",
       "map_track_pin_finish": "Fin",
+      "map_save_error_file_exists": "¡O ficheiro xa existe!",
 
       "info_total_current_track": "Ruta actual",
       "info_total_loaded_track": "Ruta cargada",
