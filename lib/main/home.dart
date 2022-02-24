@@ -1,6 +1,5 @@
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vieiros/components/vieiros_dialog.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:flutter/material.dart';
@@ -12,15 +11,15 @@ import 'package:vieiros/tabs/info.dart';
 import 'package:vieiros/tabs/settings.dart';
 import 'package:vieiros/tabs/map.dart';
 import 'package:vieiros/tabs/tracks.dart';
+import 'package:vieiros/utils/preferences.dart';
 
 //import 'package:google_sign_in/google_sign_in.dart';
 //import 'package:googleapis/drive/v3.dart';
 
 class Home extends StatefulWidget {
-  final SharedPreferences prefs;
   final LoadedTrack loadedTrack;
 
-  const Home({Key? key, required this.prefs, required this.loadedTrack})
+  const Home({Key? key, required this.loadedTrack})
       : super(key: key);
 
   @override
@@ -52,7 +51,7 @@ class _Home extends State<Home>
     if (index == 1) {
       widget.loadedTrack.clear();
       if (_mapKey.currentState != null) {
-        String? path = widget.prefs.getString('currentTrack');
+        String? path = await Preferences().get('currentTrack');
         if (path != null && widget.loadedTrack.path != path) {
           _mapKey.currentState!.loadTrack(path);
           if (_infoKey.currentState != null) {
@@ -74,7 +73,7 @@ class _Home extends State<Home>
           return;
         }
       } else {
-        String? path = widget.prefs.getString('currentTrack');
+        String? path = await Preferences().get('currentTrack');
         if (path != null && widget.loadedTrack.path != path) {
           await widget.loadedTrack.loadTrack(path);
         }
@@ -82,7 +81,7 @@ class _Home extends State<Home>
       _fabIcon = const Icon(Icons.play_arrow);
     } else if (index == 2) {
       if (_infoKey.currentState != null) {
-        String? path = widget.prefs.getString('currentTrack');
+        String? path = await Preferences().get('currentTrack');
         if (path != null && _infoKey.currentState!.currentPath != path) {
           widget.loadedTrack.clear();
           _infoKey.currentState!.loadTrack(path);
@@ -122,14 +121,12 @@ class _Home extends State<Home>
     _tabs = <Widget>[
       Tracks(
           key: _trackKey,
-          prefs: widget.prefs,
           toTabIndex: _onTabItemTapped,
           currentTrack: _currentTrack,
           loadedTrack: widget.loadedTrack,
           clearTrack: _clearTrack),
       Map(
           key: _mapKey,
-          prefs: widget.prefs,
           setPlayIcon: _setPlayFabIcon,
           currentTrack: _currentTrack,
           loadedTrack: widget.loadedTrack),

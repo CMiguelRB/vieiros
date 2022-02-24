@@ -45,6 +45,13 @@ class Preferences{
     return value;
   }
 
+  remove(String key) async{
+    final file = File('${(await getApplicationDocumentsDirectory()).path}/$_fileName.json');
+    Map<String, dynamic> prefs = json.decode(await file.readAsString());
+    prefs.remove(key);
+    file.writeAsString(json.encode(prefs));
+  }
+
   //Singleton pattern. No need to call an instance getter, just instantiate the class Calc calc = Calc();
   Preferences._privateConstructor();
 

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vieiros/components/vieiros_dialog.dart';
 import 'package:vieiros/components/vieiros_notification.dart';
 import 'package:vieiros/components/vieiros_text_input.dart';
@@ -10,6 +9,7 @@ import 'package:vieiros/resources/custom_colors.dart';
 import 'package:vieiros/resources/i18n.dart';
 import 'package:vieiros/resources/themes.dart';
 import 'package:vieiros/utils/files_handler.dart';
+import 'package:vieiros/utils/preferences.dart';
 import 'package:xml/xml.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -21,13 +21,11 @@ class Tracks extends StatefulWidget {
   final Function toTabIndex;
   final Function clearTrack;
   final CurrentTrack currentTrack;
-  final SharedPreferences prefs;
   final LoadedTrack loadedTrack;
 
   const Tracks(
       {Key? key,
       required this.toTabIndex,
-      required this.prefs,
       required this.currentTrack,
       required this.loadedTrack,
       required this.clearTrack})
@@ -42,7 +40,7 @@ class TracksState extends State<Tracks> {
   final TextEditingController _controller = TextEditingController(text: '');
 
   _loadPrefs(String value) async {
-    String? jsonString = widget.prefs.getString('files');
+    String? jsonString = await Preferences().get('files');
     jsonString = jsonString ?? '[]';
     List<GpxFile> files = json
         .decode(jsonString)
@@ -89,7 +87,7 @@ class TracksState extends State<Tracks> {
         String? name = gpx.trks[0].name;
         name ??= result.files.single.name;
         _files.add(GpxFile(name: name, path: result.files.single.path));
-        widget.prefs.setString('files', jsonEncode(_files));
+        Preferences().set('files', jsonEncode(_files));
       });
     }
   }
@@ -98,18 +96,18 @@ class TracksState extends State<Tracks> {
     Gpx gpx = GpxReader().fromString(gpxStringFile);
     String name = gpx.trks[0].name!;
     String? path = await FilesHandler()
-        .writeFile(gpxStringFile, name, widget.prefs, false);
+        .writeFile(gpxStringFile, name, false);
     setState(() {
       if (path != null) _files.add(GpxFile(name: name, path: path));
     });
   }
 
   _unloadTrack(int index, bool showNotification) async {
+    String? current = await Preferences().get('currentTrack');
     setState(() {
       GpxFile file = _files[index];
-      String? current = widget.prefs.getString('currentTrack');
       if (current == file.path) {
-        widget.prefs.remove('currentTrack');
+        Preferences().remove('currentTrack');
         widget.clearTrack();
         widget.loadedTrack.clear();
       }
@@ -121,12 +119,12 @@ class TracksState extends State<Tracks> {
   }
 
   _removeFile(context, index) async {
+    GpxFile file = _files.removeAt(index);
+    Preferences().set('files', jsonEncode(_files));
+    String? current = await Preferences().get('currentTrack');
     setState(() {
-      GpxFile file = _files.removeAt(index);
-      widget.prefs.setString('files', jsonEncode(_files));
-      String? current = widget.prefs.getString('currentTrack');
       if (current == file.path) {
-        widget.prefs.remove('currentTrack');
+        Preferences().remove('currentTrack');
         widget.clearTrack();
         widget.loadedTrack.clear();
       }
@@ -143,7 +141,7 @@ class TracksState extends State<Tracks> {
     _unloadTrack(index, false);
     String? path = _files[index].path;
     if (path == null) return;
-    widget.prefs.setString('currentTrack', path);
+    Preferences().set('currentTrack', path);
     widget.toTabIndex(1);
   }
 
