@@ -83,11 +83,11 @@ class TracksState extends State<Tracks> {
       final xmlFile = File(path!);
       Gpx gpx = GpxReader().fromString(
           XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString());
+      await Preferences().set('files', json.encode(_files));
       setState(() {
         String? name = gpx.trks[0].name;
         name ??= result.files.single.name;
         _files.add(GpxFile(name: name, path: result.files.single.path));
-        Preferences().set('files', jsonEncode(_files));
       });
     }
   }
@@ -104,10 +104,12 @@ class TracksState extends State<Tracks> {
 
   _unloadTrack(int index, bool showNotification) async {
     String? current = await Preferences().get('currentTrack');
+    GpxFile file = _files[index];
+    if (current == file.path) {
+      await Preferences().remove('currentTrack');
+    }
     setState(() {
-      GpxFile file = _files[index];
       if (current == file.path) {
-        Preferences().remove('currentTrack');
         widget.clearTrack();
         widget.loadedTrack.clear();
       }
@@ -120,11 +122,13 @@ class TracksState extends State<Tracks> {
 
   _removeFile(context, index) async {
     GpxFile file = _files.removeAt(index);
-    Preferences().set('files', jsonEncode(_files));
+    await Preferences().set('files', json.encode(_files));
     String? current = await Preferences().get('currentTrack');
+    if (current == file.path) {
+      await Preferences().remove('currentTrack');
+    }
     setState(() {
       if (current == file.path) {
-        Preferences().remove('currentTrack');
         widget.clearTrack();
         widget.loadedTrack.clear();
       }
@@ -138,10 +142,12 @@ class TracksState extends State<Tracks> {
   }
 
   _navigate(index) async {
-    _unloadTrack(index, false);
+    //_unloadTrack(index, false);
     String? path = _files[index].path;
     if (path == null) return;
-    Preferences().set('currentTrack', path);
+    await Preferences().set('currentTrack', path);
+    var current = await Preferences().get("currentTrack");
+    print(current);
     widget.toTabIndex(1);
   }
 
