@@ -18,8 +18,9 @@ void main() async {
   );
   await Future.delayed(const Duration(milliseconds: 250));
   loadStatusBarTheme();
-  String? path = await Preferences().get('currentTrack');
-  String? theme = await Preferences().get("dark_mode");
+  await Preferences().loadPreferences();
+  String? path = Preferences().get('currentTrack');
+  String? theme = Preferences().get("dark_mode");
   if (theme == null) Preferences().set('dark_mode', 'system');
   LoadedTrack loadedTrack;
   try {
@@ -30,8 +31,8 @@ void main() async {
   runApp(MyApp(loadedTrack));
 }
 
-void loadStatusBarTheme() async {
-  String? value = await Preferences().get("dark_mode");
+void loadStatusBarTheme() {
+  String? value = Preferences().get("dark_mode");
   bool light;
   switch (value) {
     case 'light':
@@ -73,7 +74,7 @@ class MyApp extends StatelessWidget {
       builder: (context, _) {
         final provider = Provider.of<ThemeProvider>(context);
         final currentMode = provider.isLightMode;
-        final String? currentPrefs = Preferences().getThemeCurrent();
+        final String? currentPrefs = Preferences().get('dark_mode');
         final bool prefsMode;
         switch (currentPrefs) {
           case 'light':

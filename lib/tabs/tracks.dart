@@ -40,7 +40,7 @@ class TracksState extends State<Tracks> {
   final TextEditingController _controller = TextEditingController(text: '');
 
   _loadPrefs(String value) async {
-    String? jsonString = await Preferences().get('files');
+    String? jsonString = Preferences().get('files');
     jsonString = jsonString ?? '[]';
     List<GpxFile> files = json
         .decode(jsonString)
@@ -103,7 +103,7 @@ class TracksState extends State<Tracks> {
   }
 
   _unloadTrack(int index, bool showNotification) async {
-    String? current = await Preferences().get('currentTrack');
+    String? current = Preferences().get('currentTrack');
     GpxFile file = _files[index];
     if (current == file.path) {
       await Preferences().remove('currentTrack');
@@ -123,7 +123,7 @@ class TracksState extends State<Tracks> {
   _removeFile(context, index) async {
     GpxFile file = _files.removeAt(index);
     await Preferences().set('files', json.encode(_files));
-    String? current = await Preferences().get('currentTrack');
+    String? current = Preferences().get('currentTrack');
     if (current == file.path) {
       await Preferences().remove('currentTrack');
     }

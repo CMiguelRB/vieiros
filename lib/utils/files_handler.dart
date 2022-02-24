@@ -22,7 +22,7 @@ class FilesHandler {
       } else {
         return '###file_exists';
       }
-      String? jsonString = await Preferences().get('files');
+      String? jsonString = Preferences().get('files');
       List<GpxFile> files = [];
       if (jsonString != null) {
         files = (json.decode(jsonString) as List)
