@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:vieiros/components/vieiros_dialog.dart';
 import 'package:vieiros/components/vieiros_notification.dart';
@@ -81,14 +82,19 @@ class TracksState extends State<Tracks> {
       }
       String? path = result.files.single.path;
       final xmlFile = File(path!);
-      Gpx gpx = GpxReader().fromString(
-          XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString());
+      String gpxString = XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString();
+      Gpx gpx = GpxReader().fromString(gpxString);
+      String? name = gpx.trks[0].name;
+      name ??= result.files.single.name;
+      String directory = (await getApplicationDocumentsDirectory()).path;
+      String newPath = directory + '/' + name.replaceAll(' ', '_') + '.gpx';
+      FilesHandler().writeFile(XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString(), name, false);
       setState(() {
-        String? name = gpx.trks[0].name;
-        name ??= result.files.single.name;
-        _files.add(GpxFile(name: name, path: result.files.single.path));
+        /*String? name = gpx.trks[0].name;
+        name ??= result.files.single.name;*/
+        _files.add(GpxFile(name: name!, path: newPath));
       });
-      await Preferences().set('files', json.encode(_files));
+      //await Preferences().set('files', json.encode(_files));
     }
   }
 
