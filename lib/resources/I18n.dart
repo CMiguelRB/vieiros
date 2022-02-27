@@ -13,6 +13,8 @@ class I18n {
       "common_empty_name": "Empty name",
       "common_save": "Save",
       "common_name": "Name",
+      "common_close": "Close",
+      "common_app_name": "Vieiros",
 
       "appbar_tab_tracks": "Tracks",
       "appbar_tab_map": "Map",
@@ -27,6 +29,7 @@ class I18n {
       "tracks_file_validation_error": "Not a valid gpx file",
       "tracks_unloaded": "Track cleared from the map",
       "tracks_delete_route": "Delete route",
+      "tracks_once_permissions_disclaimer": "Due to the new Android's permission policies, \"Allow all the time\" permission is now needed for tracking the background location. Otherwise, Vieiros won't be able to track your path while being in the background.\n\nYour location data will be only used locally, it's yours, and stored as a GPX track for your own use.",
 
       "map_waypoint": "Waypoint name",
       "map_channel_name_location": "Background location service",
@@ -75,7 +78,8 @@ class I18n {
       "settings_donate": "Donate",
       "settings_dark_mode_item_system": "System default",
       "settings_dark_mode_item_light": "Light theme",
-      "settings_dark_mode_item_dark": "Dark theme"
+      "settings_dark_mode_item_dark": "Dark theme",
+      "settings_third_party_thanks": "This application would not exist without the support of these great third-party libraries."
     },
     "es":{
       "common_ok": "Aceptar",
@@ -87,6 +91,8 @@ class I18n {
       "common_empty_name": "Introduce un nombre",
       "common_save": "Guardar",
       "common_name": "Nombre",
+      "common_close": "Cerrar",
+      "common_app_name": "Vieiros",
 
       "appbar_tab_tracks": "Rutas",
       "appbar_tab_map": "Mapa",
@@ -101,6 +107,7 @@ class I18n {
       "tracks_file_validation_error": "Archivo gpx no válido",
       "tracks_unloaded": "Ruta limpiada del mapa",
       "tracks_delete_route": "Eliminar ruta",
+      "tracks_once_permissions_disclaimer": "A causa de las nuevas directivas de permisos de Android, ahora el permiso \"Permitir siempre\" es requerido para grabar la ubicación en segundo plano. De otra manera, Vieiros no sería capaz de grabar tu camino mientras esté en segundo plano.\n\n Tus datos de ubicación sólo serán usados localmente, son tuyos, y almacenados como ruta GPX para tu propio uso.",
 
       "map_waypoint": "Nombre punto de ruta",
       "map_channel_name_location": "Servicio ubicación segundo plano",
@@ -149,7 +156,8 @@ class I18n {
       "settings_donate": "Donar",
       "settings_dark_mode_item_system": "Predeterminado del sistema",
       "settings_dark_mode_item_light": "Tema claro",
-      "settings_dark_mode_item_dark": "Tema oscuro"
+      "settings_dark_mode_item_dark": "Tema oscuro",
+      "settings_third_party_thanks": "Esta aplicación no existiría sin el apoyo de estas geniales librerías de terceros."
     },
     "gl":{
       "common_ok": "Aceptar",
@@ -161,7 +169,8 @@ class I18n {
       "common_empty_name": "Introduce un nome",
       "common_save": "Gardar",
       "common_name": "Nome",
-
+      "common_close": "Pechar",
+      "common_app_name": "Vieiros",
 
       "appbar_tab_tracks": "Rutas",
       "appbar_tab_map": "Mapa",
@@ -176,11 +185,12 @@ class I18n {
       "tracks_file_validation_error": "Arquivo gpx non válido.",
       "tracks_unloaded": "Ruta limpada do mapa",
       "tracks_delete_route": "Eliminar ruta",
+      "tracks_once_permissions_disclaimer": "A causa das novas directivas de permisos de Android, agora o permiso \"Permitir sempre\" é requerido para gravar a localización en segundo plano. Doutra maneria, Vieiros non sería capaz de gravar o teu camiño mentres estea en segundo plano.\n\n Os teus datos de localización só serán usados localmente, son teus, e almacenados coma ruta GPX para o teu propio uso.",
 
       "map_waypoint": "Nome punto de ruta",
       "map_notification_title": "Gravando ruta...",
-      "map_channel_name_location": "Servicio ubicación segundo plano",
-      "map_notification_desc": "Vieiros está obtendo a túa ubicación",
+      "map_channel_name_location": "Servicio localización segundo plano",
+      "map_notification_desc": "Vieiros está obtendo a túa localización",
       "map_off_track_notification_title": "Fóra de ruta",
       "map_off_track_notification_desc": "¡Estaste a alonxar da ruta!",
       "map_start_recording_message": "Comenzado a ruta!",
@@ -193,7 +203,7 @@ class I18n {
       "map_voice_notification_pace": "Ritmo: ",
       "map_stop_save": "¿Rematar de gravar e gardar a ruta?",
       "map_track_name": "Nome da ruta",
-      "map_permissions_request": "Esta app require permisos de ubicación en todo momento para obter a túa ubicación incluso cando a teñas en segundo plano.",
+      "map_permissions_request": "Esta app require permisos de localización en todo momento para obter a túa localización incluso cando a teñas en segundo plano.",
       "map_grant_permissions": "Conceder permisos",
       "map_finish_tracking": "Rematar gravación",
       "map_track_pin_start": "Comezo",
@@ -224,7 +234,8 @@ class I18n {
       "settings_donate": "Doar",
       "settings_dark_mode_item_system": "Predeterminado do sistema",
       "settings_dark_mode_item_light": "Tema claro",
-      "settings_dark_mode_item_dark": "Tema escuro"
+      "settings_dark_mode_item_dark": "Tema escuro",
+      "settings_third_party_thanks": "Esta aplicación non existiría de non ser polo apoio destas xeniais librarías de terceiros."
     }
   };
 

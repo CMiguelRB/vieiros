@@ -46,8 +46,12 @@ class _Home extends State<Home>
   final _mapKey = GlobalKey<MapState>();
   final _trackKey = GlobalKey<TracksState>();
   final _infoKey = GlobalKey<InfoState>();
+  final _settingsKey = GlobalKey<SettingsState>();
 
   void _onTabItemTapped(int index) async {
+    if(_settingsKey.currentState != null && _settingsKey.currentState!.tpOpen){
+      _settingsKey.currentState!.closeTp();
+    }
     if (index == 1) {
       widget.loadedTrack.clear();
       if (_mapKey.currentState != null) {
@@ -134,7 +138,7 @@ class _Home extends State<Home>
           key: _infoKey,
           currentTrack: _currentTrack,
           loadedTrack: widget.loadedTrack),
-      const Settings()
+      Settings(key: _settingsKey)
     ];
     _tabController = TabController(
         vsync: this, length: _tabs.length, initialIndex: _tabIndex);
@@ -288,7 +292,7 @@ class _Home extends State<Home>
                 : null,
             bottomNavigationBar: BottomAppBar(
                 shape: const CircularNotchedRectangle(),
-                notchMargin: 4.0,
+                notchMargin: 2.0,
                 clipBehavior: Clip.antiAlias,
                 child: BottomNavigationBar(
                     type: BottomNavigationBarType.fixed,
