@@ -72,9 +72,7 @@ class Calc {
     return avgPaceSec;
   }
 
-  String getSunsetTime(CurrentTrack currentTrack, DateTime sunset) {
-    double? lat = currentTrack.positions.last.latitude;
-    double? lon = currentTrack.positions.last.longitude;
+  String getSunsetTime(double? lat, double? lon, DateTime sunset) {
     if (lat != null && lon != null) {
       return sunset.hour.toString() + ':' + (sunset.minute.toString().length > 1 ? sunset.minute.toString() : "0"+sunset.minute.toString());
     }

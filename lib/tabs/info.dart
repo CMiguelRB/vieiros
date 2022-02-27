@@ -19,6 +19,7 @@ import 'package:vieiros/resources/i18n.dart';
 import 'package:vieiros/resources/themes.dart';
 import 'package:vieiros/utils/calc.dart';
 import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:vieiros/utils/permission_handler.dart';
 
 class Info extends StatefulWidget {
   final CurrentTrack currentTrack;
@@ -111,17 +112,34 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  _getDaylight() {
-    _sunset = getSunriseSunset(
-            widget.currentTrack.positions.last.latitude!,
-            widget.currentTrack.positions.last.longitude!,
+  _getDaylight() async {
+    if(widget.currentTrack.isRecording){
+      _sunset = getSunriseSunset(
+          widget.currentTrack.positions.last.latitude!,
+          widget.currentTrack.positions.last.longitude!,
+          DateTime.now().timeZoneOffset.inHours,
+          DateTime.now().toLocal())
+          .sunset;
+      setState(() {
+        _sunsetTime = Calc().getSunsetTime(widget.currentTrack.positions.last.latitude, widget.currentTrack.positions.last.longitude, _sunset!);
+        _toSunset = Calc().getDaylight(_sunset!);
+      });
+    }else{
+      bool _hasPermissions = await PermissionHandler().handleLocationPermission();
+      if (_hasPermissions) {
+        Position position = await Geolocator.getCurrentPosition();
+        _sunset = getSunriseSunset(
+            position.latitude,
+            position.longitude,
             DateTime.now().timeZoneOffset.inHours,
             DateTime.now().toLocal())
-        .sunset;
-    setState(() {
-      _sunsetTime = Calc().getSunsetTime(widget.currentTrack, _sunset!);
-      _toSunset = Calc().getDaylight(_sunset!);
-    });
+            .sunset;
+        setState(() {
+          _sunsetTime = Calc().getSunsetTime(position.latitude, position.longitude, _sunset!);
+          _toSunset = Calc().getDaylight(_sunset!);
+        });
+      }
+    }
   }
 
   loadTrack(path) async {
@@ -342,10 +360,10 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         textBaseline: TextBaseline.alphabetic,
                         children: [
-                          DaytimeWidget(
+                          InkWell(onTap: _getDaylight, child:DaytimeWidget(
                               lightMode: lightMode,
                               sunsetTime: _sunsetTime,
-                              toSunset: _toSunset),
+                              toSunset: _toSunset)),
                           PaceWidget(
                               lightMode: lightMode,
                               avgPace: _avgPace,

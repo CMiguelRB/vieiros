@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:vieiros/components/vieiros_dialog.dart';
@@ -90,11 +91,8 @@ class TracksState extends State<Tracks> {
       String newPath = directory + '/' + name.replaceAll(' ', '_') + '.gpx';
       FilesHandler().writeFile(XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString(), name, false);
       setState(() {
-        /*String? name = gpx.trks[0].name;
-        name ??= result.files.single.name;*/
         _files.add(GpxFile(name: name!, path: newPath));
       });
-      //await Preferences().set('files', json.encode(_files));
     }
   }
 
@@ -158,11 +156,27 @@ class TracksState extends State<Tracks> {
   void initState() {
     super.initState();
     _loadPrefs('');
+    _showDisclaimer();
   }
 
   @override
   void dispose() {
     super.dispose();
+  }
+
+  _showDisclaimer() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    if(Platform.isAndroid && androidInfo.version.sdkInt! >= 30 && Preferences().get("disclaimer_accepted") == null){
+      VieirosDialog().infoDialog(context, I18n.translate('common_app_name'), {
+        'common_ok': () => _acceptDisclaimer()
+      },bodyTag: I18n.translate('tracks_once_permissions_disclaimer'));
+    }
+  }
+
+  _acceptDisclaimer(){
+    Preferences().set("disclaimer_accepted", "true");
+    Navigator.of(context).pop(true);
   }
 
   _onChanged(value) {
