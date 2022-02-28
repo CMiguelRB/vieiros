@@ -148,7 +148,9 @@ class SettingsState extends State<Settings> {
                                         ),
                                         children: [
                                           Container(
-                                              color: Colors.white,
+                                              color: lightMode
+                                                  ? Colors.white
+                                                  : CustomColors.backgroundDark,
                                               padding: const EdgeInsets.all(5),
                                               child: Text(
                                                   thirdParties.elementAt(
