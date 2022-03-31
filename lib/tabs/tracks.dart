@@ -56,9 +56,9 @@ class TracksState extends State<Tracks> {
         files.removeAt(i);
       }
       if (value != '' &&
-          !files[i].name.toLowerCase()
-              .contains(value.toLowerCase())) {
+          !files[i].name.toLowerCase().contains(value.toLowerCase())) {
         files.removeAt(i);
+        i--;
       }
     }
     setState(() {
@@ -67,42 +67,59 @@ class TracksState extends State<Tracks> {
   }
 
   Future<void> openFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.any,
-    );
+    FilePickerResult? result = await FilePicker.platform
+        .pickFiles(type: FileType.any, allowMultiple: true);
     if (result != null) {
-      if (result.files.single.name
-              .split('.')[result.files.single.name.split('.').length - 1] !=
-          'gpx') {
-        VieirosNotification().showNotification(
-            context, 'tracks_file_validation_error', NotificationType.error);
-        return;
+      if (result.isSinglePick) {
+        _addFile(result.files.single);
+      } else {
+        for(var i = 0; i<result.files.length; i++){
+          _addFile(result.files.elementAt(i));
+        }
       }
-      for (var i = 0; i < _files.length; i++) {
-        if (_files[i].path == result.files.single.path) return;
-      }
-      String? path = result.files.single.path;
-      final xmlFile = File(path!);
-      String gpxString = XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString();
-      Gpx gpx = GpxReader().fromString(gpxString);
-      String? name = gpx.trks[0].name;
-      name ??= result.files.single.name;
-      String directory = (await getApplicationDocumentsDirectory()).path;
-      String newPath = directory + '/' + name.replaceAll(' ', '_') + '.gpx';
-      FilesHandler().writeFile(XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString(), name, false);
-      setState(() {
-        _files.add(GpxFile(name: name!, path: newPath));
-      });
     }
+  }
+
+  void _addFile(PlatformFile file) async {
+    if (file.name
+            .split('.')[file.name.split('.').length - 1] !=
+        'gpx') {
+      VieirosNotification().showNotification(
+          context, 'tracks_file_validation_error', NotificationType.error);
+      return;
+    }
+    for (var i = 0; i < _files.length; i++) {
+      if (_files[i].path == file.path) return;
+    }
+    String? path = file.path;
+    final xmlFile = File(path!);
+    String gpxString =
+        XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString();
+    Gpx gpx = GpxReader().fromString(gpxString);
+    String? name = gpx.trks[0].name;
+    name ??= file.name;
+    String directory = (await getApplicationDocumentsDirectory()).path;
+    String newPath = directory + '/' + name.replaceAll(' ', '_') + '.gpx';
+    FilesHandler().writeFile(
+        XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString(),
+        name,
+        false);
+    setState(() {
+      if (_files.indexWhere((element) => element.path == newPath).isNegative) {
+        _files.add(GpxFile(name: name!, path: newPath));
+      }
+    });
   }
 
   void openFileFromIntent(String gpxStringFile) async {
     Gpx gpx = GpxReader().fromString(gpxStringFile);
     String name = gpx.trks[0].name!;
-    String? path = await FilesHandler()
-        .writeFile(gpxStringFile, name, false);
+    String? path = await FilesHandler().writeFile(gpxStringFile, name, false);
     setState(() {
-      if (path != null) _files.add(GpxFile(name: name, path: path));
+      if (path != null &&
+          _files.indexWhere((element) => element.path == path).isNegative) {
+        _files.add(GpxFile(name: name, path: path));
+      }
     });
   }
 
@@ -118,7 +135,7 @@ class TracksState extends State<Tracks> {
         widget.loadedTrack.clear();
       }
     });
-    if(showNotification){
+    if (showNotification) {
       VieirosNotification()
           .showNotification(context, 'tracks_unloaded', NotificationType.info);
     }
@@ -136,11 +153,7 @@ class TracksState extends State<Tracks> {
         widget.clearTrack();
         widget.loadedTrack.clear();
       }
-      String? path = file.path;
-      if (path != null) {
-        File deleteFile = File(path);
-        deleteFile.delete();
-      }
+      FilesHandler().removeFile(file.path);
       Navigator.pop(context, I18n.translate("common_ok"));
     });
   }
@@ -156,7 +169,7 @@ class TracksState extends State<Tracks> {
   void initState() {
     super.initState();
     _loadPrefs('');
-    _showDisclaimer();
+    //_showDisclaimer();
   }
 
   @override
@@ -164,28 +177,13 @@ class TracksState extends State<Tracks> {
     super.dispose();
   }
 
-  _showDisclaimer() async {
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    if(Platform.isAndroid && androidInfo.version.sdkInt! >= 30 && Preferences().get("disclaimer_accepted") == null){
-      VieirosDialog().infoDialog(context, I18n.translate('common_app_name'), {
-        'common_ok': () => _acceptDisclaimer()
-      },bodyTag: I18n.translate('tracks_once_permissions_disclaimer'));
-    }
-  }
-
-  _acceptDisclaimer(){
-    Preferences().set("disclaimer_accepted", "true");
-    Navigator.of(context).pop(true);
-  }
-
   _onChanged(value) {
     _loadPrefs(_controller.value.text);
   }
 
   _clearValue() {
-      _controller.clear();
-      _loadPrefs(_controller.value.text);
+    _controller.clear();
+    _loadPrefs(_controller.value.text);
   }
 
   @override
@@ -202,8 +200,15 @@ class TracksState extends State<Tracks> {
                 onChanged: _onChanged,
                 controller: _controller,
                 suffix: IconButton(
-                    icon: Icon(_controller.value.text == '' ? Icons.search : Icons.clear, color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
-                    onPressed: _controller.value.text == '' ? null : _clearValue))),
+                    icon: Icon(
+                        _controller.value.text == ''
+                            ? Icons.search
+                            : Icons.clear,
+                        color: lightMode
+                            ? CustomColors.subText
+                            : CustomColors.subTextDark),
+                    onPressed:
+                        _controller.value.text == '' ? null : _clearValue))),
         Expanded(
             child: _files.isEmpty
                 ? Container(
@@ -224,7 +229,11 @@ class TracksState extends State<Tracks> {
                       return InkWell(
                         child: Card(
                             elevation: 0,
-                            color: _loadedElement ? (lightMode ? CustomColors.trackBackgroundLight : CustomColors.trackBackgroundDark ) : Colors.black12,
+                            color: _loadedElement
+                                ? (lightMode
+                                    ? CustomColors.trackBackgroundLight
+                                    : CustomColors.trackBackgroundDark)
+                                : Colors.black12,
                             child: Padding(
                                 padding: EdgeInsets.only(
                                     left: _loadedElement ? 0 : 16, right: 8),

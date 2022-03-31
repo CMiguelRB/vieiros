@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:vieiros/components/vieiros_select.dart';
 import 'package:vieiros/components/vieiros_switch.dart';
 import 'package:vieiros/model/tp_library.dart';
@@ -80,13 +79,6 @@ class SettingsState extends State<Settings> {
       _voiceAlerts = value;
       Preferences().set("voice_alerts", value.toString());
     });
-  }
-
-  void _donate() async {
-    String url = 'https://www.paypal.com/donate?hosted_button_id=GGNA5HGUATFFQ';
-    if (await canLaunch(url)) {
-      launch(url);
-    }
   }
 
   closeTp() {
@@ -232,18 +224,6 @@ class SettingsState extends State<Settings> {
               titleTag: 'settings_voice_alerts',
               descTag: 'settings_voice_alerts_desc')
         ]),
-        const Spacer(),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-              shape: const StadiumBorder(), elevation: 0),
-          onPressed: _donate,
-          child: Row(mainAxisSize: MainAxisSize.min, children: [
-            Container(
-                margin: const EdgeInsets.only(right: 10),
-                child: const Icon(Icons.euro)),
-            Text(I18n.translate('settings_donate'))
-          ]),
-        ),
         const Spacer()
       ])),
       Column(

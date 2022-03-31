@@ -35,6 +35,16 @@ class FilesHandler {
     }
     return null;
   }
+  
+  void removeFile(String? path) async {
+    if(path != null){
+      bool hasPermission = await PermissionHandler().handleWritePermission();
+      if (hasPermission) {
+        File deleteFile = File(path);
+        deleteFile.delete();
+      }
+    }
+  }
 
   FilesHandler._privateConstructor();
 
