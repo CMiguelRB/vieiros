@@ -13,17 +13,17 @@ class PermissionHandler {
   }
 
   Future<bool> handleLocationPermission() async{
-    bool _hasPermission = await Permission.locationAlways.isGranted;
+    bool _hasPermission = await Permission.locationWhenInUse.isGranted;
     if (_hasPermission) return true;
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    if (Platform.isAndroid && androidInfo.version.sdkInt! >= 30) {
+    /*if (Platform.isAndroid && androidInfo.version.sdkInt! >= 30) {
       final status = await Permission.location.request();
       if (status == PermissionStatus.permanentlyDenied) {
         return await Geolocator.openLocationSettings();
       }
-    }
-    final status = await Permission.locationAlways.request();
+    }*/
+    final status = await Permission.locationWhenInUse.request();
     return status == PermissionStatus.granted;
   }
 
