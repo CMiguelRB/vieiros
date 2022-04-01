@@ -15,6 +15,7 @@ class I18n {
       "common_name": "Name",
       "common_close": "Close",
       "common_app_name": "Vieiros",
+      "common_share": "Share",
 
       "appbar_tab_tracks": "Tracks",
       "appbar_tab_map": "Map",
@@ -93,6 +94,7 @@ class I18n {
       "common_name": "Nombre",
       "common_close": "Cerrar",
       "common_app_name": "Vieiros",
+      "common_share": "Compartir",
 
       "appbar_tab_tracks": "Rutas",
       "appbar_tab_map": "Mapa",
@@ -171,6 +173,7 @@ class I18n {
       "common_name": "Nome",
       "common_close": "Pechar",
       "common_app_name": "Vieiros",
+      "common_share": "Compartir",
 
       "appbar_tab_tracks": "Rutas",
       "appbar_tab_map": "Mapa",

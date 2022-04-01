@@ -188,7 +188,7 @@ class TracksState extends State<Tracks> {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return Container(
+        return Ink(
             height: MediaQuery.of(context).size.height / 5,
             padding: const EdgeInsets.only(top: 20),
             color: lightMode
@@ -200,6 +200,7 @@ class TracksState extends State<Tracks> {
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
                   InkWell(
+                      enableFeedback: true,
                       child: Container(
                           padding: const EdgeInsets.symmetric(
                               vertical: 10, horizontal: 20),
@@ -211,10 +212,11 @@ class TracksState extends State<Tracks> {
                                 Container(
                                     margin: const EdgeInsets.only(right: 20),
                                     child: const Icon(Icons.share)),
-                                const Text('Share')
+                                Text(I18n.translate('common_share'))
                               ])),
                       onTap: () => _shareFile(index)),
                   InkWell(
+                      enableFeedback: true,
                       child: Container(
                           padding: const EdgeInsets.symmetric(
                               vertical: 10, horizontal: 20),
@@ -226,7 +228,7 @@ class TracksState extends State<Tracks> {
                                 Container(
                                     margin: const EdgeInsets.only(right: 20),
                                     child: const Icon(Icons.delete)),
-                                const Text('Delete')
+                                Text(I18n.translate('common_delete'))
                               ])),
                       onTap: () => _showDeleteDialog(index))
                 ])));
