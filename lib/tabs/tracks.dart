@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:device_info_plus/device_info_plus.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:vieiros/components/vieiros_dialog.dart';
@@ -73,7 +73,7 @@ class TracksState extends State<Tracks> {
       if (result.isSinglePick) {
         _addFile(result.files.single);
       } else {
-        for(var i = 0; i<result.files.length; i++){
+        for (var i = 0; i < result.files.length; i++) {
           _addFile(result.files.elementAt(i));
         }
       }
@@ -81,9 +81,7 @@ class TracksState extends State<Tracks> {
   }
 
   void _addFile(PlatformFile file) async {
-    if (file.name
-            .split('.')[file.name.split('.').length - 1] !=
-        'gpx') {
+    if (file.name.split('.')[file.name.split('.').length - 1] != 'gpx') {
       VieirosNotification().showNotification(
           context, 'tracks_file_validation_error', NotificationType.error);
       return;
@@ -186,6 +184,74 @@ class TracksState extends State<Tracks> {
     _loadPrefs(_controller.value.text);
   }
 
+  _showBottomSheet(int index, bool lightMode) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+            height: MediaQuery.of(context).size.height / 5,
+            padding: const EdgeInsets.only(top: 20),
+            color: lightMode
+                ? CustomColors.background
+                : CustomColors.backgroundDark,
+            child: Center(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                  InkWell(
+                      child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 20),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Container(
+                                    margin: const EdgeInsets.only(right: 20),
+                                    child: const Icon(Icons.share)),
+                                const Text('Share')
+                              ])),
+                      onTap: () => _shareFile(index)),
+                  InkWell(
+                      child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 20),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                Container(
+                                    margin: const EdgeInsets.only(right: 20),
+                                    child: const Icon(Icons.delete)),
+                                const Text('Delete')
+                              ])),
+                      onTap: () => _showDeleteDialog(index))
+                ])));
+      },
+    );
+  }
+
+  _shareFile(int index) {
+    Navigator.of(context).pop();
+    Share.shareFiles([_files[index].path!], text: _files[index].name);
+  }
+
+  _showDeleteDialog(int index) {
+    Navigator.of(context).pop();
+    VieirosDialog().infoDialog(
+      context,
+      'tracks_delete_route',
+      {
+        'common_ok': () => _removeFile(context, index),
+        'common_cancel': () => Navigator.pop(context, '')
+      },
+      bodyTag: 'common_confirm',
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     bool lightMode = Provider.of<ThemeProvider>(context).isLightMode;
@@ -254,20 +320,9 @@ class TracksState extends State<Tracks> {
                                               overflow: TextOverflow.ellipsis)),
                                       IconButton(
                                           alignment: Alignment.centerRight,
-                                          onPressed: () =>
-                                              VieirosDialog().infoDialog(
-                                                  context,
-                                                  'tracks_delete_route',
-                                                  {
-                                                    'common_ok': () =>
-                                                        _removeFile(
-                                                            context, index),
-                                                    'common_cancel': () =>
-                                                        Navigator.pop(
-                                                            context, '')
-                                                  },
-                                                  bodyTag: 'common_confirm'),
-                                          icon: const Icon(Icons.delete))
+                                          onPressed: () => _showBottomSheet(
+                                              index, lightMode),
+                                          icon: const Icon(Icons.more_vert))
                                     ]))),
                         onTap: () => _navigate(index),
                       );
