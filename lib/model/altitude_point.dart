@@ -1,6 +1,6 @@
 class AltitudePoint{
   int totalDistance;
-  num altitude;
+  double altitude;
 
   AltitudePoint(this.totalDistance, this.altitude);
 }

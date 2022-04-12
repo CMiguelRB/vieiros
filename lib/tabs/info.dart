@@ -2,7 +2,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:sunrise_sunset_calc/sunrise_sunset_calc.dart';
 import 'package:vieiros/components/info/altitude_widget.dart';
-import 'package:vieiros/components/info/chart_point_info_widget.dart';
 import 'package:vieiros/components/info/chart_widget.dart';
 import 'package:vieiros/components/info/daytime_widget.dart';
 import 'package:vieiros/components/info/distance_widget.dart';
@@ -18,7 +17,6 @@ import 'package:vieiros/resources/custom_colors.dart';
 import 'package:vieiros/resources/i18n.dart';
 import 'package:vieiros/resources/themes.dart';
 import 'package:vieiros/utils/calc.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:vieiros/utils/permission_handler.dart';
 
 class Info extends StatefulWidget {
@@ -37,7 +35,6 @@ class Info extends StatefulWidget {
 
 class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   int _slideState = 0;
-  AltitudePoint? _selectedPoint;
   String _distanceUnit = 'Km';
   String _distance = '0';
   String _totalTime = '--:--:--';
@@ -54,9 +51,10 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   String _sunsetTime = '--:--';
   String _toSunset = '--:--';
   Color _chartColor = CustomColors.accent;
+  Color _chartColorFainted = CustomColors.faintedFaintedAccent;
   bool _started = false;
-  List<charts.Series<AltitudePoint, num>> _altitudeDataLoaded = [];
-  List<charts.Series<AltitudePoint, num>> _altitudeDataCurrent = [];
+  List<AltitudePoint> _altitudeDataLoaded = [];
+  List<AltitudePoint> _altitudeDataCurrent = [];
 
   final Map<int, Widget> _tabMap = {
     0: Text(I18n.translate('info_current_track')),
@@ -161,6 +159,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
       if (mounted) {
         setState(() {
           _chartColor = CustomColors.ownPath;
+          _chartColorFainted = CustomColors.ownPathFainted;
           _avgPace = _avgPaceMin + ':' + _avgPaceSec;
           _distance = _totalDistance > 1000
               ? (_totalDistance / 1000).toStringAsFixed(2)
@@ -173,11 +172,11 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
             _altitudeCurrent =
                 widget.currentTrack.positions.last.altitude!.round().toString();
           }
-          List<AltitudePoint> data = _altitudeDataCurrent.first.data;
+          List<AltitudePoint> data = _altitudeDataCurrent;
           if (data.isEmpty) {
             int _totalDistanceDataCurrent = 0;
             for (int i = 0; i < widget.currentTrack.positions.length; i++) {
-              _altitudeDataCurrent.first.data.add(AltitudePoint(
+              _altitudeDataCurrent.add(AltitudePoint(
                   _totalDistanceDataCurrent,
                   widget.currentTrack.positions[i].altitude!));
               if (i > 0) {
@@ -191,7 +190,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
               }
             }
           } else if (data.last.totalDistance != _totalDistance) {
-            _altitudeDataCurrent.first.data.add(AltitudePoint(
+            _altitudeDataCurrent.add(AltitudePoint(
                 _totalDistance, widget.currentTrack.positions.last.altitude!));
           }
           _loadingAltitudeChart = false;
@@ -212,6 +211,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
       if (mounted) {
         setState(() {
           _chartColor = CustomColors.accent;
+          _chartColorFainted = CustomColors.faintedFaintedAccent;
           _avgPace = _avgPaceMin + ':' + _avgPaceSec;
           _distance = _totalDistance > 1000
               ? (_totalDistance / 1000).toStringAsFixed(2)
@@ -227,18 +227,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
               .split('.')
               .first
               .padLeft(8, "0");
-          _altitudeDataLoaded = [
-            charts.Series<AltitudePoint, int>(
-                id: 'altitude',
-                colorFn: (_, __) => charts.Color(
-                    r: _chartColor.red,
-                    g: _chartColor.green,
-                    b: _chartColor.blue),
-                domainFn: (AltitudePoint point, _) => point.totalDistance,
-                measureFn: (AltitudePoint point, _) => point.altitude,
-                strokeWidthPxFn: (datum, index) => 1,
-                data: _altitudePoints)
-          ];
+          _altitudeDataLoaded =  _altitudePoints;
           _loadingAltitudeChart = false;
         });
       }
@@ -252,23 +241,14 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   }
 
   clearLoadedChart() {
-    _altitudeDataLoaded = [
-      charts.Series<AltitudePoint, int>(
-          id: 'altitude',
-          colorFn: (_, __) => charts.Color(
-              r: _chartColor.red, g: _chartColor.green, b: _chartColor.blue),
-          domainFn: (AltitudePoint point, _) => point.totalDistance,
-          measureFn: (AltitudePoint point, _) => point.altitude,
-          strokeWidthPxFn: (datum, index) => 1,
-          data: [])
-    ];
+    _altitudeDataLoaded = [];
   }
 
   void clearScreen() {
     if (mounted) {
       setState(() {
-        _selectedPoint = null;
         _chartColor = CustomColors.accent;
+        _chartColorFainted = CustomColors.faintedFaintedAccent;
         _loadingAltitudeChart = false;
         _totalTime = '--:--:--';
         _distance = '0';
@@ -280,18 +260,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
         _started = false;
         _avgPace = '00:00';
         //_sunsetTime = '--:--';
-        _altitudeDataCurrent = [
-          charts.Series<AltitudePoint, int>(
-              id: 'altitude',
-              colorFn: (_, __) => charts.Color(
-                  r: _chartColor.red,
-                  g: _chartColor.green,
-                  b: _chartColor.blue),
-              domainFn: (AltitudePoint point, _) => point.totalDistance,
-              measureFn: (AltitudePoint point, _) => point.altitude,
-              strokeWidthPxFn: (datum, index) => 1,
-              data: [])
-        ];
+        _altitudeDataCurrent = [];
         clearLoadedChart();
       });
     }
@@ -303,15 +272,6 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
         _slideState = int.parse(value!.toString());
       });
       _loadTrackData();
-    }
-  }
-
-  _onChangeSelectedPoint(charts.SelectionModel model) {
-    final selectedDatum = model.selectedDatum;
-    if (selectedDatum.isNotEmpty && mounted) {
-      setState(() {
-        _selectedPoint = selectedDatum.first.datum;
-      });
     }
   }
 
@@ -387,27 +347,24 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
             Flexible(
                 flex: 1,
                 child: Container(
-                    margin: const EdgeInsets.only(left: 10),
-                    child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          ChartPointInfoWidget(selectedPoint: _selectedPoint),
-                          _loadingAltitudeChart
+                    margin: const EdgeInsets.only(top: 20, bottom: 20, right: 25, left: 5),
+                          child: _loadingAltitudeChart
                               ? const CircularProgressIndicator(
                                   color: CustomColors.accent,
                                 )
-                              : ChartWidget(
+                              :  ChartWidget(
                                   lightMode: lightMode,
                                   altitudeData: _slideState == 0 &&
                                           widget.currentTrack.isRecording
                                       ? _altitudeDataCurrent
                                       : _altitudeDataLoaded,
+                                  chartColor: _chartColor,
+                                  chartColorFainted: _chartColorFainted,
                                   altitude: _altitude,
                                   altitudeMin: _altitudeMin,
-                                  distance: _distance,
-                                  onChangeSelected: _onChangeSelectedPoint)
-                        ])))
+                                  distance: _distance
+                                  )
+                        ))
           ]))
     ]));
   }
