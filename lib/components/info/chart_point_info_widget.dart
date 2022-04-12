@@ -28,7 +28,7 @@ class ChartPointInfoWidget extends StatelessWidget{
               ': ' +
               selectedPoint!.totalDistance
                   .toString() +
-              ' m.'
+              ' m'
               : ''),
           Container(
             margin: const EdgeInsets.only(right: 20),

@@ -5,6 +5,7 @@ class CustomColors {
   static const faintedAccent = Color(0xFFD5D9A3);
   static const faintedFaintedAccent = Color(0xFFE3E3DC);
   static const ownPath = Color(0xFF2280C2);
+  static const ownPathFainted = Color(0xFFD9DCDE);
   static const background = Color(0xFFF1F1EE);
   static const subText = Color(0xFF5A5A5A);
   static const subTextDark = Color(0xffeeeeee);
