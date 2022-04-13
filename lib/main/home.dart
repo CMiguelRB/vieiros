@@ -13,9 +13,6 @@ import 'package:vieiros/tabs/map.dart';
 import 'package:vieiros/tabs/tracks.dart';
 import 'package:vieiros/utils/preferences.dart';
 
-//import 'package:google_sign_in/google_sign_in.dart';
-//import 'package:googleapis/drive/v3.dart';
-
 class Home extends StatefulWidget {
   final LoadedTrack loadedTrack;
 
@@ -153,10 +150,6 @@ class _Home extends State<Home>
 
   _onFabPressed(index, lightMode) {
     if (index == 0 && _trackKey.currentState != null) {
-      /*GoogleSignIn _googleSignIn = GoogleSignIn(
-        scopes: [DriveApi.driveFileScope],
-      );
-      await _googleSignIn.signIn();*/
       _trackKey.currentState!.openFile();
     }
     if (index == 1 && _mapKey.currentState != null) {

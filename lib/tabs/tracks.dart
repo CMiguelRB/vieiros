@@ -167,7 +167,6 @@ class TracksState extends State<Tracks> {
   void initState() {
     super.initState();
     _loadPrefs('');
-    //_showDisclaimer();
   }
 
   @override
