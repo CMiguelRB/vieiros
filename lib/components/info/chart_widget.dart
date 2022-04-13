@@ -13,17 +13,16 @@ class ChartWidget extends StatelessWidget {
   final Color chartColor;
   final Color chartColorFainted;
 
-  const ChartWidget(
-      {Key? key,
-      required this.lightMode,
-      required this.chartColor,
-      required this.chartColorFainted,
-      required this.altitudeData,
-      required this.altitude,
-      required this.altitudeMin,
-      required this.distance,
-      })
-      : super(key: key);
+  const ChartWidget({
+    Key? key,
+    required this.lightMode,
+    required this.chartColor,
+    required this.chartColorFainted,
+    required this.altitudeData,
+    required this.altitude,
+    required this.altitudeMin,
+    required this.distance,
+  }) : super(key: key);
 
   Widget bottomTitleWidgets(double value, TitleMeta meta) {
     String text = '';
@@ -97,15 +96,23 @@ class ChartWidget extends StatelessWidget {
               fitInsideHorizontally: true,
               getTooltipItems: (List<LineBarSpot> spots) {
                 return spots.map((spot) {
-                  return LineTooltipItem(
-                      formatter.format(spot.y) +
-                          ' m (' +
-                          (spot.x / 1000)
-                              .toString()
-                              .padRight(4, '0')
-                              .substring(0, 4) +
-                          ' Km)',
-                      const TextStyle());
+                  double d = spot.x;
+                  String ds;
+                  if (d >= 10000) {
+                    ds = (spot.x / 1000)
+                            .toString()
+                            .padRight(4, '0')
+                            .substring(0, 5) +
+                        ' Km)';
+                  } else {
+                    ds = (spot.x / 1000)
+                            .toString()
+                            .padRight(4, '0')
+                            .substring(0, 4) +
+                        ' Km)';
+                  }
+                  return LineTooltipItem(formatter.format(spot.y) + ' m (' + ds,
+                      const TextStyle(fontSize: 12));
                 }).toList();
               })),
       gridData: FlGridData(
@@ -139,8 +146,9 @@ class ChartWidget extends StatelessWidget {
                         value.toInt() == titleMetaData.max.toInt()) {
                       return Container();
                     }
-                    return  Text(formatter.format(!value.isNaN ? value.toInt() : ''),
-                            style: const TextStyle(fontSize: 10));
+                    return Text(
+                        formatter.format(!value.isNaN ? value.toInt() : ''),
+                        style: const TextStyle(fontSize: 10));
                   },
                   interval: ((double.parse(altitude != '-' ? altitude : '0') -
                                   altitudeMin) /
@@ -155,12 +163,16 @@ class ChartWidget extends StatelessWidget {
                   showTitles: true,
                   reservedSize: 10,
                   getTitlesWidget: (value, titleMetaData) {
-                    if(altitudeData.isEmpty || altitudeData.length == 1) return Container();
-                    try{
-                      if(value.isNaN){
+                    if (altitudeData.isEmpty || altitudeData.length == 1) {
+                      return Container();
+                    }
+                    try {
+                      if (value.isNaN) {
                         return Container();
                       }
-                      if(value.toInt() > (double.parse(distance) * 1000 / 3) * 2 && value.toInt() < titleMetaData.max.toInt()) {
+                      if (value.toInt() >
+                              (double.parse(distance) * 1000 / 3) * 2 &&
+                          value.toInt() < titleMetaData.max.toInt()) {
                         return Container();
                       }
                       return Container(
@@ -168,19 +180,19 @@ class ChartWidget extends StatelessWidget {
                               horizontal: 20, vertical: 0),
                           child: Text(formatter.format(value.toInt()),
                               style: const TextStyle(fontSize: 10)));
-                    } catch(e){return Container();}
-
+                    } catch (e) {
+                      return Container();
+                    }
                   },
-                  interval:
-                      double.parse(distance) * 1000 / 3 > 0
-                          ? double.parse(distance) * 1000 / 3
-                          : 1))),
+                  interval: double.parse(distance) * 1000 / 3 > 0
+                      ? double.parse(distance) * 1000 / 3
+                      : 1))),
       lineBarsData: [
         LineChartBarData(
           belowBarData: BarAreaData(
             show: true,
-            color:
-              Color.fromARGB(150, chartColorFainted.red, chartColorFainted.green, chartColorFainted.blue),
+            color: Color.fromARGB(lightMode ? 150 : 20, chartColorFainted.red,
+                chartColorFainted.green, chartColorFainted.blue),
           ),
           spots: altitudeData
               .map((e) => FlSpot(

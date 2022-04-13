@@ -234,7 +234,7 @@ class SettingsState extends State<Settings> {
           ),
           TextButton(
               onPressed: () => _show(lightMode),
-              child: const Text('Vieiros v1.0.5',
+              child: const Text('Vieiros v1.1.0',
                   style: TextStyle(color: CustomColors.faintedText))),
           Container(
             margin: const EdgeInsets.only(bottom: 10),
