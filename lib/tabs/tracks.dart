@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -67,9 +68,18 @@ class TracksState extends State<Tracks> {
   }
 
   Future<void> openFile() async {
+    Timer(const Duration(milliseconds: 500), () {
+      setState(() {
+        _files.add(GpxFile(name: 'loading', path: '/loading'));
+      });
+    });
+
     FilePickerResult? result = await FilePicker.platform
         .pickFiles(type: FileType.any, allowMultiple: true);
     if (result != null) {
+      setState(() {
+        _files.removeWhere((element) => element.path == '/loading');
+      });
       if (result.isSinglePick) {
         _addFile(result.files.single);
       } else {
@@ -77,6 +87,10 @@ class TracksState extends State<Tracks> {
           _addFile(result.files.elementAt(i));
         }
       }
+    }else{
+      setState(() {
+        _files.removeWhere((element) => element.path == '/loading');
+      });
     }
   }
 
@@ -308,18 +322,19 @@ class TracksState extends State<Tracks> {
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
+                                      _files[index].path == '/loading' ?  SizedBox(width: 20, height: 20,child: CircularProgressIndicator(color: lightMode ? Colors.black : Colors.white, strokeWidth: 2,) ): (
                                       _loadedElement
                                           ? IconButton(
                                               onPressed: () =>
                                                   _unloadTrack(index, true),
                                               icon: const Icon(Icons.landscape))
-                                          : const Text(''),
+                                          : Container()),
                                       Flexible(
                                           fit: FlexFit.tight,
-                                          child: Text(_files[index].name,
+                                          child: Text(_files[index].path == '/loading' ? '' :_files[index].name,
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis)),
-                                      IconButton(
+                                      _files[index].path == '/loading' ? const SizedBox(width: 50, height: 50) : IconButton(
                                           alignment: Alignment.centerRight,
                                           onPressed: () => _showBottomSheet(
                                               index, lightMode),
