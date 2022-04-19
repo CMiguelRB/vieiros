@@ -1,8 +1,13 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart' as geolocator;
+import 'package:image/image.dart' as image;
 import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -11,6 +16,7 @@ import 'package:vieiros/components/vieiros_notification.dart';
 import 'package:vieiros/components/vieiros_text_input.dart';
 import 'package:vieiros/model/current_track.dart';
 import 'package:vieiros/model/loaded_track.dart';
+import 'package:vieiros/model/pk_marker.dart';
 import 'package:vieiros/model/position.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -130,7 +136,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
 
   loadTrack(path) async {
     await widget.loadedTrack.loadTrack(path);
-    loadCurrentTrack();
+    loadLoadedTrack();
   }
 
   clearTrack() {
@@ -139,7 +145,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         _polyline.removeWhere(
             (element) => element.polylineId.value == 'loadedTrack');
         _markers
-            .removeWhere((element) => element.markerId.value != 'recordingPin');
+            .removeWhere((element) => !element.markerId.value.contains('##'));
         for (var element in _currentMarkers) {
           _markers.add(element);
         }
@@ -148,7 +154,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   }
 
   navigateCurrentTrack() async {
-    if(!widget.currentTrack.isRecording){
+    if (!widget.currentTrack.isRecording) {
       final GoogleMapController controller = await _mapController.future;
       if (widget.loadedTrack.gpx != null &&
           _polyline.isNotEmpty &&
@@ -159,7 +165,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  loadCurrentTrack() async {
+  loadLoadedTrack() async {
     clearTrack();
     final GoogleMapController controller = await _mapController.future;
     if (widget.loadedTrack.gpx != null) {
@@ -169,6 +175,22 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         if (element.lat == null || element.lon == null) return;
         addMarkerSet(
             LatLng(element.lat!, element.lon!), true, element.name, controller);
+      }
+      int _referenceDistance = 1000;
+      double _distance = 0;
+      for (int i = 0; i < points.length - 1; i++) {
+        if (i > 1) {
+          _distance = _distance +
+              geolocator.Geolocator.distanceBetween(
+                  points[i].latitude,
+                  points[i].longitude,
+                  points[i - 1].latitude,
+                  points[i - 1].longitude);
+          if (_distance > _referenceDistance) {
+            _referenceDistance += 1000;
+            _setPKMarker(RecordedPosition(points[i].latitude, points[i].longitude, null, null), ((_referenceDistance~/1000)-1).toString());
+          }
+        }
       }
       Polyline polyline = Polyline(
           polylineId: const PolylineId('loadedTrack'),
@@ -185,7 +207,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         });
       }
       if (points.isEmpty) return;
-      if(widget.currentTrack.isRecording) return;
+      if (widget.currentTrack.isRecording) return;
       controller.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(target: points.first, zoom: 14.0)));
     }
@@ -194,8 +216,10 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   centerMapView() async {
     final GoogleMapController controller = await _mapController.future;
     if (widget.currentTrack.positions.isNotEmpty) {
-      controller.animateCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(target: LatLng(widget.currentTrack.positions.last.latitude!, widget.currentTrack.positions.last.longitude!), zoom: 14.0)));
+      controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+          target: LatLng(widget.currentTrack.positions.last.latitude!,
+              widget.currentTrack.positions.last.longitude!),
+          zoom: 14.0)));
     }
   }
 
@@ -221,17 +245,18 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         Calc().addDistance(widget.currentTrack);
         if (widget.currentTrack.positions.length == 1) {
           _marker = Marker(
-              markerId: const MarkerId('recordingPin'),
+              markerId: const MarkerId('recordingPin##'),
               position: LatLng(widget.currentTrack.positions.first.latitude!,
                   widget.currentTrack.positions.first.longitude!),
               icon: icon);
         }
         int dist = widget.currentTrack.distance;
         String? voiceAlerts = Preferences().get("voice_alerts");
-        if (dist > _referenceDistance &&
-            (voiceAlerts == null ||
-                voiceAlerts == 'true')) {
-          VieirosTts().speakDistance(dist, widget.currentTrack.dateTime!);
+        if (dist > _referenceDistance) {
+          _setPKMarker(null, (_referenceDistance~/1000).toString());
+          if(voiceAlerts == null || voiceAlerts == 'true'){
+            VieirosTts().speakDistance(dist, widget.currentTrack.dateTime!);
+          }
           _referenceDistance += 1000;
         }
         if (mounted) {
@@ -256,6 +281,80 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         }
       }
     });
+  }
+
+  Future<Uint8List> _getBytesFromAsset(Uint8List b64Image, int width) async {
+    ui.Codec codec = await ui.instantiateImageCodec(b64Image,
+        targetWidth: width);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+        .buffer
+        .asUint8List();
+  }
+
+  _setPKMarker(RecordedPosition? position, String distance) async {
+    List<dynamic> pksJSON = json.decode(await rootBundle.loadString('assets/pkMarkers.json'));
+    final mergedImage = image.Image(65, 65);
+    String suffix = position != null ? 'l' : 'r';
+    String baseB64 = '';
+    String num1B64 = '';
+    String num2B64 = '';
+    if(int.parse(distance) >= 10){
+      for(int i = 0; i<pksJSON.length;i++){
+        PKMarker base = PKMarker.fromJson(pksJSON[i]);
+        if(base.pk == 'clear'+suffix){
+          baseB64 = base.marker;
+        }
+        if(base.pk == distance.split('')[0]+suffix){
+          num1B64 = base.marker;
+        }
+        if(base.pk == distance.split('')[1]+suffix){
+          num2B64 = base.marker;
+        }
+      }
+      final image1 = image.decodeImage(await _getBytesFromAsset(base64Decode(baseB64), 65));
+      final image2 = image.decodeImage(await _getBytesFromAsset(base64Decode(num1B64), 14));
+      final image3 = image.decodeImage(await _getBytesFromAsset(base64Decode(num2B64), 14));
+      image.copyInto(mergedImage, image1!, blend: false);
+      image.copyInto(mergedImage, image2!, dstX: 18, dstY: 21, blend: false);
+      image.copyInto(mergedImage, image3!, dstX: 32, dstY: 21, blend: false);
+    }else{
+        for(int i = 0; i<pksJSON.length;i++){
+          PKMarker base = PKMarker.fromJson(pksJSON[i]);
+          if(base.pk == 'clear'+suffix){
+            baseB64 = base.marker;
+          }
+          if(base.pk == distance+suffix){
+            num1B64 = base.marker;
+          }
+        }
+        final image1 = image.decodeImage(await _getBytesFromAsset(base64Decode(baseB64), 65));
+        final image2 = image.decodeImage(await _getBytesFromAsset(base64Decode(num1B64), 14));
+        image.copyInto(mergedImage, image1!, blend: false);
+        image.copyInto(mergedImage, image2!, dstX: 25, dstY: 21, blend: false);
+    }
+    final Uint8List markerIcon = await _getBytesFromAsset(image.encodePng(mergedImage) as Uint8List, 65);
+    BitmapDescriptor icon = BitmapDescriptor.fromBytes(markerIcon);
+    Marker _marker;
+    if (position != null) {
+      _marker = Marker(
+          markerId: MarkerId('km' + distance),
+          position: LatLng(position.latitude!-0.000008, position.longitude!),
+          zIndex: 1000,
+          icon: icon);
+      setState(() {
+        _markers.add(_marker);
+      });
+    } else {
+      _marker = Marker(
+          markerId: MarkerId('km' + distance+'##'),
+          position: LatLng(widget.currentTrack.positions.last.latitude!-0.000008, widget.currentTrack.positions.last.longitude!),
+          zIndex: 1000,
+          icon: icon);
+      setState(() {
+        _markers.add(_marker);
+      });
+    }
   }
 
   _checkOffTrack(LocationData event) {
@@ -400,11 +499,10 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     //add namespaces
     gpxString = gpxString.replaceFirst(RegExp('creator="vieiros"'),
         'creator="vieiros" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"');
-    String? result =
-        await FilesHandler().writeFile(gpxString, name, true);
+    String? result = await FilesHandler().writeFile(gpxString, name, true);
     if (result == '###file_exists') {
-      return VieirosNotification()
-          .showNotification(context, I18n.translate('map_save_error_file_exists'), NotificationType.error);
+      return VieirosNotification().showNotification(context,
+          I18n.translate('map_save_error_file_exists'), NotificationType.error);
     }
     Navigator.pop(context, I18n.translate('common_ok'));
     if (mounted) {
@@ -419,7 +517,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         _currentMarkers = [];
         offTrack = false;
         _markers
-            .removeWhere((element) => element.markerId.value == 'recordingPin');
+            .removeWhere((element) => element.markerId.value.contains('##'));
         _currentMarkers = [];
       });
     }
@@ -441,7 +539,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         }
         _currentMarkers = [];
         _markers
-            .removeWhere((element) => element.markerId.value == 'recordingPin');
+            .removeWhere((element) => element.markerId.value.contains('##'));
       });
     }
   }
@@ -464,7 +562,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
-    loadCurrentTrack();
+    loadLoadedTrack();
     getLocation();
     _initializeNotifications();
   }
