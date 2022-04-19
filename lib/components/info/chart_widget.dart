@@ -112,7 +112,7 @@ class ChartWidget extends StatelessWidget {
                         ' Km)';
                   }
                   return LineTooltipItem(formatter.format(spot.y) + ' m (' + ds,
-                      const TextStyle(fontSize: 12));
+                      const TextStyle(fontSize: 14));
                 }).toList();
               })),
       gridData: FlGridData(

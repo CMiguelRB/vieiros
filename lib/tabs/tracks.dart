@@ -299,7 +299,7 @@ class TracksState extends State<Tracks> {
                             color: lightMode
                                 ? CustomColors.subText
                                 : CustomColors.subTextDark)))
-                : ListView.builder(
+                : ReorderableListView.builder(
                     scrollDirection: Axis.vertical,
                     padding: const EdgeInsets.all(8),
                     itemCount: _files.length,
@@ -308,6 +308,7 @@ class TracksState extends State<Tracks> {
                       bool _loadedElement =
                           widget.loadedTrack.path == _files[index].path;
                       return InkWell(
+                        key: Key(_files[index].path!),
                         child: Card(
                             elevation: 0,
                             color: _loadedElement
@@ -342,7 +343,16 @@ class TracksState extends State<Tracks> {
                                     ]))),
                         onTap: () => _navigate(index),
                       );
-                    }))
+                    }, onReorder: (int oldIndex, int newIndex) {
+                      GpxFile _file =  _files.removeAt(oldIndex);
+                      if(oldIndex < newIndex) {
+                        newIndex--;
+                      }
+                      _files.insert(newIndex, _file);
+                      setState(() {_files = _files;});
+                      Preferences().set('files', json.encode(_files));
+
+            },))
       ],
     ));
   }
