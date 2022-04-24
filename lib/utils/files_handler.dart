@@ -29,7 +29,7 @@ class FilesHandler {
             .map((i) => GpxFile.fromJson(i))
             .toList();
       }
-      files.add(GpxFile(name: name, path: path));
+      files.insert(0, GpxFile(name: name, path: path));
       Preferences().set('files', jsonEncode(files));
       return path;
     }

@@ -70,7 +70,7 @@ class TracksState extends State<Tracks> {
   Future<void> openFile() async {
     Timer(const Duration(milliseconds: 500), () {
       setState(() {
-        _files.add(GpxFile(name: 'loading', path: '/loading'));
+        _files.insert(0, GpxFile(name: 'loading', path: '/loading'));
       });
     });
 
@@ -118,7 +118,7 @@ class TracksState extends State<Tracks> {
         false);
     setState(() {
       if (_files.indexWhere((element) => element.path == newPath).isNegative) {
-        _files.add(GpxFile(name: name!, path: newPath));
+        _files.insert(0, GpxFile(name: name!, path: newPath));
       }
     });
   }
@@ -130,7 +130,7 @@ class TracksState extends State<Tracks> {
     setState(() {
       if (path != null &&
           _files.indexWhere((element) => element.path == path).isNegative) {
-        _files.add(GpxFile(name: name, path: path));
+        _files.insert(0, GpxFile(name: name, path: path));
       }
     });
   }
