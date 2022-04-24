@@ -143,7 +143,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     if (mounted) {
       setState(() {
         _polyline.removeWhere(
-            (element) => element.polylineId.value == 'loadedTrack');
+            (element) => element.polylineId.value.contains('loadedTrack'));
         _markers
             .removeWhere((element) => !element.markerId.value.contains('##'));
         for (var element in _currentMarkers) {
@@ -188,29 +188,90 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                   points[i - 1].longitude);
           if (_distance > _referenceDistance) {
             _referenceDistance += 1000;
-            _setPKMarker(RecordedPosition(points[i].latitude, points[i].longitude, null, null), ((_referenceDistance~/1000)-1).toString());
+            _setPKMarker(
+                RecordedPosition(
+                    points[i].latitude, points[i].longitude, null, null),
+                ((_referenceDistance ~/ 1000) - 1).toString());
           }
         }
       }
-      Polyline polyline = Polyline(
-          polylineId: const PolylineId('loadedTrack'),
-          points: points,
-          width: 5,
-          color: CustomColors.accent);
+      String? gradientPolyline = Preferences().get("gradient_polyline");
+      if (gradientPolyline == null || gradientPolyline == "true") {
+        List<LatLng> _pointsAux = [];
+        Wpt? _prevPoint;
+        List<Wpt> _loadedPoints =
+            widget.loadedTrack.gpx!.trks[0].trksegs[0].trkpts;
+        double _startingAltitude = _loadedPoints.first.ele!;
+        String _currentRange = '0';
+        for (int i = 0; i < _loadedPoints.length; i++) {
+          _pointsAux.add(LatLng(_loadedPoints[i].lat!, _loadedPoints[i].lon!));
+          if (i == 0) continue;
+          String range = _checkRange(_loadedPoints[i], _startingAltitude);
+          if (range != _currentRange) {
+            if (_prevPoint != null) {
+              _pointsAux.insert(0, LatLng(_prevPoint.lat!, _prevPoint.lon!));
+            }
+            _pointsAux =
+                _setGradientPolyline(_pointsAux, _currentRange, i.toString());
+            _currentRange = range;
+            _prevPoint = _loadedPoints[i];
+          }
+        }
+        if (_prevPoint != null) {
+          _pointsAux.insert(0, LatLng(_prevPoint.lat!, _prevPoint.lon!));
+        }
+        _currentRange = _checkRange(_loadedPoints.last, _startingAltitude);
+        _pointsAux = _setGradientPolyline(_pointsAux, _currentRange, 'last');
+      } else {
+        Polyline polyline = Polyline(
+            polylineId: const PolylineId('loadedTrack'),
+            points: points,
+            width: 5,
+            color: CustomColors.accent);
+        if (mounted) {
+          setState(() {
+            _polyline.add(polyline);
+          });
+        }
+      }
       addMarkerSet(points.first, false, I18n.translate('map_track_pin_start'),
           controller);
       addMarkerSet(points.last, false, I18n.translate('map_track_pin_finish'),
           controller);
-      if (mounted) {
-        setState(() {
-          _polyline.add(polyline);
-        });
-      }
       if (points.isEmpty) return;
       if (widget.currentTrack.isRecording) return;
       controller.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(target: points.first, zoom: 14.0)));
     }
+  }
+
+  String _checkRange(Wpt _point, double startingAltitude) {
+    int diff = (_point.ele! - startingAltitude).toInt();
+    if (diff <= 100 && diff > -100) return '0';
+    if(diff > 2000 ) return '2000';
+    if(diff < -2000) return '-2000';
+    return diff.toString().substring(0, diff.toString().length - 2) + '00';
+  }
+
+  List<LatLng> _setGradientPolyline(
+      List<LatLng> points, String range, String index) {
+    Color _color = CustomColors.altitudeGradient
+        .where((element) => element['range'] == range)
+        .last['color'];
+    String polIdSuffix = range + index;
+    Polyline polyline = Polyline(
+        polylineId: PolylineId('loadedTrack' + polIdSuffix),
+        points: points,
+        width: 5,
+        endCap: Cap.roundCap,
+        startCap: Cap.roundCap,
+        color: _color);
+    if (mounted) {
+      setState(() {
+        _polyline.add(polyline);
+      });
+    }
+    return [];
   }
 
   centerMapView() async {
@@ -253,8 +314,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         int dist = widget.currentTrack.distance;
         String? voiceAlerts = Preferences().get("voice_alerts");
         if (dist > _referenceDistance) {
-          _setPKMarker(null, (_referenceDistance~/1000).toString());
-          if(voiceAlerts == null || voiceAlerts == 'true'){
+          _setPKMarker(null, (_referenceDistance ~/ 1000).toString());
+          if (voiceAlerts == null || voiceAlerts == 'true') {
             VieirosTts().speakDistance(dist, widget.currentTrack.dateTime!);
           }
           _referenceDistance += 1000;
@@ -284,8 +345,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   }
 
   Future<Uint8List> _getBytesFromAsset(Uint8List b64Image, int width) async {
-    ui.Codec codec = await ui.instantiateImageCodec(b64Image,
-        targetWidth: width);
+    ui.Codec codec =
+        await ui.instantiateImageCodec(b64Image, targetWidth: width);
     ui.FrameInfo fi = await codec.getNextFrame();
     return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
         .buffer
@@ -293,53 +354,60 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   }
 
   _setPKMarker(RecordedPosition? position, String distance) async {
-    List<dynamic> pksJSON = json.decode(await rootBundle.loadString('assets/pkMarkers.json'));
+    List<dynamic> pksJSON =
+        json.decode(await rootBundle.loadString('assets/pkMarkers.json'));
     final mergedImage = image.Image(65, 65);
     String suffix = position != null ? 'l' : 'r';
     String baseB64 = '';
     String num1B64 = '';
     String num2B64 = '';
-    if(int.parse(distance) >= 10){
-      for(int i = 0; i<pksJSON.length;i++){
+    if (int.parse(distance) >= 10) {
+      for (int i = 0; i < pksJSON.length; i++) {
         PKMarker base = PKMarker.fromJson(pksJSON[i]);
-        if(base.pk == 'clear'+suffix){
+        if (base.pk == 'clear' + suffix) {
           baseB64 = base.marker;
         }
-        if(base.pk == distance.split('')[0]+suffix){
+        if (base.pk == distance.split('')[0] + suffix) {
           num1B64 = base.marker;
         }
-        if(base.pk == distance.split('')[1]+suffix){
+        if (base.pk == distance.split('')[1] + suffix) {
           num2B64 = base.marker;
         }
       }
-      final image1 = image.decodeImage(await _getBytesFromAsset(base64Decode(baseB64), 65));
-      final image2 = image.decodeImage(await _getBytesFromAsset(base64Decode(num1B64), 14));
-      final image3 = image.decodeImage(await _getBytesFromAsset(base64Decode(num2B64), 14));
+      final image1 = image
+          .decodeImage(await _getBytesFromAsset(base64Decode(baseB64), 65));
+      final image2 = image
+          .decodeImage(await _getBytesFromAsset(base64Decode(num1B64), 14));
+      final image3 = image
+          .decodeImage(await _getBytesFromAsset(base64Decode(num2B64), 14));
       image.copyInto(mergedImage, image1!, blend: false);
       image.copyInto(mergedImage, image2!, dstX: 18, dstY: 21, blend: false);
       image.copyInto(mergedImage, image3!, dstX: 32, dstY: 21, blend: false);
-    }else{
-        for(int i = 0; i<pksJSON.length;i++){
-          PKMarker base = PKMarker.fromJson(pksJSON[i]);
-          if(base.pk == 'clear'+suffix){
-            baseB64 = base.marker;
-          }
-          if(base.pk == distance+suffix){
-            num1B64 = base.marker;
-          }
+    } else {
+      for (int i = 0; i < pksJSON.length; i++) {
+        PKMarker base = PKMarker.fromJson(pksJSON[i]);
+        if (base.pk == 'clear' + suffix) {
+          baseB64 = base.marker;
         }
-        final image1 = image.decodeImage(await _getBytesFromAsset(base64Decode(baseB64), 65));
-        final image2 = image.decodeImage(await _getBytesFromAsset(base64Decode(num1B64), 14));
-        image.copyInto(mergedImage, image1!, blend: false);
-        image.copyInto(mergedImage, image2!, dstX: 25, dstY: 21, blend: false);
+        if (base.pk == distance + suffix) {
+          num1B64 = base.marker;
+        }
+      }
+      final image1 = image
+          .decodeImage(await _getBytesFromAsset(base64Decode(baseB64), 65));
+      final image2 = image
+          .decodeImage(await _getBytesFromAsset(base64Decode(num1B64), 14));
+      image.copyInto(mergedImage, image1!, blend: false);
+      image.copyInto(mergedImage, image2!, dstX: 25, dstY: 21, blend: false);
     }
-    final Uint8List markerIcon = await _getBytesFromAsset(image.encodePng(mergedImage) as Uint8List, 65);
+    final Uint8List markerIcon =
+        await _getBytesFromAsset(image.encodePng(mergedImage) as Uint8List, 65);
     BitmapDescriptor icon = BitmapDescriptor.fromBytes(markerIcon);
     Marker _marker;
     if (position != null) {
       _marker = Marker(
           markerId: MarkerId('km' + distance),
-          position: LatLng(position.latitude!-0.000008, position.longitude!),
+          position: LatLng(position.latitude! - 0.000008, position.longitude!),
           zIndex: 1000,
           icon: icon);
       setState(() {
@@ -347,8 +415,10 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
       });
     } else {
       _marker = Marker(
-          markerId: MarkerId('km' + distance+'##'),
-          position: LatLng(widget.currentTrack.positions.last.latitude!-0.000008, widget.currentTrack.positions.last.longitude!),
+          markerId: MarkerId('km' + distance + '##'),
+          position: LatLng(
+              widget.currentTrack.positions.last.latitude! - 0.000008,
+              widget.currentTrack.positions.last.longitude!),
           zIndex: 1000,
           icon: icon);
       setState(() {
