@@ -195,8 +195,35 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
           }
         }
       }
-      String? gradientPolyline = Preferences().get("gradient_polyline");
-      if (gradientPolyline == null || gradientPolyline == "true") {
+      String? _gradientPolyline = Preferences().get("gradient_mode");
+      if (_gradientPolyline != null && _gradientPolyline == "slope") {
+        double _slopeDistance = 0;
+        double _slopeReferenceDistance = 50;
+        List<LatLng> _pointsAux = [];
+        List<Wpt> _loadedPoints =
+            widget.loadedTrack.gpx!.trks[0].trksegs[0].trkpts;
+        double _slopeStart = _loadedPoints.first.ele!;
+        for (int i = 0; i < _loadedPoints.length; i++) {
+          _pointsAux.add(LatLng(_loadedPoints[i].lat!, _loadedPoints[i].lon!));
+          if (i > 0) {
+            _slopeDistance = _slopeDistance +
+                geolocator.Geolocator.distanceBetween(
+                    _loadedPoints[i].lat!,
+                    _loadedPoints[i].lon!,
+                    _loadedPoints[i - 1].lat!,
+                    _loadedPoints[i - 1].lon!);
+            if (_slopeDistance > _slopeReferenceDistance) {
+              _slopeReferenceDistance += 50;
+              double _slopeEnd = _loadedPoints[i].ele!;
+              double _gradient =
+                  (_slopeEnd - _slopeStart) * 100 / _slopeDistance;
+              _slopeStart = _slopeEnd;
+              String _gradientColor = _checkGradient(_gradient);
+              //Pick color and set Polyline
+            }
+          }
+        }
+      } else if (_gradientPolyline != null && _gradientPolyline == 'altitude') {
         List<LatLng> _pointsAux = [];
         Wpt? _prevPoint;
         List<Wpt> _loadedPoints =
@@ -248,9 +275,18 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   String _checkRange(Wpt _point, double startingAltitude) {
     int diff = (_point.ele! - startingAltitude).toInt();
     if (diff <= 100 && diff > -100) return '0';
-    if(diff > 2000 ) return '2000';
-    if(diff < -2000) return '-2000';
+    if (diff > 2000) return '2000';
+    if (diff < -2000) return '-2000';
     return diff.toString().substring(0, diff.toString().length - 2) + '00';
+  }
+
+  String _checkGradient(double gradient) {
+    /*int diff = (_point.ele! - startingAltitude).toInt();
+    if (diff <= 100 && diff > -100) return '0';
+    if (diff > 2000) return '2000';
+    if (diff < -2000) return '-2000';
+    return diff.toString().substring(0, diff.toString().length - 2) + '00';*/
+    return '';
   }
 
   List<LatLng> _setGradientPolyline(

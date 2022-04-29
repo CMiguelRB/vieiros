@@ -20,9 +20,10 @@ class Settings extends StatefulWidget {
 
 class SettingsState extends State<Settings> {
   bool _voiceAlerts = true;
-  bool _gradientPolyline = true;
   String? _themeSelectValue = 'system';
   String? _themeSelectTag = '';
+  String? _gradientSelectedValue = 'none';
+  String? _gradientSelectedTag = '';
   bool tpOpen = false;
 
   List<TPLibrary> thirdParties = [];
@@ -33,6 +34,12 @@ class SettingsState extends State<Settings> {
     {"value": 'dark', "tag": 'settings_dark_mode_item_dark'}
   ];
 
+  final List<Map<String, String>> _gradients = [
+    {"value": 'none', "tag": 'settings_gradient_none'},
+    {"value": 'altitude', "tag": 'settings_gradient_altitude'},
+    {"value": 'slope', "tag": 'settings_gradient_slope'}
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -40,14 +47,20 @@ class SettingsState extends State<Settings> {
     if (Preferences().get('dark_mode') != null) {
       _themeSelectValue = Preferences().get('dark_mode');
     }
+    if (Preferences().get('gradient_mode') != null) {
+      _gradientSelectedValue = Preferences().get('gradient_mode');
+    }
     setState(() {
       _voiceAlerts = Preferences().get("voice_alerts") == 'true' ||
           Preferences().get("voice_alerts") == null;
-      _gradientPolyline = Preferences().get("gradient_polyline") == 'true' ||
-          Preferences().get("gradient_polyline") == null;
       for (int i = 0; i < _themes.length; i++) {
         if (_themes[i]['value'] == _themeSelectValue) {
           _themeSelectTag = _themes[i]['tag'];
+        }
+      }
+      for (int i = 0; i < _gradients.length; i++) {
+        if (_gradients[i]['value'] == _gradientSelectedValue) {
+          _gradientSelectedTag = _gradients[i]['tag'];
         }
       }
     });
@@ -78,14 +91,19 @@ class SettingsState extends State<Settings> {
     });
   }
 
+  _onChangeGradientMode(Map<String, String> element, context) {
+    Preferences().set("gradient_mode", element['value']!);
+    setState(() {
+      _gradientSelectedValue = element['value'];
+      _gradientSelectedTag = element['tag'];
+    });
+  }
+
   _onChangeSwitchValue(value, context, element) {
     setState(() {
       switch (element) {
         case "voice_alerts":
           _voiceAlerts = value;
-          break;
-        case "gradient_polyline":
-          _gradientPolyline = value;
           break;
       }
       Preferences().set(element, value.toString());
@@ -240,19 +258,25 @@ class SettingsState extends State<Settings> {
               value: _voiceAlerts,
               titleTag: 'settings_voice_alerts',
               descTag: 'settings_voice_alerts_desc'),
-          Container(
-              margin: const EdgeInsets.only(left: 20, top: 30),
-              alignment: Alignment.centerLeft,
-              child: Text(I18n.translate('settings_track'),
-                  style: const TextStyle(
-                      fontSize: 14, color: CustomColors.accent))),
-          VieirosSwitch(
-              lightMode: lightMode,
-              onChanged: (value, context) =>
-                  _onChangeSwitchValue(value, context, 'gradient_polyline'),
-              value: _gradientPolyline,
-              titleTag: 'settings_gradient_polyline',
-              descTag: 'settings_gradient_polyline_desc')
+          Column(children: [
+            Container(
+                margin: const EdgeInsets.only(left: 20, top: 30),
+                alignment: Alignment.centerLeft,
+                child: Text(I18n.translate('settings_track'),
+                    style: const TextStyle(
+                        fontSize: 14, color: CustomColors.accent))),
+            Container(
+                margin: const EdgeInsets.only(left: 15, top: 5),
+                child: VieirosSelect(
+                    lightMode: lightMode,
+                    onChanged: (element) =>
+                        _onChangeGradientMode(element, context),
+                    titleTag: 'settings_gradient_polyline',
+                    valueTag: _gradientSelectedTag!,
+                    value: _gradientSelectedValue!,
+                    items: _gradients,
+                    context: context))
+          ])
         ]),
         const Spacer()
       ])),
