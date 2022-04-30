@@ -17,6 +17,30 @@ class CustomColors {
   static const trackBackgroundLight = Color(0xFFE2E3D5);
   static const trackBackgroundDark = Color(0xFF4E4E3D);
 
+  static const List<Map<String, dynamic>> slopeGradient = [
+    {"range": "-50", "color": Color(0xFF4fa16c)},
+    {"range": "-45", "color": Color(0xFF51a168)},
+    {"range": "-40", "color": Color(0xFF54a163)},
+    {"range": "-35", "color": Color(0xFF56a15e)},
+    {"range": "-30", "color": Color(0xFF59a159)},
+    {"range": "-25", "color": Color(0xFF5da154)},
+    {"range": "-20", "color": Color(0xFF60a14f)},
+    {"range": "-15", "color": Color(0xFF72a14c)},
+    {"range": "-10", "color": Color(0xFF83a14b)},
+    {"range": "-5", "color": Color(0xFF92a14c)},
+    {"range": "0", "color": Color(0xFF9FA14F)},
+    {"range": "5","color": Color(0xFFc0ba42)},
+    {"range": "10","color": Color(0xFFe6d22c)},
+    {"range": "15","color": Color(0xFFe7c02a)},
+    {"range": "20","color": Color(0xFFe6af2c)},
+    {"range": "25","color": Color(0xFFe8a028)},
+    {"range": "30","color": Color(0xFFe89127)},
+    {"range": "35","color": Color(0xFFe88228)},
+    {"range": "40","color": Color(0xFFe6722c)},
+    {"range": "45","color": Color(0xFFe6612b)},
+    {"range": "50","color": Color(0xFFe64f2c)},
+  ];
+
   static const List<Map<String, dynamic>> altitudeGradient = [
     {"range": "-2000", "color": Color(0xFF2b568a)},
     {"range": "-1900", "color": Color(0xFF16618e)},
