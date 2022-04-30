@@ -169,87 +169,79 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     clearTrack();
     final GoogleMapController controller = await _mapController.future;
     if (widget.loadedTrack.gpx != null) {
-      List<LatLng> points = GpxHandler().getPointsFromGpx(widget.loadedTrack);
       Gpx gpx = widget.loadedTrack.gpx!;
+      List<Wpt> points = gpx.trks.first.trksegs.first.trkpts;
       for (var element in gpx.wpts) {
         if (element.lat == null || element.lon == null) return;
         addMarkerSet(
             LatLng(element.lat!, element.lon!), true, element.name, controller);
       }
+      String? _gradientPolyline = Preferences().get("gradient_mode");
       int _referenceDistance = 1000;
       double _distance = 0;
+      double _slopeReferenceDistance = 100;
+      double _slopeStart = points.first.ele!;
+      Wpt? _prevPoint;
+      List<LatLng> _pointsAux = [];
+      double _startingAltitude = points.first.ele!;
+      String _currentRange = '0';
       for (int i = 0; i < points.length - 1; i++) {
-        if (i > 1) {
+        _pointsAux.add(LatLng(points[i].lat!, points[i].lon!));
+        if (i > 0) {
           _distance = _distance +
-              geolocator.Geolocator.distanceBetween(
-                  points[i].latitude,
-                  points[i].longitude,
-                  points[i - 1].latitude,
-                  points[i - 1].longitude);
+              geolocator.Geolocator.distanceBetween(points[i].lat!,
+                  points[i].lon!, points[i - 1].lat!, points[i - 1].lon!);
           if (_distance > _referenceDistance) {
             _referenceDistance += 1000;
             _setPKMarker(
-                RecordedPosition(
-                    points[i].latitude, points[i].longitude, null, null),
+                RecordedPosition(points[i].lat, points[i].lon, null, null),
                 ((_referenceDistance ~/ 1000) - 1).toString());
+          }
+          if (_gradientPolyline != null && _gradientPolyline == "slope") {
+            if (_distance >= _slopeReferenceDistance) {
+              _slopeReferenceDistance += 100;
+              double _slopeEnd = points[i].ele!;
+              int _gradient = (_slopeEnd - _slopeStart).toInt();
+              _slopeStart = _slopeEnd;
+              String _gradientColor = _checkGradient(_gradient);
+              if (_prevPoint != null) {
+                _pointsAux.insert(0, LatLng(_prevPoint.lat!, _prevPoint.lon!));
+              }
+              _pointsAux = _setGradientPolyline(
+                  _pointsAux, _gradientColor, i.toString(), "slope");
+              _prevPoint = points[i];
+            }
+          }
+          if (_gradientPolyline != null && _gradientPolyline == "altitude") {
+            String range = _checkRange(points[i], _startingAltitude);
+            if (range != _currentRange) {
+              if (_prevPoint != null) {
+                _pointsAux.insert(0, LatLng(_prevPoint.lat!, _prevPoint.lon!));
+              }
+              _pointsAux = _setGradientPolyline(
+                  _pointsAux, _currentRange, i.toString(), "altitude");
+              _currentRange = range;
+              _prevPoint = points[i];
+            }
           }
         }
       }
-      String? _gradientPolyline = Preferences().get("gradient_mode");
+      if (_prevPoint != null) {
+        _pointsAux.insert(0, LatLng(_prevPoint.lat!, _prevPoint.lon!));
+      }
       if (_gradientPolyline != null && _gradientPolyline == "slope") {
-        double _slopeDistance = 0;
-        double _slopeReferenceDistance = 50;
-        List<LatLng> _pointsAux = [];
-        List<Wpt> _loadedPoints =
-            widget.loadedTrack.gpx!.trks[0].trksegs[0].trkpts;
-        double _slopeStart = _loadedPoints.first.ele!;
-        for (int i = 0; i < _loadedPoints.length; i++) {
-          _pointsAux.add(LatLng(_loadedPoints[i].lat!, _loadedPoints[i].lon!));
-          if (i > 0) {
-            _slopeDistance = _slopeDistance +
-                geolocator.Geolocator.distanceBetween(
-                    _loadedPoints[i].lat!,
-                    _loadedPoints[i].lon!,
-                    _loadedPoints[i - 1].lat!,
-                    _loadedPoints[i - 1].lon!);
-            if (_slopeDistance > _slopeReferenceDistance) {
-              _slopeReferenceDistance += 50;
-              double _slopeEnd = _loadedPoints[i].ele!;
-              double _gradient =
-                  (_slopeEnd - _slopeStart) * 100 / _slopeDistance;
-              _slopeStart = _slopeEnd;
-              String _gradientColor = _checkGradient(_gradient);
-              //Pick color and set Polyline
-            }
-          }
-        }
+        double _slopeEnd = points.last.ele!;
+        int _gradient = (_slopeEnd - _slopeStart).toInt();
+        _slopeStart = _slopeEnd;
+        String _gradientColor = _checkGradient(_gradient);
+        _pointsAux =
+            _setGradientPolyline(_pointsAux, _gradientColor, 'last', "slope");
       } else if (_gradientPolyline != null && _gradientPolyline == 'altitude') {
-        List<LatLng> _pointsAux = [];
-        Wpt? _prevPoint;
-        List<Wpt> _loadedPoints =
-            widget.loadedTrack.gpx!.trks[0].trksegs[0].trkpts;
-        double _startingAltitude = _loadedPoints.first.ele!;
-        String _currentRange = '0';
-        for (int i = 0; i < _loadedPoints.length; i++) {
-          _pointsAux.add(LatLng(_loadedPoints[i].lat!, _loadedPoints[i].lon!));
-          if (i == 0) continue;
-          String range = _checkRange(_loadedPoints[i], _startingAltitude);
-          if (range != _currentRange) {
-            if (_prevPoint != null) {
-              _pointsAux.insert(0, LatLng(_prevPoint.lat!, _prevPoint.lon!));
-            }
-            _pointsAux =
-                _setGradientPolyline(_pointsAux, _currentRange, i.toString());
-            _currentRange = range;
-            _prevPoint = _loadedPoints[i];
-          }
-        }
-        if (_prevPoint != null) {
-          _pointsAux.insert(0, LatLng(_prevPoint.lat!, _prevPoint.lon!));
-        }
-        _currentRange = _checkRange(_loadedPoints.last, _startingAltitude);
-        _pointsAux = _setGradientPolyline(_pointsAux, _currentRange, 'last');
+        _currentRange = _checkRange(points.last, _startingAltitude);
+        _pointsAux =
+            _setGradientPolyline(_pointsAux, _currentRange, 'last', "altitude");
       } else {
+        List<LatLng> points = GpxHandler().getPointsFromGpx(widget.loadedTrack);
         Polyline polyline = Polyline(
             polylineId: const PolylineId('loadedTrack'),
             points: points,
@@ -261,14 +253,14 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
           });
         }
       }
-      addMarkerSet(points.first, false, I18n.translate('map_track_pin_start'),
-          controller);
-      addMarkerSet(points.last, false, I18n.translate('map_track_pin_finish'),
-          controller);
+      addMarkerSet(LatLng(points.first.lat!, points.first.lon!), false,
+          I18n.translate('map_track_pin_start'), controller);
+      addMarkerSet(LatLng(points.last.lat!, points.last.lon!), false,
+          I18n.translate('map_track_pin_finish'), controller);
       if (points.isEmpty) return;
       if (widget.currentTrack.isRecording) return;
-      controller.animateCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(target: points.first, zoom: 14.0)));
+      controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+          target: LatLng(points.first.lat!, points.first.lon!), zoom: 14.0)));
     }
   }
 
@@ -280,20 +272,26 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     return diff.toString().substring(0, diff.toString().length - 2) + '00';
   }
 
-  String _checkGradient(double gradient) {
-    /*int diff = (_point.ele! - startingAltitude).toInt();
-    if (diff <= 100 && diff > -100) return '0';
-    if (diff > 2000) return '2000';
-    if (diff < -2000) return '-2000';
-    return diff.toString().substring(0, diff.toString().length - 2) + '00';*/
-    return '';
+  String _checkGradient(int gradient) {
+    gradient = (gradient / 5).round() * 5;
+    if (gradient <= 5 && gradient > 5) return '0';
+    if (gradient > 50) return '50';
+    if (gradient < -50) return '-50';
+    return gradient.toString();
   }
 
   List<LatLng> _setGradientPolyline(
-      List<LatLng> points, String range, String index) {
-    Color _color = CustomColors.altitudeGradient
-        .where((element) => element['range'] == range)
-        .last['color'];
+      List<LatLng> points, String range, String index, String type) {
+    Color _color;
+    if (type == 'slope') {
+      _color = CustomColors.slopeGradient
+          .where((element) => element['range'] == range)
+          .last['color'];
+    } else {
+      _color = CustomColors.altitudeGradient
+          .where((element) => element['range'] == range)
+          .last['color'];
+    }
     String polIdSuffix = range + index;
     Polyline polyline = Polyline(
         polylineId: PolylineId('loadedTrack' + polIdSuffix),
