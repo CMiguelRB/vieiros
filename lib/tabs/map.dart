@@ -59,6 +59,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   bool offTrack = false;
+  bool _showBearingButton = false;
+  double _bearing = 0.0;
 
   getLocation() async {
     bool _hasPermissions = await PermissionHandler().handleLocationPermission();
@@ -718,7 +720,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                   latLngBounds.southwest.longitude) /
               2,
         ),
-        bearing: 0,
+        bearing: 0.0,
         zoom: 14.0)));
   }
 
@@ -728,6 +730,24 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
         target: LatLng(locationData.latitude!, locationData.longitude!),
         zoom: 14.0)));
+  }
+
+  _onCameraMove(CameraPosition camera) async {
+    if (camera.bearing != 0.0 && !_showBearingButton) {
+      setState(() {
+        _showBearingButton = true;
+      });
+    }
+    if (camera.bearing == 0.0 && _showBearingButton) {
+      setState(() {
+        _showBearingButton = false;
+      });
+    }
+    if(camera.bearing != 0.0){
+      setState(() {
+        _bearing = - camera.bearing * 3.14 / 180;
+      });
+    }
   }
 
   @override
@@ -777,6 +797,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                       compassEnabled: true,
                       polylines: _polyline,
                       markers: _markers,
+                      onCameraMove: _onCameraMove,
                       zoomControlsEnabled: false,
                       onLongPress: (latLng) =>
                           _currentMarkerDialog(latLng, lightMode),
@@ -787,28 +808,33 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                       },
                     ),
                     floatingActionButtonLocation:
-                        FloatingActionButtonLocation.endTop,
+                        FloatingActionButtonLocation.miniEndFloat,
                     floatingActionButton: Padding(
-                        padding: const EdgeInsets.only(top: 20),
+                        padding: const EdgeInsets.only(bottom: 20),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.end,
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            Transform.rotate(angle: _bearing, child: FloatingActionButton(
+                              elevation: 0,
+                              mini: true,
+                              enableFeedback: _showBearingButton,
+                              backgroundColor: _showBearingButton
+                                  ? const Color.fromARGB(95, 255, 255, 255)
+                                  : Colors.transparent,
+                              onPressed:
+                                  _showBearingButton ? _resetBearing : null,
+                              child: Icon(Icons.navigation,
+                                  color: _showBearingButton
+                                      ? CustomColors.trackBackgroundDark
+                                      : Colors.transparent),
+                            )),
                             FloatingActionButton(
                               elevation: 0,
                               mini: true,
                               backgroundColor:
                                   const Color.fromARGB(95, 255, 255, 255),
-                              onPressed: _resetBearing,
-                              child: const Icon(Icons.navigation,
-                                  color: CustomColors.trackBackgroundDark),
-                            ),
-                            FloatingActionButton(
-                              elevation: 0,
-                              mini: true,
-                              backgroundColor:
-                                  const Color.fromARGB(95, 255, 255, 255),
-                              onPressed: () => _moveCurrentLocation,
+                              onPressed: _moveCurrentLocation,
                               child: const Icon(Icons.my_location,
                                   color: CustomColors.trackBackgroundDark),
                             )
