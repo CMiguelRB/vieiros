@@ -707,6 +707,29 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     super.dispose();
   }
 
+  _resetBearing() async {
+    final GoogleMapController controller = await _mapController.future;
+    LatLngBounds latLngBounds = await controller.getVisibleRegion();
+    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+        target: LatLng(
+          (latLngBounds.northeast.latitude + latLngBounds.southwest.latitude) /
+              2,
+          (latLngBounds.northeast.longitude +
+                  latLngBounds.southwest.longitude) /
+              2,
+        ),
+        bearing: 0,
+        zoom: 14.0)));
+  }
+
+  _moveCurrentLocation() async {
+    final GoogleMapController controller = await _mapController.future;
+    LocationData locationData = await _location.getLocation();
+    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+        target: LatLng(locationData.latitude!, locationData.longitude!),
+        zoom: 14.0)));
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -735,31 +758,62 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                   ],
                 ))
             : _showMap
-                ? GoogleMap(
-                    gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                      Factory<OneSequenceGestureRecognizer>(
-                        () => EagerGestureRecognizer(),
-                      ),
-                    },
-                    mapType: MapType.hybrid,
-                    mapToolbarEnabled: false,
-                    buildingsEnabled: false,
-                    initialCameraPosition: const CameraPosition(
-                        target: LatLng(43.463305, -8.273529), zoom: 15.0),
-                    myLocationEnabled: true,
-                    myLocationButtonEnabled: true,
-                    trafficEnabled: false,
-                    compassEnabled: true,
-                    polylines: _polyline,
-                    markers: _markers,
-                    onLongPress: (latLng) =>
-                        _currentMarkerDialog(latLng, lightMode),
-                    onMapCreated: (GoogleMapController controller) {
-                      if (!_mapController.isCompleted) {
-                        _mapController.complete(controller);
-                      }
-                    },
-                  )
+                ? Scaffold(
+                    body: GoogleMap(
+                      gestureRecognizers: <
+                          Factory<OneSequenceGestureRecognizer>>{
+                        Factory<OneSequenceGestureRecognizer>(
+                          () => EagerGestureRecognizer(),
+                        ),
+                      },
+                      mapType: MapType.hybrid,
+                      mapToolbarEnabled: false,
+                      buildingsEnabled: false,
+                      initialCameraPosition: const CameraPosition(
+                          target: LatLng(43.463305, -8.273529), zoom: 15.0),
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: false,
+                      trafficEnabled: false,
+                      compassEnabled: true,
+                      polylines: _polyline,
+                      markers: _markers,
+                      zoomControlsEnabled: false,
+                      onLongPress: (latLng) =>
+                          _currentMarkerDialog(latLng, lightMode),
+                      onMapCreated: (GoogleMapController controller) {
+                        if (!_mapController.isCompleted) {
+                          _mapController.complete(controller);
+                        }
+                      },
+                    ),
+                    floatingActionButtonLocation:
+                        FloatingActionButtonLocation.endTop,
+                    floatingActionButton: Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            FloatingActionButton(
+                              elevation: 0,
+                              mini: true,
+                              backgroundColor:
+                                  const Color.fromARGB(95, 255, 255, 255),
+                              onPressed: _resetBearing,
+                              child: const Icon(Icons.navigation,
+                                  color: CustomColors.trackBackgroundDark),
+                            ),
+                            FloatingActionButton(
+                              elevation: 0,
+                              mini: true,
+                              backgroundColor:
+                                  const Color.fromARGB(95, 255, 255, 255),
+                              onPressed: () => _moveCurrentLocation,
+                              child: const Icon(Icons.my_location,
+                                  color: CustomColors.trackBackgroundDark),
+                            )
+                          ],
+                        )))
                 : const Center(
                     child: CircularProgressIndicator(
                     color: CustomColors.accent,
