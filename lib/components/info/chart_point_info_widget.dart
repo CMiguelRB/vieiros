@@ -16,19 +16,11 @@ class ChartPointInfoWidget extends StatelessWidget{
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(selectedPoint != null
-              ? I18n.translate('info_chart_altitude') +
-              ': ' +
-              selectedPoint!.altitude
-                  .round()
-                  .toString() +
-              ' m.'
+              ? '${I18n.translate('info_chart_altitude')}: ${selectedPoint!.altitude
+                  .round()} m.'
               : ''),
           Text(selectedPoint != null
-              ? I18n.translate('info_chart_distance') +
-              ': ' +
-              selectedPoint!.totalDistance
-                  .toString() +
-              ' m'
+              ? '${I18n.translate('info_chart_distance')}: ${selectedPoint!.totalDistance} m'
               : ''),
           Container(
             margin: const EdgeInsets.only(right: 20),

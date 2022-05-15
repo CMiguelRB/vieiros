@@ -20,10 +20,10 @@ class Home extends StatefulWidget {
       : super(key: key);
 
   @override
-  _Home createState() => _Home();
+  HomeState createState() => HomeState();
 }
 
-class _Home extends State<Home>
+class HomeState extends State<Home>
     with TickerProviderStateMixin, WidgetsBindingObserver {
   static const platform = MethodChannel('com.rabocorp.vieiros/opened_file');
 
@@ -117,7 +117,7 @@ class _Home extends State<Home>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
     getOpenedFile();
     _tabs = <Widget>[
       Tracks(
@@ -143,7 +143,7 @@ class _Home extends State<Home>
 
   @override
   void dispose() {
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
     super.dispose();
   }
@@ -170,78 +170,78 @@ class _Home extends State<Home>
     return <BottomNavigationBarItem>[
       BottomNavigationBarItem(
         activeIcon: Container(
-            child: const Icon(Icons.timeline),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
             decoration: const BoxDecoration(
                 color: CustomColors.faintedAccent,
                 shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.all(Radius.circular(20)))),
+                borderRadius: BorderRadius.all(Radius.circular(20))),
+            child: const Icon(Icons.timeline)),
         icon: Container(
-            child: const Icon(Icons.timeline_outlined),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
             decoration: BoxDecoration(
                 color: lightMode
                     ? CustomColors.background
                     : CustomColors.backgroundDark,
                 shape: BoxShape.rectangle,
-                borderRadius: const BorderRadius.all(Radius.circular(20)))),
+                borderRadius: const BorderRadius.all(Radius.circular(20))),
+            child: const Icon(Icons.timeline_outlined)),
         label: I18n.translate('appbar_tab_tracks'),
       ),
       BottomNavigationBarItem(
         activeIcon: Container(
-            child: const Icon(Icons.terrain),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
             decoration: const BoxDecoration(
                 color: CustomColors.faintedAccent,
                 shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.all(Radius.circular(20)))),
+                borderRadius: BorderRadius.all(Radius.circular(20))),
+            child: const Icon(Icons.terrain)),
         icon: Container(
-            child: const Icon(Icons.terrain_outlined),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
             decoration: BoxDecoration(
                 color: lightMode
                     ? CustomColors.background
                     : CustomColors.backgroundDark,
                 shape: BoxShape.rectangle,
-                borderRadius: const BorderRadius.all(Radius.circular(20)))),
+                borderRadius: const BorderRadius.all(Radius.circular(20))),
+            child: const Icon(Icons.terrain_outlined)),
         label: I18n.translate('appbar_tab_map'),
       ),
       BottomNavigationBarItem(
         activeIcon: Container(
-            child: const Icon(Icons.insert_chart),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
             decoration: const BoxDecoration(
                 color: CustomColors.faintedAccent,
                 shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.all(Radius.circular(20)))),
+                borderRadius: BorderRadius.all(Radius.circular(20))),
+            child: const Icon(Icons.insert_chart)),
         icon: Container(
-            child: const Icon(Icons.insert_chart_outlined),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
             decoration: BoxDecoration(
                 color: lightMode
                     ? CustomColors.background
                     : CustomColors.backgroundDark,
                 shape: BoxShape.rectangle,
-                borderRadius: const BorderRadius.all(Radius.circular(20)))),
+                borderRadius: const BorderRadius.all(Radius.circular(20))),
+            child: const Icon(Icons.insert_chart_outlined)),
         label: I18n.translate('appbar_tab_info'),
       ),
       BottomNavigationBarItem(
         activeIcon: Container(
-            child: const Icon(Icons.settings),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
             decoration: const BoxDecoration(
                 color: CustomColors.faintedAccent,
                 shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.all(Radius.circular(20)))),
+                borderRadius: BorderRadius.all(Radius.circular(20))),
+            child: const Icon(Icons.settings)),
         icon: Container(
-            child: const Icon(Icons.settings_outlined),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
             decoration: BoxDecoration(
                 color: lightMode
                     ? CustomColors.background
                     : CustomColors.backgroundDark,
                 shape: BoxShape.rectangle,
-                borderRadius: const BorderRadius.all(Radius.circular(20)))),
+                borderRadius: const BorderRadius.all(Radius.circular(20))),
+            child: const Icon(Icons.settings_outlined)),
         label: I18n.translate('appbar_tab_settings'),
       )
     ];

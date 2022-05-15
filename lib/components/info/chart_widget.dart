@@ -99,19 +99,17 @@ class ChartWidget extends StatelessWidget {
                   double d = spot.x;
                   String ds;
                   if (d >= 10000) {
-                    ds = (spot.x / 1000)
+                    ds = '${(spot.x / 1000)
                             .toString()
                             .padRight(4, '0')
-                            .substring(0, 5) +
-                        ' Km)';
+                            .substring(0, 5)} Km)';
                   } else {
-                    ds = (spot.x / 1000)
+                    ds = '${(spot.x / 1000)
                             .toString()
                             .padRight(4, '0')
-                            .substring(0, 4) +
-                        ' Km)';
+                            .substring(0, 4)} Km)';
                   }
-                  return LineTooltipItem(formatter.format(spot.y) + ' m (' + ds,
+                  return LineTooltipItem('${formatter.format(spot.y)} m ($ds',
                       const TextStyle(fontSize: 14));
                 }).toList();
               })),

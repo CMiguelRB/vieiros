@@ -6,15 +6,15 @@ import 'package:vieiros/model/loaded_track.dart';
 class Calc {
 
   void addDistance(CurrentTrack currentTrack) {
-    int _totalDistance = currentTrack.distance;
+    int totalDistance = currentTrack.distance;
     if (currentTrack.positions.length <= 1) return;
-    int _distance = Geolocator.distanceBetween(
+    int distance = Geolocator.distanceBetween(
             currentTrack.positions[currentTrack.positions.length - 2].latitude!,
             currentTrack
                 .positions[currentTrack.positions.length - 2].longitude!,
             currentTrack.positions.last.latitude!,
             currentTrack.positions.last.longitude!).round();
-    currentTrack.setDistance(_totalDistance + _distance);
+    currentTrack.setDistance(totalDistance + distance);
   }
 
   void setGain(CurrentTrack currentTrack) {
@@ -74,7 +74,7 @@ class Calc {
 
   String getSunsetTime(double? lat, double? lon, DateTime sunset) {
     if (lat != null && lon != null) {
-      return sunset.hour.toString() + ':' + (sunset.minute.toString().length > 1 ? sunset.minute.toString() : "0"+sunset.minute.toString());
+      return '${sunset.hour}:${sunset.minute.toString().length > 1 ? sunset.minute.toString() : "0${sunset.minute}"}';
     }
     return '--:--';
   }
@@ -84,11 +84,11 @@ class Calc {
     if(minutesToSunset <= 0) return '00:00';
     int toSunsetH = minutesToSunset~/60;
     String toSunsetSH = toSunsetH.toString();
-    toSunsetSH = toSunsetSH.length > 1 ? toSunsetSH : '0' + toSunsetSH;
+    toSunsetSH = toSunsetSH.length > 1 ? toSunsetSH : '0$toSunsetSH';
     int toSunsetM = minutesToSunset - toSunsetH * 60;
     String toSunsetSM = toSunsetM.toString();
-    toSunsetSM = toSunsetSM.length > 1 ? toSunsetSM : '0' + toSunsetSM;
-    return toSunsetSH + ':' + toSunsetSM;
+    toSunsetSM = toSunsetSM.length > 1 ? toSunsetSM : '0$toSunsetSM';
+    return '$toSunsetSH:$toSunsetSM';
   }
 
   void loadedTrackValues(LoadedTrack loadedTrack){
@@ -97,13 +97,13 @@ class Calc {
     List<Wpt> trackPoints = gpx.trks[0].trksegs[0].trkpts;
     for (var i = 0; i < trackPoints.length; i++) {
       if(i > 0){
-        int _distance = Geolocator.distanceBetween(
+        int distance = Geolocator.distanceBetween(
             trackPoints[i-1].lat!,
             trackPoints[i-1].lon!,
             trackPoints[i].lat!,
             trackPoints[i].lon!)
             .round();
-        distance += _distance;
+        distance += distance;
         double gainDiff = trackPoints[i].ele! - trackPoints[i-1].ele!;
         if (gainDiff > 0) loadedTrack.setGain(loadedTrack.altitudeGain+gainDiff.round());
       }

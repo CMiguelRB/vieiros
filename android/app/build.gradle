@@ -19,12 +19,12 @@ if (flutterRoot == null) {
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 if (flutterVersionCode == null) {
-    flutterVersionCode = '11'
+    flutterVersionCode = '12'
 }
 
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
-    flutterVersionName = '1.2.2'
+    flutterVersionName = '1.2.3'
 }
 
 apply plugin: 'com.android.application'
@@ -62,7 +62,7 @@ android {
     }
 
     dependencies{
-        implementation 'com.google.android.material:material:1.5.0'
+        implementation 'com.google.android.material:material:1.6.0'
     }
 }
 

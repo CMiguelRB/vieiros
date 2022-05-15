@@ -14,6 +14,8 @@ class DistanceWidget extends StatelessWidget{
   Widget build(BuildContext context) {
     return Container(
         height: 80,
+        width: MediaQuery.of(context).size.width / 2,
+        alignment: Alignment.center,
         child: Column(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment:
@@ -25,6 +27,7 @@ class DistanceWidget extends StatelessWidget{
                         ? CustomColors.subText
                         : CustomColors.subTextDark)),
             Container(
+                alignment: Alignment.center,
                 child: Row(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment:
@@ -45,12 +48,9 @@ class DistanceWidget extends StatelessWidget{
                               fontSize: 17,
                               fontWeight:
                               FontWeight.bold))
-                    ]),
-                alignment: Alignment.center)
+                    ]))
           ],
-        ),
-        width: MediaQuery.of(context).size.width / 2,
-        alignment: Alignment.center);
+        ));
   }
 
 }
