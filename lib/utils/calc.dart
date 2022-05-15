@@ -97,13 +97,13 @@ class Calc {
     List<Wpt> trackPoints = gpx.trks[0].trksegs[0].trkpts;
     for (var i = 0; i < trackPoints.length; i++) {
       if(i > 0){
-        int distance = Geolocator.distanceBetween(
+        int distanceAux = Geolocator.distanceBetween(
             trackPoints[i-1].lat!,
             trackPoints[i-1].lon!,
             trackPoints[i].lat!,
             trackPoints[i].lon!)
             .round();
-        distance += distance;
+        distance += distanceAux;
         double gainDiff = trackPoints[i].ele! - trackPoints[i-1].ele!;
         if (gainDiff > 0) loadedTrack.setGain(loadedTrack.altitudeGain+gainDiff.round());
       }
