@@ -9,10 +9,10 @@ class TimerWidget extends StatefulWidget{
   const TimerWidget({Key? key, required this.time}) : super(key: key);
 
   @override
-  _TimerState createState() => _TimerState();
+  TimerState createState() => TimerState();
 }
 
-class _TimerState extends State<TimerWidget>{
+class TimerState extends State<TimerWidget>{
 
   String _totalTime = '--:--';
   int _baseTime = 0;
@@ -30,7 +30,7 @@ class _TimerState extends State<TimerWidget>{
       int diff = DateTime.now().millisecondsSinceEpoch - _baseTime;
       _totalTime = Duration(milliseconds: diff).abs().toString().split('.')[0];
       if(_totalTime.split(':')[0].length < 2){
-        _totalTime = '0'+_totalTime;
+        _totalTime = '0$_totalTime';
       }
     });
   }

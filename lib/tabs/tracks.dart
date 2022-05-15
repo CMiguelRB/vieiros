@@ -13,7 +13,6 @@ import 'package:vieiros/resources/i18n.dart';
 import 'package:vieiros/resources/themes.dart';
 import 'package:vieiros/utils/files_handler.dart';
 import 'package:vieiros/utils/preferences.dart';
-import 'package:xml/xml.dart';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
@@ -106,14 +105,14 @@ class TracksState extends State<Tracks> {
     String? path = file.path;
     final xmlFile = File(path!);
     String gpxString =
-        XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString();
+        xmlFile.readAsStringSync();
     Gpx gpx = GpxReader().fromString(gpxString);
     String? name = gpx.trks[0].name;
     name ??= file.name;
     String directory = (await getApplicationDocumentsDirectory()).path;
-    String newPath = directory + '/' + name.replaceAll(' ', '_') + '.gpx';
+    String newPath = '$directory/${name.replaceAll(' ', '_')}.gpx';
     FilesHandler().writeFile(
-        XmlDocument.parse(xmlFile.readAsStringSync()).toXmlString(),
+        gpxString,
         name,
         false);
     setState(() {
@@ -148,6 +147,7 @@ class TracksState extends State<Tracks> {
       }
     });
     if (showNotification) {
+      if(!mounted) return;
       VieirosNotification()
           .showNotification(context, 'tracks_unloaded', NotificationType.info);
     }
@@ -305,26 +305,26 @@ class TracksState extends State<Tracks> {
                     itemCount: _files.length,
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
-                      bool _loadedElement =
+                      bool loadedElement =
                           widget.loadedTrack.path == _files[index].path;
                       return InkWell(
                         key: Key(_files[index].path!),
                         child: Card(
                             elevation: 0,
-                            color: _loadedElement
+                            color: loadedElement
                                 ? (lightMode
                                     ? CustomColors.trackBackgroundLight
                                     : CustomColors.trackBackgroundDark)
                                 : Colors.black12,
                             child: Padding(
                                 padding: EdgeInsets.only(
-                                    left: _loadedElement ? 0 : 16, right: 8),
+                                    left: loadedElement ? 0 : 16, right: 8),
                                 child: Row(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
                                       _files[index].path == '/loading' ?  SizedBox(width: 20, height: 20,child: CircularProgressIndicator(color: lightMode ? Colors.black : Colors.white, strokeWidth: 2,) ): (
-                                      _loadedElement
+                                      loadedElement
                                           ? IconButton(
                                               onPressed: () =>
                                                   _unloadTrack(index, true),
@@ -344,11 +344,11 @@ class TracksState extends State<Tracks> {
                         onTap: () => _navigate(index),
                       );
                     }, onReorder: (int oldIndex, int newIndex) {
-                      GpxFile _file =  _files.removeAt(oldIndex);
+                      GpxFile file =  _files.removeAt(oldIndex);
                       if(oldIndex < newIndex) {
                         newIndex--;
                       }
-                      _files.insert(newIndex, _file);
+                      _files.insert(newIndex, file);
                       setState(() {_files = _files;});
                       Preferences().set('files', json.encode(_files));
 

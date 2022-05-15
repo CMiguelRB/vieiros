@@ -14,6 +14,7 @@ class PaceWidget extends StatelessWidget{
   Widget build(BuildContext context) {
     return SizedBox(
       height: 80,
+      width: MediaQuery.of(context).size.width / 2,
       child: Column(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -43,7 +44,6 @@ class PaceWidget extends StatelessWidget{
               ])
         ],
       ),
-      width: MediaQuery.of(context).size.width / 2,
     );
   }
 }

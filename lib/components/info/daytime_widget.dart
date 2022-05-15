@@ -15,6 +15,8 @@ class DaytimeWidget extends StatelessWidget{
   Widget build(BuildContext context) {
     return Container(
         height: 80,
+        width: MediaQuery.of(context).size.width / 2,
+        alignment: Alignment.center,
         child: Column(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment:
@@ -81,9 +83,7 @@ class DaytimeWidget extends StatelessWidget{
               ],
             )
           ],
-        ),
-        width: MediaQuery.of(context).size.width / 2,
-        alignment: Alignment.center);
+        ));
   }
 
 

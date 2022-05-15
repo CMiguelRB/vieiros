@@ -123,8 +123,8 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
         _toSunset = Calc().getDaylight(_sunset!);
       });
     }else{
-      bool _hasPermissions = await PermissionHandler().handleLocationPermission();
-      if (_hasPermissions) {
+      bool hasPermissions = await PermissionHandler().handleLocationPermission();
+      if (hasPermissions) {
         Position position = await Geolocator.getCurrentPosition();
         _sunset = getSunriseSunset(
             position.latitude,
@@ -146,25 +146,25 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   }
 
   void _loadTrackData() async {
-    int _totalDistance = 0;
-    double _avgPaceSeconds = 0.0;
-    String _avgPaceMin = '';
-    String _avgPaceSec = '';
+    int totalDistance = 0;
+    double avgPaceSeconds = 0.0;
+    String avgPaceMin = '';
+    String avgPaceSec = '';
 
     if (widget.currentTrack.isRecording && _slideState == 0) {
-      _totalDistance = widget.currentTrack.distance;
-      _avgPaceSeconds = Calc().avgPaceSecs(widget.currentTrack);
-      _avgPaceMin = Calc().avgPaceMinString(_avgPaceSeconds);
-      _avgPaceSec = Calc().avgPaceSecString(_avgPaceSeconds);
+      totalDistance = widget.currentTrack.distance;
+      avgPaceSeconds = Calc().avgPaceSecs(widget.currentTrack);
+      avgPaceMin = Calc().avgPaceMinString(avgPaceSeconds);
+      avgPaceSec = Calc().avgPaceSecString(avgPaceSeconds);
       if (mounted) {
         setState(() {
           _chartColor = CustomColors.ownPath;
           _chartColorFainted = CustomColors.ownPathFainted;
-          _avgPace = _avgPaceMin + ':' + _avgPaceSec;
-          _distance = _totalDistance > 1000
-              ? (_totalDistance / 1000).toStringAsFixed(2)
-              : _totalDistance.toString();
-          _distanceUnit = _totalDistance > 1000 ? 'Km' : 'm';
+          _avgPace = '$avgPaceMin:$avgPaceSec';
+          _distance = totalDistance > 1000
+              ? (totalDistance / 1000).toStringAsFixed(2)
+              : totalDistance.toString();
+          _distanceUnit = totalDistance > 1000 ? 'Km' : 'm';
           _altitude = widget.currentTrack.altitudeTop.toString();
           _altitudeMin = widget.currentTrack.altitudeMin;
           _altitudeGain = widget.currentTrack.altitudeGain.toString();
@@ -174,13 +174,13 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           }
           List<AltitudePoint> data = _altitudeDataCurrent;
           if (data.isEmpty) {
-            int _totalDistanceDataCurrent = 0;
+            int totalDistanceDataCurrent = 0;
             for (int i = 0; i < widget.currentTrack.positions.length; i++) {
               _altitudeDataCurrent.add(AltitudePoint(
-                  _totalDistanceDataCurrent,
+                  totalDistanceDataCurrent,
                   widget.currentTrack.positions[i].altitude!));
               if (i > 0) {
-                _totalDistanceDataCurrent = _totalDistanceDataCurrent +
+                totalDistanceDataCurrent = totalDistanceDataCurrent +
                     Geolocator.distanceBetween(
                             widget.currentTrack.positions[(i - 1)].latitude!,
                             widget.currentTrack.positions[(i - 1)].longitude!,
@@ -189,45 +189,45 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                         .toInt();
               }
             }
-          } else if (data.last.totalDistance != _totalDistance) {
+          } else if (data.last.totalDistance != totalDistance) {
             _altitudeDataCurrent.add(AltitudePoint(
-                _totalDistance, widget.currentTrack.positions.last.altitude!));
+                totalDistance, widget.currentTrack.positions.last.altitude!));
           }
           _loadingAltitudeChart = false;
         });
       }
     }else{
       if (widget.loadedTrack.gpx == null) return clearScreen();
-      List<AltitudePoint> _altitudePoints = widget.loadedTrack.altitudePoints;
-      Gpx _gpx = widget.loadedTrack.gpx as Gpx;
-      DateTime? _timeStart = _gpx.trks[0].trksegs[0].trkpts.first.time;
-      DateTime? _timeEnd = _gpx.trks[0].trksegs[0].trkpts.last.time;
-      _totalDistance = widget.loadedTrack.distance;
-      _avgPaceSeconds = _timeEnd!.difference(_timeStart!).abs().inMilliseconds /
+      List<AltitudePoint> altitudePoints = widget.loadedTrack.altitudePoints;
+      Gpx gpx = widget.loadedTrack.gpx as Gpx;
+      DateTime? timeStart = gpx.trks[0].trksegs[0].trkpts.first.time;
+      DateTime? timeEnd = gpx.trks[0].trksegs[0].trkpts.last.time;
+      totalDistance = widget.loadedTrack.distance;
+      avgPaceSeconds = timeEnd!.difference(timeStart!).abs().inMilliseconds /
           1000 /
-          (_totalDistance / 1000);
-      _avgPaceMin = Calc().avgPaceMinString(_avgPaceSeconds);
-      _avgPaceSec = Calc().avgPaceSecString(_avgPaceSeconds);
+          (totalDistance / 1000);
+      avgPaceMin = Calc().avgPaceMinString(avgPaceSeconds);
+      avgPaceSec = Calc().avgPaceSecString(avgPaceSeconds);
       if (mounted) {
         setState(() {
           _chartColor = CustomColors.accent;
           _chartColorFainted = CustomColors.faintedFaintedAccent;
-          _avgPace = _avgPaceMin + ':' + _avgPaceSec;
-          _distance = _totalDistance > 1000
-              ? (_totalDistance / 1000).toStringAsFixed(2)
-              : _totalDistance.toString();
-          _distanceUnit = _totalDistance > 1000 ? 'Km' : 'm';
+          _avgPace = '$avgPaceMin:$avgPaceSec';
+          _distance = totalDistance > 1000
+              ? (totalDistance / 1000).toStringAsFixed(2)
+              : totalDistance.toString();
+          _distanceUnit = totalDistance > 1000 ? 'Km' : 'm';
           _altitude = widget.loadedTrack.altitudeTop.toString();
           _altitudeMin = widget.loadedTrack.altitudeMin;
           _altitudeGain = widget.loadedTrack.altitudeGain.toString();
-          _totalTime = _timeEnd
-              .difference(_timeStart)
+          _totalTime = timeEnd
+              .difference(timeStart)
               .abs()
               .toString()
               .split('.')
               .first
               .padLeft(8, "0");
-          _altitudeDataLoaded =  _altitudePoints;
+          _altitudeDataLoaded =  altitudePoints;
           _loadingAltitudeChart = false;
         });
       }

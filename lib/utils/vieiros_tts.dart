@@ -6,11 +6,11 @@ import 'package:vieiros/resources/i18n.dart';
 class VieirosTts {
 
   void speakDistance(int distance, DateTime dateTime) async {
-    FlutterTts _flutterTts = FlutterTts();
+    FlutterTts flutterTts = FlutterTts();
     final String lang = Platform.localeName.replaceAll("_", "-");
-    await _flutterTts.setLanguage(lang);
-    await _flutterTts.setVolume(1.0);
-    await _flutterTts.awaitSpeakCompletion(true);
+    await flutterTts.setLanguage(lang);
+    await flutterTts.setVolume(1.0);
+    await flutterTts.awaitSpeakCompletion(true);
     DateTime start = dateTime;
     int secs = DateTime.now().difference(start).abs().inSeconds;
     String hText = secs >= 7200 ?  I18n.translate('map_voice_notification_h') : I18n.translate('map_voice_notification_h').substring(0, I18n.translate('map_voice_notification_h').length-1);
@@ -30,10 +30,10 @@ class VieirosTts {
     }
     seconds = secs.toString();
     String km = (distance ~/ 1000).toString();
-    await _flutterTts.speak(I18n.translate('map_voice_notification_pace'));
+    await flutterTts.speak(I18n.translate('map_voice_notification_pace'));
     String kText = distance >= 2000 ? km.toString() : I18n.translate('map_voice_notification_km_first');
     String kmText = distance >= 2000 ? I18n.translate('map_voice_notification_km') : I18n.translate('map_voice_notification_km').substring(0, I18n.translate('map_voice_notification_km').length-1);
-    await _flutterTts.speak(
+    await flutterTts.speak(
         kText +
         kmText +
         I18n.translate('map_voice_notification_in') +

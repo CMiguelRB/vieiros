@@ -8,7 +8,7 @@ class VieirosDialog {
   infoDialog(
       BuildContext context, String titleTag, Map<String, Function> actions,
       {String? bodyTag}) async {
-    Color _bodyTextColor =
+    Color bodyTextColor =
         Provider.of<ThemeProvider>(context, listen: false).isLightMode
             ? CustomColors.subText
             : CustomColors.subTextDark;
@@ -37,7 +37,7 @@ class VieirosDialog {
                             margin: const EdgeInsets.only(bottom: 24),
                             child: Text(
                               I18n.translate(bodyTag),
-                              style: TextStyle(color: _bodyTextColor),
+                              style: TextStyle(color: bodyTextColor),
                             ))
                         : Container(),
                     Row(
@@ -90,10 +90,10 @@ class VieirosDialog {
   }
 
   List<Widget> _dialogActions(actions) {
-    List<Widget> _dialogActions = [];
+    List<Widget> dialogActions = [];
 
     actions.forEach((tag, function) {
-      _dialogActions.add(TextButton(
+      dialogActions.add(TextButton(
         style: ButtonStyle(
           overlayColor: MaterialStateColor.resolveWith(
               (states) => CustomColors.subTextDark),
@@ -104,7 +104,7 @@ class VieirosDialog {
       ));
     });
 
-    return _dialogActions;
+    return dialogActions;
   }
 
   VieirosDialog._privateConstructor();

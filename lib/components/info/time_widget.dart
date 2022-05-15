@@ -18,6 +18,8 @@ class TimeWidget extends StatelessWidget{
   Widget build(BuildContext context) {
     return Container(
         height: 80,
+        width: MediaQuery.of(context).size.width / 2,
+        alignment: Alignment.center,
         child: Column(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment:
@@ -37,9 +39,7 @@ class TimeWidget extends StatelessWidget{
                     fontSize: 35,
                     fontWeight: FontWeight.bold))
           ],
-        ),
-        width: MediaQuery.of(context).size.width / 2,
-        alignment: Alignment.center);
+        ));
   }
 
 

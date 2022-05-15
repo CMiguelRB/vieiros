@@ -16,7 +16,7 @@ class FilesHandler {
         Directory d = await getApplicationDocumentsDirectory();
         directory = d.path;
       }
-      String path = directory + '/' + name.replaceAll(' ', '_') + '.gpx';
+      String path = '$directory/${name.replaceAll(' ', '_')}.gpx';
       if (!File(path).existsSync()) {
         File(path).writeAsStringSync(gpxString);
       } else {

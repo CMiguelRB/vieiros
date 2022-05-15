@@ -63,8 +63,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   double _bearing = 0.0;
 
   getLocation() async {
-    bool _hasPermissions = await PermissionHandler().handleLocationPermission();
-    if (_hasPermissions) {
+    bool hasPermissions = await PermissionHandler().handleLocationPermission();
+    if (hasPermissions) {
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
           setState(() {
@@ -82,12 +82,12 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
           description: I18n.translate('map_notification_desc'));
       _location.changeSettings(
           interval: 2000, distanceFilter: 5, accuracy: LocationAccuracy.high);
-      LocationData _locationData;
+      LocationData locationData;
       final GoogleMapController controller = await _mapController.future;
 
-      _locationData = await _location.getLocation();
-      double? lat = _locationData.latitude;
-      double? lon = _locationData.longitude;
+      locationData = await _location.getLocation();
+      double? lat = locationData.latitude;
+      double? lon = locationData.longitude;
       if (lat != null && lon != null && widget.loadedTrack.gpx == null) {
         controller.animateCamera(CameraUpdate.newCameraPosition(
             CameraPosition(target: LatLng(lat, lon), zoom: 15.0)));
@@ -178,70 +178,70 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         addMarkerSet(
             LatLng(element.lat!, element.lon!), true, element.name, controller);
       }
-      String? _gradientPolyline = Preferences().get("gradient_mode");
-      int _referenceDistance = 1000;
-      double _distance = 0;
-      double _slopeReferenceDistance = 100;
-      double _slopeStart = points.first.ele!;
-      Wpt? _prevPoint;
-      List<LatLng> _pointsAux = [];
-      double _startingAltitude = points.first.ele!;
-      String _currentRange = '0';
+      String? gradientPolyline = Preferences().get("gradient_mode");
+      int referenceDistance = 1000;
+      double distance = 0;
+      double slopeReferenceDistance = 100;
+      double slopeStart = points.first.ele!;
+      Wpt? prevPoint;
+      List<LatLng> pointsAux = [];
+      double startingAltitude = points.first.ele!;
+      String currentRange = '0';
       for (int i = 0; i < points.length - 1; i++) {
-        _pointsAux.add(LatLng(points[i].lat!, points[i].lon!));
+        pointsAux.add(LatLng(points[i].lat!, points[i].lon!));
         if (i > 0) {
-          _distance = _distance +
+          distance = distance +
               geolocator.Geolocator.distanceBetween(points[i].lat!,
                   points[i].lon!, points[i - 1].lat!, points[i - 1].lon!);
-          if (_distance > _referenceDistance) {
-            _referenceDistance += 1000;
+          if (distance > referenceDistance) {
+            referenceDistance += 1000;
             _setPKMarker(
                 RecordedPosition(points[i].lat, points[i].lon, null, null),
-                ((_referenceDistance ~/ 1000) - 1).toString());
+                ((referenceDistance ~/ 1000) - 1).toString());
           }
-          if (_gradientPolyline != null && _gradientPolyline == "slope") {
-            if (_distance >= _slopeReferenceDistance) {
-              _slopeReferenceDistance += 100;
-              double _slopeEnd = points[i].ele!;
-              int _gradient = (_slopeEnd - _slopeStart).toInt();
-              _slopeStart = _slopeEnd;
-              String _gradientColor = _checkGradient(_gradient);
-              if (_prevPoint != null) {
-                _pointsAux.insert(0, LatLng(_prevPoint.lat!, _prevPoint.lon!));
+          if (gradientPolyline != null && gradientPolyline == "slope") {
+            if (distance >= slopeReferenceDistance) {
+              slopeReferenceDistance += 100;
+              double slopeEnd = points[i].ele!;
+              int gradient = (slopeEnd - slopeStart).toInt();
+              slopeStart = slopeEnd;
+              String gradientColor = _checkGradient(gradient);
+              if (prevPoint != null) {
+                pointsAux.insert(0, LatLng(prevPoint.lat!, prevPoint.lon!));
               }
-              _pointsAux = _setGradientPolyline(
-                  _pointsAux, _gradientColor, i.toString(), "slope");
-              _prevPoint = points[i];
+              pointsAux = _setGradientPolyline(
+                  pointsAux, gradientColor, i.toString(), "slope");
+              prevPoint = points[i];
             }
           }
-          if (_gradientPolyline != null && _gradientPolyline == "altitude") {
-            String range = _checkRange(points[i], _startingAltitude);
-            if (range != _currentRange) {
-              if (_prevPoint != null) {
-                _pointsAux.insert(0, LatLng(_prevPoint.lat!, _prevPoint.lon!));
+          if (gradientPolyline != null && gradientPolyline == "altitude") {
+            String range = _checkRange(points[i], startingAltitude);
+            if (range != currentRange) {
+              if (prevPoint != null) {
+                pointsAux.insert(0, LatLng(prevPoint.lat!, prevPoint.lon!));
               }
-              _pointsAux = _setGradientPolyline(
-                  _pointsAux, _currentRange, i.toString(), "altitude");
-              _currentRange = range;
-              _prevPoint = points[i];
+              pointsAux = _setGradientPolyline(
+                  pointsAux, currentRange, i.toString(), "altitude");
+              currentRange = range;
+              prevPoint = points[i];
             }
           }
         }
       }
-      if (_prevPoint != null) {
-        _pointsAux.insert(0, LatLng(_prevPoint.lat!, _prevPoint.lon!));
+      if (prevPoint != null) {
+        pointsAux.insert(0, LatLng(prevPoint.lat!, prevPoint.lon!));
       }
-      if (_gradientPolyline != null && _gradientPolyline == "slope") {
-        double _slopeEnd = points.last.ele!;
-        int _gradient = (_slopeEnd - _slopeStart).toInt();
-        _slopeStart = _slopeEnd;
-        String _gradientColor = _checkGradient(_gradient);
-        _pointsAux =
-            _setGradientPolyline(_pointsAux, _gradientColor, 'last', "slope");
-      } else if (_gradientPolyline != null && _gradientPolyline == 'altitude') {
-        _currentRange = _checkRange(points.last, _startingAltitude);
-        _pointsAux =
-            _setGradientPolyline(_pointsAux, _currentRange, 'last', "altitude");
+      if (gradientPolyline != null && gradientPolyline == "slope") {
+        double slopeEnd = points.last.ele!;
+        int gradient = (slopeEnd - slopeStart).toInt();
+        slopeStart = slopeEnd;
+        String gradientColor = _checkGradient(gradient);
+        pointsAux =
+            _setGradientPolyline(pointsAux, gradientColor, 'last', "slope");
+      } else if (gradientPolyline != null && gradientPolyline == 'altitude') {
+        currentRange = _checkRange(points.last, startingAltitude);
+        pointsAux =
+            _setGradientPolyline(pointsAux, currentRange, 'last', "altitude");
       } else {
         List<LatLng> points = GpxHandler().getPointsFromGpx(widget.loadedTrack);
         Polyline polyline = Polyline(
@@ -266,12 +266,12 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  String _checkRange(Wpt _point, double startingAltitude) {
-    int diff = (_point.ele! - startingAltitude).toInt();
+  String _checkRange(Wpt point, double startingAltitude) {
+    int diff = (point.ele! - startingAltitude).toInt();
     if (diff <= 100 && diff > -100) return '0';
     if (diff > 2000) return '2000';
     if (diff < -2000) return '-2000';
-    return diff.toString().substring(0, diff.toString().length - 2) + '00';
+    return '${diff.toString().substring(0, diff.toString().length - 2)}00';
   }
 
   String _checkGradient(int gradient) {
@@ -284,24 +284,24 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
 
   List<LatLng> _setGradientPolyline(
       List<LatLng> points, String range, String index, String type) {
-    Color _color;
+    Color color;
     if (type == 'slope') {
-      _color = CustomColors.slopeGradient
+      color = CustomColors.slopeGradient
           .where((element) => element['range'] == range)
           .last['color'];
     } else {
-      _color = CustomColors.altitudeGradient
+      color = CustomColors.altitudeGradient
           .where((element) => element['range'] == range)
           .last['color'];
     }
     String polIdSuffix = range + index;
     Polyline polyline = Polyline(
-        polylineId: PolylineId('loadedTrack' + polIdSuffix),
+        polylineId: PolylineId('loadedTrack$polIdSuffix'),
         points: points,
         width: 5,
         endCap: Cap.roundCap,
         startCap: Cap.roundCap,
-        color: _color);
+        color: color);
     if (mounted) {
       setState(() {
         _polyline.add(polyline);
@@ -326,11 +326,11 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     widget.currentTrack.setRecording(true);
     widget.currentTrack.dateTime = DateTime.now();
     _location.enableBackgroundMode(enable: true);
-    int _referenceDistance = 1000;
+    int referenceDistance = 1000;
     BitmapDescriptor icon = await BitmapDescriptor.fromAssetImage(
         const ImageConfiguration(size: Size(100, 100)),
         'assets/current_pin.png');
-    Marker? _marker;
+    Marker? marker;
     _location.onLocationChanged.listen((event) async {
       if (widget.currentTrack.isRecording) {
         _checkOffTrack(event);
@@ -341,7 +341,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         Calc().setMin(widget.currentTrack);
         Calc().addDistance(widget.currentTrack);
         if (widget.currentTrack.positions.length == 1) {
-          _marker = Marker(
+          marker = Marker(
               markerId: const MarkerId('recordingPin##'),
               position: LatLng(widget.currentTrack.positions.first.latitude!,
                   widget.currentTrack.positions.first.longitude!),
@@ -349,24 +349,24 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         }
         int dist = widget.currentTrack.distance;
         String? voiceAlerts = Preferences().get("voice_alerts");
-        if (dist > _referenceDistance) {
-          _setPKMarker(null, (_referenceDistance ~/ 1000).toString());
+        if (dist > referenceDistance) {
+          _setPKMarker(null, (referenceDistance ~/ 1000).toString());
           if (voiceAlerts == null || voiceAlerts == 'true') {
             VieirosTts().speakDistance(dist, widget.currentTrack.dateTime!);
           }
-          _referenceDistance += 1000;
+          referenceDistance += 1000;
         }
         if (mounted) {
           List<LatLng> points = widget.currentTrack.getPoints();
           setState(() {
             if (points.length == 1) {
-              Polyline _recordingPolyline = Polyline(
+              Polyline recordingPolyline = Polyline(
                   polylineId: const PolylineId('recordingPolyline'),
                   points: points,
                   width: 5,
                   color: CustomColors.ownPath);
-              _polyline.add(_recordingPolyline);
-              _markers.add(_marker!);
+              _polyline.add(recordingPolyline);
+              _markers.add(marker!);
             } else {
               _polyline
                   .singleWhere((element) =>
@@ -400,7 +400,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     if (int.parse(distance) >= 10) {
       for (int i = 0; i < pksJSON.length; i++) {
         PKMarker base = PKMarker.fromJson(pksJSON[i]);
-        if (base.pk == 'clear' + suffix) {
+        if (base.pk == 'clear$suffix') {
           baseB64 = base.marker;
         }
         if (base.pk == distance.split('')[0] + suffix) {
@@ -422,7 +422,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     } else {
       for (int i = 0; i < pksJSON.length; i++) {
         PKMarker base = PKMarker.fromJson(pksJSON[i]);
-        if (base.pk == 'clear' + suffix) {
+        if (base.pk == 'clear$suffix') {
           baseB64 = base.marker;
         }
         if (base.pk == distance + suffix) {
@@ -439,26 +439,26 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     final Uint8List markerIcon =
         await _getBytesFromAsset(image.encodePng(mergedImage) as Uint8List, 65);
     BitmapDescriptor icon = BitmapDescriptor.fromBytes(markerIcon);
-    Marker _marker;
+    Marker marker;
     if (position != null) {
-      _marker = Marker(
-          markerId: MarkerId('km' + distance),
+      marker = Marker(
+          markerId: MarkerId('km$distance'),
           position: LatLng(position.latitude! - 0.000008, position.longitude!),
           zIndex: 1000,
           icon: icon);
       setState(() {
-        _markers.add(_marker);
+        _markers.add(marker);
       });
     } else {
-      _marker = Marker(
-          markerId: MarkerId('km' + distance + '##'),
+      marker = Marker(
+          markerId: MarkerId('km$distance##'),
           position: LatLng(
               widget.currentTrack.positions.last.latitude! - 0.000008,
               widget.currentTrack.positions.last.longitude!),
           zIndex: 1000,
           icon: icon);
       setState(() {
-        _markers.add(_marker);
+        _markers.add(marker);
       });
     }
   }
@@ -469,12 +469,12 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
       if (widget.loadedTrack.gpx != null &&
           widget.currentTrack.positions.isNotEmpty) {
         for (int i = 0; i < trackPoints.length; i++) {
-          double _distance = geolocator.Geolocator.distanceBetween(
+          double distance = geolocator.Geolocator.distanceBetween(
               widget.currentTrack.positions.last.latitude!,
               widget.currentTrack.positions.last.longitude!,
               trackPoints[i].lat!,
               trackPoints[i].lon!);
-          if (_distance < 30) {
+          if (distance < 30) {
             offTrack = false;
             return;
           }
@@ -607,9 +607,11 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         'creator="vieiros" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"');
     String? result = await FilesHandler().writeFile(gpxString, name, true);
     if (result == '###file_exists') {
+      if(!mounted) return;
       return VieirosNotification().showNotification(context,
           I18n.translate('map_save_error_file_exists'), NotificationType.error);
     }
+    if(!mounted) return;
     Navigator.pop(context, I18n.translate('common_ok'));
     if (mounted) {
       setState(() {
@@ -656,8 +658,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   bool _showWarning = false;
 
   void _refreshTab() async {
-    bool _hasPermission = await PermissionHandler().handleLocationPermission();
-    if (_hasPermission) {
+    bool hasPermission = await PermissionHandler().handleLocationPermission();
+    if (hasPermission) {
       setState(() {
         _showMap = true;
         _showWarning = false;

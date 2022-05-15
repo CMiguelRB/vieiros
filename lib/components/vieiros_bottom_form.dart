@@ -41,10 +41,10 @@ class VieirosBottomForm {
   }
 
   List<Widget> _dialogActions(actions) {
-    List<Widget> _dialogActions = [];
+    List<Widget> dialogActions = [];
 
     actions.forEach((tag, function) {
-      _dialogActions.add(Container(
+      dialogActions.add(Container(
           margin: const EdgeInsets.only(right: 5),
           child: ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -56,7 +56,7 @@ class VieirosBottomForm {
           )));
     });
 
-    return _dialogActions;
+    return dialogActions;
   }
 
   VieirosBottomForm._privateConstructor();

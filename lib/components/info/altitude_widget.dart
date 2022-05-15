@@ -16,6 +16,7 @@ class AltitudeWidget extends StatelessWidget{
   Widget build(BuildContext context) {
     return SizedBox(
         height: 80,
+        width: MediaQuery.of(context).size.width,
         child: Column(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment:
@@ -189,7 +190,6 @@ class AltitudeWidget extends StatelessWidget{
               ],
             )
           ],
-        ),
-        width: MediaQuery.of(context).size.width);
+        ));
   }
 }

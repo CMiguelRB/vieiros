@@ -10,8 +10,8 @@ class PermissionHandler {
   }
 
   Future<bool> handleLocationPermission() async{
-    bool _hasPermission = await Permission.locationWhenInUse.isGranted;
-    if (_hasPermission) return true;
+    bool hasPermission = await Permission.locationWhenInUse.isGranted;
+    if (hasPermission) return true;
     final status = await Permission.locationWhenInUse.request();
     return status == PermissionStatus.granted;
   }

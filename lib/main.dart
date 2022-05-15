@@ -42,7 +42,7 @@ void loadStatusBarTheme() {
       light = false;
       break;
     default:
-      SchedulerBinding.instance!.window.platformBrightness == Brightness.dark
+      SchedulerBinding.instance.window.platformBrightness == Brightness.dark
           ? light = false
           : light = true;
   }
@@ -84,7 +84,7 @@ class MyApp extends StatelessWidget {
             prefsMode = false;
             break;
           default:
-            SchedulerBinding.instance!.window.platformBrightness ==
+            SchedulerBinding.instance.window.platformBrightness ==
                     Brightness.dark
                 ? prefsMode = false
                 : prefsMode = true;

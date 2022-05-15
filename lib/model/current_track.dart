@@ -39,13 +39,13 @@ class CurrentTrack {
   }
 
   List<LatLng> getPoints() {
-    List<LatLng> _latLngList = [];
+    List<LatLng> latLngList = [];
     for (var i = 0; i < positions.length; i++) {
       if (positions[i].latitude != null && positions[i].longitude != null) {
-        _latLngList.add(LatLng(positions[i].latitude!, positions[i].longitude!));
+        latLngList.add(LatLng(positions[i].latitude!, positions[i].longitude!));
       }
     }
-    return _latLngList;
+    return latLngList;
   }
 
   void setDistance(int distance) {
