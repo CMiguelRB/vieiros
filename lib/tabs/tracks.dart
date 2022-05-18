@@ -106,7 +106,14 @@ class TracksState extends State<Tracks> {
     final xmlFile = File(path!);
     String gpxString =
         xmlFile.readAsStringSync();
-    Gpx gpx = GpxReader().fromString(gpxString);
+    Gpx gpx;
+    try{
+      gpx = GpxReader().fromString(gpxString);
+    }catch(e){
+      VieirosNotification().showNotification(
+          context, 'tracks_file_validation_error', NotificationType.error);
+      return;
+    }
     String? name = gpx.trks[0].name;
     name ??= file.name;
     String directory = (await getApplicationDocumentsDirectory()).path;
@@ -123,7 +130,14 @@ class TracksState extends State<Tracks> {
   }
 
   void openFileFromIntent(String gpxStringFile) async {
-    Gpx gpx = GpxReader().fromString(gpxStringFile);
+    Gpx gpx;
+    try{
+      gpx = GpxReader().fromString(gpxStringFile);
+    }catch(e){
+      VieirosNotification().showNotification(
+          context, 'tracks_file_validation_error', NotificationType.error);
+      return;
+    }
     String name = gpx.trks[0].name!;
     String? path = await FilesHandler().writeFile(gpxStringFile, name, false);
     setState(() {

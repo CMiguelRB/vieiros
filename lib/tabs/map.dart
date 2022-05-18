@@ -796,7 +796,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                       myLocationEnabled: true,
                       myLocationButtonEnabled: false,
                       trafficEnabled: false,
-                      compassEnabled: true,
+                      compassEnabled: false,
                       polylines: _polyline,
                       markers: _markers,
                       onCameraMove: _onCameraMove,
