@@ -115,7 +115,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
       _sunset = getSunriseSunset(
           widget.currentTrack.positions.last.latitude!,
           widget.currentTrack.positions.last.longitude!,
-          DateTime.now().timeZoneOffset.inHours,
+          DateTime.now().timeZoneOffset,
           DateTime.now().toLocal())
           .sunset;
       setState(() {
@@ -129,7 +129,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
         _sunset = getSunriseSunset(
             position.latitude,
             position.longitude,
-            DateTime.now().timeZoneOffset.inHours,
+            DateTime.now().timeZoneOffset,
             DateTime.now().toLocal())
             .sunset;
         setState(() {

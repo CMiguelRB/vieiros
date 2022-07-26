@@ -275,18 +275,16 @@ class HomeState extends State<Home>
                 controller: _tabController,
                 children: _tabs),
             floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerDocked,
+                FloatingActionButtonLocation.endFloat,
             floatingActionButton: _tabIndex <= 1
                 ? FloatingActionButton(
                     heroTag: null,
-                    child: _fabIcon,
+                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
                     onPressed: () => _onFabPressed(_tabIndex, lightMode),
+                    child: _fabIcon,
                   )
                 : null,
             bottomNavigationBar: BottomAppBar(
-                shape: const CircularNotchedRectangle(),
-                notchMargin: 2.0,
-                clipBehavior: Clip.antiAlias,
                 child: BottomNavigationBar(
                     type: BottomNavigationBarType.fixed,
                     items: _bottomNavigationBarItems(lightMode),

@@ -810,13 +810,22 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                       },
                     ),
                     floatingActionButtonLocation:
-                        FloatingActionButtonLocation.miniEndFloat,
+                        FloatingActionButtonLocation.miniEndTop,
                     floatingActionButton: Padding(
-                        padding: const EdgeInsets.only(bottom: 20),
+                        padding: const EdgeInsets.only(top: 20),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            FloatingActionButton(
+                              elevation: 0,
+                              mini: true,
+                              backgroundColor:
+                              const Color.fromARGB(95, 255, 255, 255),
+                              onPressed: _moveCurrentLocation,
+                              child: const Icon(Icons.my_location,
+                                  color: CustomColors.trackBackgroundDark),
+                            ),
                             Transform.rotate(angle: _bearing, child: FloatingActionButton(
                               elevation: 0,
                               mini: true,
@@ -830,16 +839,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                                   color: _showBearingButton
                                       ? CustomColors.trackBackgroundDark
                                       : Colors.transparent),
-                            )),
-                            FloatingActionButton(
-                              elevation: 0,
-                              mini: true,
-                              backgroundColor:
-                                  const Color.fromARGB(95, 255, 255, 255),
-                              onPressed: _moveCurrentLocation,
-                              child: const Icon(Icons.my_location,
-                                  color: CustomColors.trackBackgroundDark),
-                            )
+                            ))
                           ],
                         )))
                 : const Center(
