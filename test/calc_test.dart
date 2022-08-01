@@ -1,7 +1,7 @@
 //import 'package:test/test.dart';
-import 'package:vieiros/model/current_track.dart';
-import 'package:vieiros/model/position.dart';
-import 'package:vieiros/utils/calc.dart';
+//import 'package:vieiros/model/current_track.dart';
+//import 'package:vieiros/model/position.dart';
+//import 'package:vieiros/utils/calc.dart';
 
 void main() {
   /*group('Measurements', () {
