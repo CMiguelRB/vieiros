@@ -19,9 +19,9 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  google_maps_flutter: ^2.1.9
+  google_maps_flutter: ^2.1.10
   geolocator: ^9.0.1
-  file_picker: ^5.0.0
+  file_picker: ^5.0.1
   cupertino_icons: ^1.0.5
   gpx: ^2.2.0
   uuid: ^3.0.6
@@ -30,7 +30,7 @@ dependencies:
   sunrise_sunset_calc: ^3.0.0
   provider: ^6.0.3
   flutter_tts: ^3.5.0
-  flutter_native_splash: ^2.2.6
+  flutter_native_splash: ^2.2.7
   flutter_local_notifications: ^9.7.0
   firebase_crashlytics: ^2.8.6
   firebase_core: ^1.20.0
