@@ -46,7 +46,7 @@ class HomeState extends State<Home>
   void _onTabItemTapped(int index) async {
     if (_settingsKey.currentState != null &&
         _settingsKey.currentState!.tpOpen) {
-      _settingsKey.currentState!.closeTp();
+      _settingsKey.currentState!.closeThirdParties();
     }
     if (index == 1) {
       widget.loadedTrack.clear();
