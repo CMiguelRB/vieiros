@@ -110,7 +110,7 @@ class SettingsState extends State<Settings> {
     });
   }
 
-  closeTp() {
+  closeThirdParties() {
     setState(() {
       tpOpen = false;
       for (int i = 0; i < thirdParties.length; i++) {
@@ -120,7 +120,7 @@ class SettingsState extends State<Settings> {
     });
   }
 
-  _show(bool lightMode) {
+  _showThirdParties(bool lightMode) {
     setState(() {
       tpOpen = true;
     });
@@ -204,9 +204,7 @@ class SettingsState extends State<Settings> {
                         Container(
                             margin: const EdgeInsets.all(10),
                             child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    shape: const StadiumBorder(), elevation: 0),
-                                onPressed: closeTp,
+                                onPressed: closeThirdParties,
                                 child: Text(I18n.translate('common_close'))))
                       ]));
             }));
@@ -282,13 +280,12 @@ class SettingsState extends State<Settings> {
       ])),
       Column(
         children: [
-          //Image.asset('assets/app_logo.png', scale: 6),
           Container(
             margin: const EdgeInsets.only(bottom: 10),
           ),
           TextButton(
-              onPressed: () => _show(lightMode),
-              child: const Text('Vieiros v1.2.4',
+              onPressed: () => _showThirdParties(lightMode),
+              child: const Text('Vieiros v1.3.0',
                   style: TextStyle(color: CustomColors.faintedText))),
           Container(
             margin: const EdgeInsets.only(bottom: 10),

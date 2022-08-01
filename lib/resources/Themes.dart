@@ -50,16 +50,13 @@ class Themes {
       backgroundColor: CustomColors.background,
       bottomAppBarColor: CustomColors.background,
       elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(primary: CustomColors.accent)),
+        style: ElevatedButton.styleFrom(onPrimary: Colors.white, primary: CustomColors.accent)
+      ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
           foregroundColor: Colors.white,
           backgroundColor: CustomColors.accent,
           elevation: 2),
       indicatorColor: CustomColors.accent,
-      buttonTheme: const ButtonThemeData(
-        buttonColor: CustomColors.accent,
-        textTheme: ButtonTextTheme.primary,
-      ),
       scaffoldBackgroundColor: CustomColors.background,
       navigationBarTheme: NavigationBarThemeData(
           backgroundColor: CustomColors.background,
@@ -101,7 +98,7 @@ class Themes {
       primaryColor: CustomColors.backgroundDark,
       backgroundColor: CustomColors.backgroundDark,
       elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(primary: CustomColors.accent)),
+          style: ElevatedButton.styleFrom(onPrimary: Colors.white, primary: CustomColors.accent)),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
           foregroundColor: Colors.white,
           backgroundColor: CustomColors.accent,

@@ -773,8 +773,6 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                                     ? CustomColors.subText
                                     : CustomColors.subTextDark))),
                     ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            shape: const StadiumBorder(), elevation: 0),
                         onPressed: _refreshTab,
                         child: Text(I18n.translate('map_grant_permissions')))
                   ],
