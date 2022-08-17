@@ -149,7 +149,7 @@ class HomeState extends State<Home>
 
   _onFabPressed(index, lightMode) {
     if (index == 0 && _trackKey.currentState != null) {
-      _trackKey.currentState!.openFile();
+      _trackKey.currentState!.addFileOrDirectory(lightMode);
     }
     if (index == 1 && _mapKey.currentState != null) {
       if (!_currentTrack.isRecording) {

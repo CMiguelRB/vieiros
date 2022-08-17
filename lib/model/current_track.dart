@@ -3,34 +3,19 @@ import 'dart:async';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:vieiros/model/position.dart';
 import 'package:vieiros/model/waypoint.dart';
+import 'package:vieiros/model/track.dart';
 
-class CurrentTrack {
+class CurrentTrack extends Track {
   bool isRecording = false;
   DateTime? dateTime;
   final List<RecordedPosition> positions = [];
   final List<Waypoint> waypoints = [];
-  int distance = 0;
-  int altitudeTop = 0;
-  int altitudeMin = 8849;
-  int altitudeGain = 0;
   String name = '';
   final StreamController event = StreamController.broadcast();
 
   setRecording(willBeRecording) {
     isRecording = willBeRecording;
     event.add('recording status');
-  }
-
-  void setTop(int top){
-    altitudeTop = top;
-  }
-
-  void setGain(int gain){
-    altitudeGain = gain;
-  }
-
-  void setMin(int min){
-    altitudeMin = min;
   }
 
   void addPosition(position) {
@@ -48,10 +33,7 @@ class CurrentTrack {
     return latLngList;
   }
 
-  void setDistance(int distance) {
-    this.distance = distance;
-  }
-
+  @override
   void clear() {
     positions.clear();
     waypoints.clear();
