@@ -11,6 +11,7 @@ import 'package:vieiros/resources/themes.dart';
 import 'package:vieiros/utils/preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -24,7 +25,7 @@ void main() async {
   if (theme == null) Preferences().set('dark_mode', 'system');
   LoadedTrack loadedTrack;
   try {
-    loadedTrack = await LoadedTrack().loadTrack(path);
+    loadedTrack = await LoadedTrack().loadTrack(path) as LoadedTrack;
   } on Exception {
     loadedTrack = LoadedTrack();
   }

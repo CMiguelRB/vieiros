@@ -1,5 +1,6 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:gpx/gpx.dart';
+import 'package:vieiros/model/track.dart';
 import 'package:vieiros/model/current_track.dart';
 import 'package:vieiros/model/loaded_track.dart';
 
@@ -91,9 +92,9 @@ class Calc {
     return '$toSunsetSH:$toSunsetSM';
   }
 
-  void loadedTrackValues(LoadedTrack loadedTrack){
+  void loadedTrackValues(Track track){
     int distance = 0;
-    Gpx gpx = loadedTrack.gpx!;
+    Gpx gpx = track.gpx!;
     List<Wpt> trackPoints = gpx.trks[0].trksegs[0].trkpts;
     for (var i = 0; i < trackPoints.length; i++) {
       if(i > 0){
@@ -105,22 +106,22 @@ class Calc {
             .round();
         distance += distanceAux;
         double gainDiff = trackPoints[i].ele! - trackPoints[i-1].ele!;
-        if (gainDiff > 0) loadedTrack.setGain(loadedTrack.altitudeGain+gainDiff.round());
+        if (gainDiff > 0) track.setGain(track.altitudeGain+gainDiff.round());
       }
-      if (trackPoints[i].ele! > loadedTrack.altitudeTop) {
-        loadedTrack.setTop(trackPoints[i].ele!.round());
+      if (trackPoints[i].ele! > track.altitudeTop) {
+        track.setTop(trackPoints[i].ele!.round());
       }
-      if(trackPoints[i].ele! < loadedTrack.altitudeMin){
-        loadedTrack.setMin(trackPoints[i].ele!.round());
+      if(trackPoints[i].ele! < track.altitudeMin){
+        track.setMin(trackPoints[i].ele!.round());
       }
       if (((trackPoints.length > 500 && i % 2 != 0) ||
           (trackPoints.length > 1000 && i % 3 != 0) ||
           (trackPoints.length > 3000 && i % 5 != 0))) {
         continue;
       }
-      loadedTrack.setAltitudePoint(distance, trackPoints[i].ele!);
+      track.setAltitudePoint(distance, trackPoints[i].ele!);
     }
-    loadedTrack.setDistance(distance);
+    track.setDistance(distance);
   }
 
   //Singleton pattern. No need to call an instance getter, just instantiate the class Calc calc = Calc();
