@@ -7,14 +7,15 @@ class DistanceWidget extends StatelessWidget{
   final bool lightMode;
   final String distance;
   final String distanceUnit;
+  final double width;
 
-  const DistanceWidget({Key? key, required this.lightMode, required this.distance, required this.distanceUnit}) : super(key: key);
+  const DistanceWidget({Key? key, required this.lightMode, required this.distance, required this.distanceUnit, required this.width}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
         height: 80,
-        width: MediaQuery.of(context).size.width / 2,
+        width: width / 2,
         alignment: Alignment.center,
         child: Column(
           mainAxisSize: MainAxisSize.max,

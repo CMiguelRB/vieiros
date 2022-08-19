@@ -23,10 +23,7 @@ class Info extends StatefulWidget {
   final CurrentTrack currentTrack;
   final LoadedTrack loadedTrack;
 
-  const Info(
-      {Key? key,
-      required this.currentTrack,
-      required this.loadedTrack})
+  const Info({Key? key, required this.currentTrack, required this.loadedTrack})
       : super(key: key);
 
   @override
@@ -101,39 +98,41 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  void clearLoadedListener(){
+  void clearLoadedListener() {
     setState(() {
       _slideState = 0;
     });
-    if(!widget.currentTrack.isRecording){
+    if (!widget.currentTrack.isRecording) {
       clearScreen();
     }
   }
 
   _getDaylight() async {
-    if(widget.currentTrack.isRecording){
+    if (widget.currentTrack.isRecording) {
       _sunset = getSunriseSunset(
-          widget.currentTrack.positions.last.latitude!,
-          widget.currentTrack.positions.last.longitude!,
-          DateTime.now().timeZoneOffset,
-          DateTime.now().toLocal())
+              widget.currentTrack.positions.last.latitude!,
+              widget.currentTrack.positions.last.longitude!,
+              DateTime.now().timeZoneOffset,
+              DateTime.now().toLocal())
           .sunset;
       setState(() {
-        _sunsetTime = Calc().getSunsetTime(widget.currentTrack.positions.last.latitude, widget.currentTrack.positions.last.longitude, _sunset!);
+        _sunsetTime = Calc().getSunsetTime(
+            widget.currentTrack.positions.last.latitude,
+            widget.currentTrack.positions.last.longitude,
+            _sunset!);
         _toSunset = Calc().getDaylight(_sunset!);
       });
-    }else{
-      bool hasPermissions = await PermissionHandler().handleLocationPermission();
+    } else {
+      bool hasPermissions =
+          await PermissionHandler().handleLocationPermission();
       if (hasPermissions) {
         Position position = await Geolocator.getCurrentPosition();
-        _sunset = getSunriseSunset(
-            position.latitude,
-            position.longitude,
-            DateTime.now().timeZoneOffset,
-            DateTime.now().toLocal())
+        _sunset = getSunriseSunset(position.latitude, position.longitude,
+                DateTime.now().timeZoneOffset, DateTime.now().toLocal())
             .sunset;
         setState(() {
-          _sunsetTime = Calc().getSunsetTime(position.latitude, position.longitude, _sunset!);
+          _sunsetTime = Calc()
+              .getSunsetTime(position.latitude, position.longitude, _sunset!);
           _toSunset = Calc().getDaylight(_sunset!);
         });
       }
@@ -176,8 +175,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           if (data.isEmpty) {
             int totalDistanceDataCurrent = 0;
             for (int i = 0; i < widget.currentTrack.positions.length; i++) {
-              _altitudeDataCurrent.add(AltitudePoint(
-                  totalDistanceDataCurrent,
+              _altitudeDataCurrent.add(AltitudePoint(totalDistanceDataCurrent,
                   widget.currentTrack.positions[i].altitude!));
               if (i > 0) {
                 totalDistanceDataCurrent = totalDistanceDataCurrent +
@@ -196,7 +194,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           _loadingAltitudeChart = false;
         });
       }
-    }else{
+    } else {
       if (widget.loadedTrack.gpx == null) return clearScreen();
       List<AltitudePoint> altitudePoints = widget.loadedTrack.altitudePoints;
       Gpx gpx = widget.loadedTrack.gpx as Gpx;
@@ -227,7 +225,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
               .split('.')
               .first
               .padLeft(8, "0");
-          _altitudeDataLoaded =  altitudePoints;
+          _altitudeDataLoaded = altitudePoints;
           _loadingAltitudeChart = false;
         });
       }
@@ -279,6 +277,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     super.build(context);
     bool lightMode = Provider.of<ThemeProvider>(context).isLightMode;
+    double width = MediaQuery.of(context).size.width;
     return SafeArea(
         child: Column(children: [
       widget.currentTrack.isRecording && widget.loadedTrack.gpx != null
@@ -307,11 +306,13 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                             initDatetime: widget.currentTrack.dateTime,
                             isRecording: widget.currentTrack.isRecording,
                             totalTime: _totalTime,
+                            width: width,
                           ),
                           DistanceWidget(
                               lightMode: lightMode,
                               distance: _distance,
-                              distanceUnit: _distanceUnit)
+                              distanceUnit: _distanceUnit,
+                              width: width)
                         ],
                       ),
                       Row(
@@ -320,10 +321,12 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         textBaseline: TextBaseline.alphabetic,
                         children: [
-                          InkWell(onTap: _getDaylight, child:DaytimeWidget(
-                              lightMode: lightMode,
-                              sunsetTime: _sunsetTime,
-                              toSunset: _toSunset)),
+                          InkWell(
+                              onTap: _getDaylight,
+                              child: DaytimeWidget(
+                                  lightMode: lightMode,
+                                  sunsetTime: _sunsetTime,
+                                  toSunset: _toSunset)),
                           PaceWidget(
                               lightMode: lightMode,
                               avgPace: _avgPace,
@@ -336,13 +339,13 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           AltitudeWidget(
-                              lightMode: lightMode,
-                              altitudeUnit: _altitudeUnit,
-                              altitude: _altitude,
-                              altitudeGain: _altitudeGain,
-                              altitudeCurrent: _altitudeCurrent,
-                              width: MediaQuery.of(context).size.width,
-                              isAltitudeMin: false,
+                            lightMode: lightMode,
+                            altitudeUnit: _altitudeUnit,
+                            altitude: _altitude,
+                            altitudeGain: _altitudeGain,
+                            altitudeCurrent: _altitudeCurrent,
+                            width: width,
+                            isAltitudeMin: false,
                           )
                         ],
                       )
@@ -350,24 +353,23 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
             Flexible(
                 flex: 1,
                 child: Container(
-                    margin: const EdgeInsets.only(top: 20, bottom: 20, right: 25, left: 5),
-                          child: _loadingAltitudeChart
-                              ? const CircularProgressIndicator(
-                                  color: CustomColors.accent,
-                                )
-                              :  ChartWidget(
-                                  lightMode: lightMode,
-                                  altitudeData: _slideState == 0 &&
-                                          widget.currentTrack.isRecording
-                                      ? _altitudeDataCurrent
-                                      : _altitudeDataLoaded,
-                                  chartColor: _chartColor,
-                                  chartColorFainted: _chartColorFainted,
-                                  altitude: _altitude,
-                                  altitudeMin: _altitudeMin,
-                                  distance: _distance
-                                  )
-                        ))
+                    margin: const EdgeInsets.only(
+                        top: 20, bottom: 20, right: 25, left: 5),
+                    child: _loadingAltitudeChart
+                        ? const CircularProgressIndicator(
+                            color: CustomColors.accent,
+                          )
+                        : ChartWidget(
+                            lightMode: lightMode,
+                            altitudeData: _slideState == 0 &&
+                                    widget.currentTrack.isRecording
+                                ? _altitudeDataCurrent
+                                : _altitudeDataLoaded,
+                            chartColor: _chartColor,
+                            chartColorFainted: _chartColorFainted,
+                            altitude: _altitude,
+                            altitudeMin: _altitudeMin,
+                            distance: _distance)))
           ]))
     ]));
   }

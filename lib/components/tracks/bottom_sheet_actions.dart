@@ -30,8 +30,8 @@ class BottomSheetActions extends StatelessWidget {
           child:
           Column(children: [
             Ink(
-              decoration: const ShapeDecoration(
-                shape: CircleBorder(side: BorderSide(color: Colors.black26, width: 1)),
+              decoration:  ShapeDecoration(
+                shape: CircleBorder(side: BorderSide(color: lightMode ? Colors.black26 : Colors.white24, width: 1)),
               ),
               child: IconButton(
                 icon: icon!,
@@ -39,7 +39,7 @@ class BottomSheetActions extends StatelessWidget {
                 onPressed: () => action!(),
               ),
             ),
-            Container(margin: const EdgeInsets.only(top: 8), child: Text(I18n.translate(key), style: const TextStyle(color: Colors.black, fontSize: 12)))]))
+            Container(margin: const EdgeInsets.only(top: 8), child: Text(I18n.translate(key), style: TextStyle(color: lightMode ? CustomColors.subText : CustomColors.subTextDark, fontSize: 12)))]))
         );
     });
     return Center(
