@@ -10,15 +10,16 @@ class TimeWidget extends StatelessWidget{
   final bool isRecording;
   final DateTime? initDatetime;
   final String? totalTime;
+  final double width;
 
-  const TimeWidget({Key? key, required this.lightMode, required this.slideState, required this.isRecording, required this.totalTime, required this.initDatetime}) : super(key: key);
+  const TimeWidget({Key? key, required this.lightMode, required this.slideState, required this.isRecording, required this.totalTime, required this.initDatetime, required this.width}) : super(key: key);
 
 
   @override
   Widget build(BuildContext context) {
     return Container(
         height: 80,
-        width: MediaQuery.of(context).size.width / 2,
+        width: width / 2,
         alignment: Alignment.center,
         child: Column(
           mainAxisSize: MainAxisSize.max,

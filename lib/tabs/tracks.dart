@@ -74,7 +74,7 @@ class TracksState extends State<Tracks> {
   }
 
   Future<void> openFile() async {
-    Navigator.of(context).pop();
+    //Navigator.of(context).pop();
     Timer(const Duration(milliseconds: 500), () {
       setState(() {
         _files.insert(0, GpxFile(name: 'loading', path: '/loading'));
@@ -338,7 +338,7 @@ class TracksState extends State<Tracks> {
           heroTag: null,
           shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(16.0))),
-          onPressed: () => addFileOrDirectory(lightMode),
+          onPressed: () => openFile()/*addFileOrDirectory(lightMode)*/,
           child: const Icon(Icons.add),
         ),
         body: SafeArea(

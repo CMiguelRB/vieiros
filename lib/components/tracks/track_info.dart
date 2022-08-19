@@ -1,10 +1,8 @@
-import 'dart:convert';
-import 'dart:developer';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:vieiros/components/info/altitude_widget.dart';
 import 'package:vieiros/components/info/distance_widget.dart';
+import 'package:vieiros/components/info/time_widget.dart';
 import 'package:vieiros/components/tracks/bottom_sheet_actions.dart';
 import 'package:vieiros/model/track.dart';
 import 'package:vieiros/resources/custom_colors.dart';
@@ -22,19 +20,23 @@ class TrackInfo extends StatelessWidget {
       required this.lightMode,
       required this.track,
       required this.actions,
-        required this.iconStart,
-        required this.iconEnd
-      })
+      required this.iconStart,
+      required this.iconEnd})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-
     List<LatLng> points = GpxHandler().getPointsFromGpx(track);
 
-    Marker start = Marker(markerId: const MarkerId('track_preview_start'), position: points.first, icon: iconStart);
+    Marker start = Marker(
+        markerId: const MarkerId('track_preview_start'),
+        position: points.first,
+        icon: iconStart);
 
-    Marker end = Marker(markerId: const MarkerId('track_preview_start'), position: points.last, icon: iconEnd);
+    Marker end = Marker(
+        markerId: const MarkerId('track_preview_start'),
+        position: points.last,
+        icon: iconEnd);
 
     Set<Marker> markers = {};
     markers.add(start);
@@ -53,23 +55,34 @@ class TrackInfo extends StatelessWidget {
     double minX = 90;
     double maxY = -180;
     double minY = 180;
-    for(LatLng latLng in points){
-      if(latLng.latitude > maxY){
+    for (LatLng latLng in points) {
+      if (latLng.latitude > maxY) {
         maxY = latLng.latitude;
       }
-      if(latLng.latitude < minY){
+      if (latLng.latitude < minY) {
         minY = latLng.latitude;
       }
-      if(latLng.longitude > maxX){
+      if (latLng.longitude > maxX) {
         maxX = latLng.longitude;
       }
-      if(latLng.longitude < minX){
+      if (latLng.longitude < minX) {
         minX = latLng.longitude;
       }
     }
 
-    double centerLon = (maxX + minX)/2;
-    double centerLat = (maxY + minY)/2;
+    double centerLon = (maxX + minX) / 2;
+    double centerLat = (maxY + minY) / 2;
+
+    double width = MediaQuery.of(context).size.width;
+
+    String totalTime = track.gpx!.trks.first.trksegs.first.trkpts.last.time!
+        .difference(track.gpx!.trks.first.trksegs.first.trkpts.first.time!)
+        .abs()
+        .toString()
+        .split('.')
+        .first
+        .padLeft(8, "0");
+    DateTime? initTime = track.gpx!.trks.first.trksegs.first.trkpts.first.time;
 
     return Ink(
         height: MediaQuery.of(context).size.height * .9,
@@ -94,53 +107,101 @@ class TrackInfo extends StatelessWidget {
                             style: const TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.w600),
                           )),
-
-                            Expanded(
-                              child:
-                                  Container(
-                                      margin: const EdgeInsets.symmetric(horizontal: 20),
-                                      width: MediaQuery.of(context).size.width,
-                                      child: GoogleMap(
-                                        liteModeEnabled: true,
-                                        compassEnabled: false,
-                                        buildingsEnabled: false,
-                                        mapType: MapType.satellite,
-                                        mapToolbarEnabled: false,
-                                        myLocationButtonEnabled: false,
-                                        myLocationEnabled: false,
-                                        indoorViewEnabled: false,
-                                        zoomControlsEnabled: false,
-                                        zoomGesturesEnabled: false,
-                                        trafficEnabled: false,
-                                        scrollGesturesEnabled: false,
-                                        rotateGesturesEnabled: false,
-                                        polylines: polylines,
-                                        markers: markers,
-                                        initialCameraPosition: CameraPosition(
-                                          target: LatLng(centerLat, centerLon),
-                                          zoom: 13,
-                                        ),
-                                        onMapCreated: (controller) async {
-                                          Uint8List? uInt8list =
-                                              await controller.takeSnapshot();
-                                          log(base64Encode(uInt8list!));
-                                        },
-                                      ))
-                                ,
-                            ),
-                            Container(
-                                margin: const EdgeInsets.symmetric(vertical: 20),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
+                      Expanded(
+                        child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 20),
+                            width: width,
+                            child: ClipRRect(
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(12)),
+                                child: GoogleMap(
+                                  liteModeEnabled: true,
+                                  compassEnabled: false,
+                                  buildingsEnabled: false,
+                                  mapType: MapType.satellite,
+                                  mapToolbarEnabled: false,
+                                  myLocationButtonEnabled: false,
+                                  myLocationEnabled: false,
+                                  indoorViewEnabled: false,
+                                  zoomControlsEnabled: false,
+                                  zoomGesturesEnabled: false,
+                                  trafficEnabled: false,
+                                  scrollGesturesEnabled: false,
+                                  rotateGesturesEnabled: false,
+                                  polylines: polylines,
+                                  markers: markers,
+                                  initialCameraPosition: CameraPosition(
+                                    target: LatLng(centerLat, centerLon),
+                                    zoom: 13,
+                                  ),
+                                  /*onMapCreated: (controller) async {
+                                    Uint8List? uInt8list =
+                                        await controller.takeSnapshot();
+                                    log(base64Encode(uInt8list!));
+                                  },*/
+                                ))),
+                      ),
+                      Container(
+                          margin: const EdgeInsets.symmetric(vertical: 20),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.max,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceEvenly,
                                   mainAxisSize: MainAxisSize.max,
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.center,
                                   children: [
-                                    DistanceWidget(lightMode: lightMode, distance: (track.distance/1000).toStringAsFixed(2), distanceUnit: 'Km'),
-                                    AltitudeWidget(lightMode: lightMode, altitudeUnit: 'm', altitude: track.altitudeTop.toString(), altitudeGain: track.altitudeGain.toString(), altitudeCurrent: track.altitudeMin.toString(), width: MediaQuery.of(context).size.width-40, isAltitudeMin: true)
-                                  ],
-                                ))
-
+                                    Card(
+                                        elevation: 0,
+                                        color:
+                                            lightMode ? CustomColors.faintedFaintedAccent : CustomColors.trackBackgroundDark,
+                                        child: (Container(
+                                            margin: const EdgeInsets.symmetric(
+                                                vertical: 4),
+                                            child: DistanceWidget(
+                                              lightMode: lightMode,
+                                              distance: (track.distance / 1000)
+                                                  .toStringAsFixed(2),
+                                              distanceUnit: 'Km',
+                                              width: width - 60,
+                                            )))),
+                                    Card(
+                                        elevation: 0,
+                                        color:
+                                        lightMode ? CustomColors.faintedFaintedAccent : CustomColors.trackBackgroundDark,
+                                        child: (Container(
+                                            margin: const EdgeInsets.symmetric(
+                                                vertical: 4),
+                                            child: TimeWidget(
+                                              lightMode: lightMode,
+                                              slideState: 0,
+                                              isRecording: false,
+                                              totalTime: totalTime,
+                                              initDatetime: initTime,
+                                              width: width - 60,
+                                            ))))
+                                  ]),
+                              Card(
+                                  elevation: 0,
+                                  color: lightMode ? CustomColors.faintedFaintedAccent : CustomColors.trackBackgroundDark,
+                                  child: (Container(
+                                      margin: const EdgeInsets.symmetric(
+                                          vertical: 4),
+                                      child: AltitudeWidget(
+                                          lightMode: lightMode,
+                                          altitudeUnit: 'm',
+                                          altitude:
+                                              track.altitudeTop.toString(),
+                                          altitudeGain:
+                                              track.altitudeGain.toString(),
+                                          altitudeCurrent:
+                                              track.altitudeMin.toString(),
+                                          width: width - 40,
+                                          isAltitudeMin: true))))
+                            ],
+                          ))
                     ])),
             BottomSheetActions(actions: actions, lightMode: lightMode)
           ],
