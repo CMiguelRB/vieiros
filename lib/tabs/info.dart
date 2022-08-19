@@ -340,7 +340,10 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                               altitudeUnit: _altitudeUnit,
                               altitude: _altitude,
                               altitudeGain: _altitudeGain,
-                              altitudeCurrent: _altitudeCurrent)
+                              altitudeCurrent: _altitudeCurrent,
+                              width: MediaQuery.of(context).size.width,
+                              isAltitudeMin: false,
+                          )
                         ],
                       )
                     ])),

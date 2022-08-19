@@ -1,9 +1,10 @@
 <component name="libraryTable">
   <library name="Gradle: com.google.android.datatransport:transport-backend-cct:3.1.5@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/f649c8f3b8db3c2002873ba4f89f923d/transformed/jetified-transport-backend-cct-3.1.5/jars/classes.jar!/" />
       <root url="file://$USER_HOME$/.gradle/caches/transforms-3/f649c8f3b8db3c2002873ba4f89f923d/transformed/jetified-transport-backend-cct-3.1.5/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/f649c8f3b8db3c2002873ba4f89f923d/transformed/jetified-transport-backend-cct-3.1.5/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/b80d7b93eb91f0a84a8ce74fae533e8a/transformed/jetified-transport-backend-cct-3.1.5/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/b80d7b93eb91f0a84a8ce74fae533e8a/transformed/jetified-transport-backend-cct-3.1.5/AndroidManifest.xml" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/b80d7b93eb91f0a84a8ce74fae533e8a/transformed/jetified-transport-backend-cct-3.1.5/jars/classes.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.android.datatransport/transport-backend-cct/3.1.5/fb208b2a3422a8cbf19927e5b8facdde2fd92470/transport-backend-cct-3.1.5-javadoc.jar!/" />

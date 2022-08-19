@@ -1,11 +1,9 @@
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:vieiros/components/vieiros_dialog.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:flutter/material.dart';
 import 'package:vieiros/model/current_track.dart';
 import 'package:vieiros/resources/i18n.dart';
-import 'package:vieiros/resources/themes.dart';
 import 'package:vieiros/tabs/info.dart';
 import 'package:vieiros/tabs/settings.dart';
 import 'package:vieiros/tabs/map.dart';
@@ -32,7 +30,6 @@ class HomeState extends State<Home>
   }
 
   int _tabIndex = 0;
-  Icon _fabIcon = const Icon(Icons.add);
 
   late List<Widget> _tabs;
   late TabController _tabController;
@@ -62,7 +59,6 @@ class HomeState extends State<Home>
           _mapKey.currentState!.navigateCurrentTrack();
         }
         if (_currentTrack.isRecording) {
-          _fabIcon = const Icon(Icons.stop);
           _mapKey.currentState!.centerMapView();
           if (mounted) {
             setState(() {
@@ -78,7 +74,6 @@ class HomeState extends State<Home>
           await widget.loadedTrack.loadTrack(path);
         }
       }
-      _fabIcon = const Icon(Icons.play_arrow);
     } else if (index == 2) {
       if (_infoKey.currentState != null) {
         String? path = Preferences().get('currentTrack');
@@ -87,8 +82,6 @@ class HomeState extends State<Home>
           _infoKey.currentState!.loadTrack(path);
         }
       }
-    } else {
-      _fabIcon = const Icon(Icons.add);
     }
     if (mounted) {
       setState(() {
@@ -96,12 +89,6 @@ class HomeState extends State<Home>
         _tabController.animateTo(index);
       });
     }
-  }
-
-  void _setPlayFabIcon() {
-    setState(() {
-      _fabIcon = const Icon(Icons.play_arrow);
-    });
   }
 
   void _clearTrack() {
@@ -127,7 +114,6 @@ class HomeState extends State<Home>
           clearTrack: _clearTrack),
       Map(
           key: _mapKey,
-          setPlayIcon: _setPlayFabIcon,
           currentTrack: _currentTrack,
           loadedTrack: widget.loadedTrack),
       Info(
@@ -145,24 +131,6 @@ class HomeState extends State<Home>
     WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
     super.dispose();
-  }
-
-  _onFabPressed(index, lightMode) {
-    if (index == 0 && _trackKey.currentState != null) {
-      _trackKey.currentState!.addFileOrDirectory(lightMode);
-    }
-    if (index == 1 && _mapKey.currentState != null) {
-      if (!_currentTrack.isRecording) {
-        _mapKey.currentState!.startRecording();
-        if (mounted) {
-          setState(() {
-            _fabIcon = const Icon(Icons.stop);
-          });
-        }
-      } else {
-        _mapKey.currentState!.stopRecording(lightMode);
-      }
-    }
   }
 
   Future<bool> _onWillPop(BuildContext context) async {
@@ -183,7 +151,6 @@ class HomeState extends State<Home>
 
   @override
   Widget build(BuildContext context) {
-    bool lightMode = Provider.of<ThemeProvider>(context).isLightMode;
     return WillPopScope(
         onWillPop: () => _onWillPop(context),
         child: Scaffold(
@@ -192,16 +159,6 @@ class HomeState extends State<Home>
                 physics: const NeverScrollableScrollPhysics(),
                 controller: _tabController,
                 children: _tabs),
-            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-            floatingActionButton: _tabIndex <= 1
-                ? FloatingActionButton(
-                    heroTag: null,
-                    shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(16.0))),
-                    onPressed: () => _onFabPressed(_tabIndex, lightMode),
-                    child: _fabIcon,
-                  )
-                : null,
             bottomNavigationBar: NavigationBar(
                 selectedIndex: _tabIndex,
                 onDestinationSelected: _onTabItemTapped,
