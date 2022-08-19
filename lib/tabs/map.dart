@@ -32,13 +32,11 @@ import 'package:vieiros/utils/preferences.dart';
 import 'package:vieiros/utils/vieiros_tts.dart';
 
 class Map extends StatefulWidget {
-  final Function setPlayIcon;
   final CurrentTrack currentTrack;
   final LoadedTrack loadedTrack;
 
   const Map(
       {Key? key,
-      required this.setPlayIcon,
       required this.currentTrack,
       required this.loadedTrack})
       : super(key: key);
@@ -53,6 +51,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   final Set<Polyline> _polyline = {};
   final Set<Marker> _markers = {};
   List<Marker> _currentMarkers = [];
+  Icon _fabIcon = const Icon(Icons.play_arrow);
   final _formKey = GlobalKey<FormState>();
   final _formKeyWaypointAdd = GlobalKey<FormState>();
   final _formKeyWaypointEdit = GlobalKey<FormState>();
@@ -380,6 +379,20 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     });
   }
 
+  _onFabPressed(lightMode) {
+    if (!widget.currentTrack.isRecording) {
+      startRecording();
+      setState(() {
+        _fabIcon = const Icon(Icons.stop);
+      });
+    } else {
+      stopRecording(lightMode);
+      setState(() {
+        _fabIcon = const Icon(Icons.play_arrow);
+      });
+    }
+  }
+
   Future<Uint8List> _getBytesFromAsset(Uint8List b64Image, int width) async {
     ui.Codec codec =
         await ui.instantiateImageCodec(b64Image, targetWidth: width);
@@ -598,7 +611,6 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   _stopAndSave(name) async {
     if (!_formKey.currentState!.validate()) return;
     _location.enableBackgroundMode(enable: false);
-    widget.setPlayIcon();
     Gpx gpx = GpxHandler()
         .createGpx(widget.currentTrack, name, currentMarkers: _currentMarkers);
     String gpxString = GpxWriter().asString(gpx, pretty: true);
@@ -607,11 +619,11 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         'creator="vieiros" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"');
     String? result = await FilesHandler().writeFile(gpxString, name, true);
     if (result == '###file_exists') {
-      if(!mounted) return;
+      if (!mounted) return;
       return VieirosNotification().showNotification(context,
           I18n.translate('map_save_error_file_exists'), NotificationType.error);
     }
-    if(!mounted) return;
+    if (!mounted) return;
     Navigator.pop(context, I18n.translate('common_ok'));
     if (mounted) {
       setState(() {
@@ -634,7 +646,6 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   void _stopAndDiscard() {
     _location.enableBackgroundMode(enable: false);
     Navigator.pop(context, 'Stop and discard');
-    widget.setPlayIcon();
     if (mounted) {
       setState(() {
         _polyline.removeWhere(
@@ -745,9 +756,9 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         _showBearingButton = false;
       });
     }
-    if(camera.bearing != 0.0){
+    if (camera.bearing != 0.0) {
       setState(() {
-        _bearing = - camera.bearing * 3.14 / 180;
+        _bearing = -camera.bearing * 3.14 / 180;
       });
     }
   }
@@ -779,67 +790,82 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                 ))
             : _showMap
                 ? Scaffold(
-                    body: GoogleMap(
-                      gestureRecognizers: <
-                          Factory<OneSequenceGestureRecognizer>>{
-                        Factory<OneSequenceGestureRecognizer>(
-                          () => EagerGestureRecognizer(),
-                        ),
-                      },
-                      mapType: MapType.hybrid,
-                      mapToolbarEnabled: false,
-                      buildingsEnabled: false,
-                      initialCameraPosition: const CameraPosition(
-                          target: LatLng(43.463305, -8.273529), zoom: 15.0),
-                      myLocationEnabled: true,
-                      myLocationButtonEnabled: false,
-                      trafficEnabled: false,
-                      compassEnabled: false,
-                      polylines: _polyline,
-                      markers: _markers,
-                      onCameraMove: _onCameraMove,
-                      zoomControlsEnabled: false,
-                      onLongPress: (latLng) =>
-                          _currentMarkerDialog(latLng, lightMode),
-                      onMapCreated: (GoogleMapController controller) {
-                        if (!_mapController.isCompleted) {
-                          _mapController.complete(controller);
-                        }
-                      },
-                    ),
                     floatingActionButtonLocation:
-                        FloatingActionButtonLocation.miniEndTop,
-                    floatingActionButton: Padding(
-                        padding: const EdgeInsets.only(top: 20),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            FloatingActionButton(
-                              elevation: 0,
-                              mini: true,
-                              backgroundColor:
-                              const Color.fromARGB(95, 255, 255, 255),
-                              onPressed: _moveCurrentLocation,
-                              child: const Icon(Icons.my_location,
-                                  color: CustomColors.trackBackgroundDark),
+                        FloatingActionButtonLocation.endFloat,
+                    floatingActionButton: FloatingActionButton(
+                      heroTag: null,
+                      shape: const RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(16.0))),
+                      onPressed: () => _onFabPressed(lightMode),
+                      child: _fabIcon,
+                    ),
+                    body: Scaffold(
+                        body: GoogleMap(
+                          gestureRecognizers: <
+                              Factory<OneSequenceGestureRecognizer>>{
+                            Factory<OneSequenceGestureRecognizer>(
+                              () => EagerGestureRecognizer(),
                             ),
-                            Transform.rotate(angle: _bearing, child: FloatingActionButton(
-                              elevation: 0,
-                              mini: true,
-                              enableFeedback: _showBearingButton,
-                              backgroundColor: _showBearingButton
-                                  ? const Color.fromARGB(95, 255, 255, 255)
-                                  : Colors.transparent,
-                              onPressed:
-                                  _showBearingButton ? _resetBearing : null,
-                              child: Icon(Icons.navigation,
-                                  color: _showBearingButton
-                                      ? CustomColors.trackBackgroundDark
-                                      : Colors.transparent),
-                            ))
-                          ],
-                        )))
+                          },
+                          mapType: MapType.hybrid,
+                          mapToolbarEnabled: false,
+                          buildingsEnabled: false,
+                          initialCameraPosition: const CameraPosition(
+                              target: LatLng(43.463305, -8.273529), zoom: 15.0),
+                          myLocationEnabled: true,
+                          myLocationButtonEnabled: false,
+                          trafficEnabled: false,
+                          compassEnabled: false,
+                          polylines: _polyline,
+                          markers: _markers,
+                          onCameraMove: _onCameraMove,
+                          zoomControlsEnabled: false,
+                          onLongPress: (latLng) =>
+                              _currentMarkerDialog(latLng, lightMode),
+                          onMapCreated: (GoogleMapController controller) {
+                            if (!_mapController.isCompleted) {
+                              _mapController.complete(controller);
+                            }
+                          },
+                        ),
+                        floatingActionButtonLocation:
+                            FloatingActionButtonLocation.miniEndTop,
+                        floatingActionButton: Padding(
+                            padding: const EdgeInsets.only(top: 20),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                FloatingActionButton(
+                                  elevation: 0,
+                                  mini: true,
+                                  backgroundColor:
+                                      const Color.fromARGB(95, 255, 255, 255),
+                                  onPressed: _moveCurrentLocation,
+                                  child: const Icon(Icons.my_location,
+                                      color: CustomColors.trackBackgroundDark),
+                                ),
+                                Transform.rotate(
+                                    angle: _bearing,
+                                    child: FloatingActionButton(
+                                      elevation: 0,
+                                      mini: true,
+                                      enableFeedback: _showBearingButton,
+                                      backgroundColor: _showBearingButton
+                                          ? const Color.fromARGB(
+                                              95, 255, 255, 255)
+                                          : Colors.transparent,
+                                      onPressed: _showBearingButton
+                                          ? _resetBearing
+                                          : null,
+                                      child: Icon(Icons.navigation,
+                                          color: _showBearingButton
+                                              ? CustomColors.trackBackgroundDark
+                                              : Colors.transparent),
+                                    ))
+                              ],
+                            ))))
                 : const Center(
                     child: CircularProgressIndicator(
                     color: CustomColors.accent,

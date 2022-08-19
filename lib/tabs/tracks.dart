@@ -1,8 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:vieiros/components/tracks/bottom_sheet_actions.dart';
+import 'package:vieiros/components/tracks/track_info.dart';
 import 'package:vieiros/components/vieiros_dialog.dart';
 import 'package:vieiros/components/vieiros_notification.dart';
 import 'package:vieiros/components/vieiros_text_input.dart';
@@ -41,6 +45,8 @@ class Tracks extends StatefulWidget {
 class TracksState extends State<Tracks> {
   List<GpxFile> _files = [];
   final TextEditingController _controller = TextEditingController(text: '');
+
+  final Set<Marker> _markers = {};
 
   _loadPrefs(String value) async {
     String? jsonString = Preferences().get('files');
@@ -210,122 +216,99 @@ class TracksState extends State<Tracks> {
   }
 
   void addFileOrDirectory(bool lightMode) {
-    _showBottomSheet('fileManager', 0, lightMode);
+    _showBottomSheet('fileManager', 0, lightMode, null);
   }
 
-  _showBottomSheet(String type, int index, bool lightMode) async {
+  _showBottomSheet(
+      String type, int index, bool lightMode, double? height) async {
     Widget content;
 
     if (type == 'fileManager') {
       content = _fileManagerContent(lightMode);
     } else {
-      content = await _trackManagerContent(index, lightMode);
+      content = await _trackManagerContent(index, lightMode, height);
     }
 
     showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(24),
+        context: context,
+        isScrollControlled: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(24),
+          ),
         ),
-      ),
-      clipBehavior: Clip.antiAliasWithSaveLayer,
-      builder: (BuildContext context) {
-        return content;
-      },
-    );
+        clipBehavior: Clip.antiAliasWithSaveLayer,
+        builder: (BuildContext context) {
+          return content;
+        });
   }
 
-  Future<Widget> _trackManagerContent(int index, bool lightMode) async {
+  Future<Widget> _trackManagerContent(
+      int index, bool lightMode, double? height) async {
     GpxFile file = _files.elementAt(index);
 
     Track track = await Track().loadTrack(file.path);
 
-    return Ink(
-        height: 150,
-        padding: const EdgeInsets.only(top: 20, bottom: 30),
-        color:
-            lightMode ? CustomColors.background : CustomColors.backgroundDark,
-        child: Center(
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                children: <Widget>[
-            Expanded(child: InkWell(
-                  enableFeedback: true,
-                  child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            const Icon(Icons.share,  size: 32),
-                            Text(I18n.translate('common_share'), style: const TextStyle(fontSize: 12))
-                          ])),
-                  onTap: () => _shareFile(index))),
-              Expanded(child: InkWell(
-                  enableFeedback: true,
-                  child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            const Icon(Icons.delete_outline,  size: 32),
-                            Text(I18n.translate('common_delete'), style: const TextStyle(fontSize: 12))
-                          ])),
-                  onTap: () => _showDeleteDialog(index)))
-            ])));
+    double lat = track.gpx!.trks.first.trksegs.first.trkpts.first.lat!;
+    double lon = track.gpx!.trks.first.trksegs.first.trkpts.first.lon!;
+
+    Marker marker = Marker(
+        markerId: const MarkerId('12345'),
+        position: LatLng(lat, lon),
+        icon: BitmapDescriptor.defaultMarker);
+    setState(() {
+      _markers.add(marker);
+    });
+
+    BitmapDescriptor iconStart = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(100, 100)),
+        'assets/loaded_pin.png');
+    BitmapDescriptor iconEnd = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(100, 100)),
+        'assets/loaded_pin_end.png');
+
+    return TrackInfo(
+        lightMode: lightMode,
+        actions: {
+          "common_share": {
+            "icon": Icons.share,
+            "action": () => _shareFile(index)
+          },
+          "common_delete": {
+            "icon": Icons.delete,
+            "action": () => _showDeleteDialog(index)
+          }
+        },
+        track: track,
+      iconStart: iconStart,
+      iconEnd: iconEnd,
+    );
   }
 
   Widget _fileManagerContent(bool lightMode) {
+    Map<String, Map<String, dynamic>> actions = {
+      "tracks_add_file": {"icon": Icons.file_download, "action": openFile},
+      "tracks_create_directory": {
+        "icon": Icons.create_new_folder_outlined,
+        "action": _addDirectory
+      }
+    };
+
     return Ink(
-        height: 150,
+        height: 180,
         padding: const EdgeInsets.only(top: 20, bottom: 30),
         color:
             lightMode ? CustomColors.background : CustomColors.backgroundDark,
-        child: Center(
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-              Expanded(
-                  child: InkWell(
-                      enableFeedback: true,
-                      child: Container(
-                          margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                          child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.max,
-                              children: [
-                                const Icon(Icons.add,  size: 32),
-                                Text(I18n.translate('tracks_add_file'), style: const TextStyle(fontSize: 12))
-                              ])),
-                      onTap: () => openFile())),
-              Expanded(
-                  child: InkWell(
-                      enableFeedback: true,
-                      child: Container(
-                          margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                          child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                               const Icon(
-                                   Icons.create_new_folder_outlined, size: 32),
-                                Text(I18n.translate('tracks_create_directory'), style: const TextStyle(fontSize: 12))
-                              ])),
-                      onTap: () => _addDirectory()))
-            ])));
+        child: Column(children:[
+          Text(I18n.translate('common_add'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
+          BottomSheetActions(actions: actions, lightMode: lightMode)]));
   }
 
   _addDirectory() {
     Navigator.of(context).pop();
-    print('add directory');
+    if (kDebugMode) {
+      print('add directory');
+    }
   }
 
   _shareFile(int index) {
@@ -349,111 +332,132 @@ class TracksState extends State<Tracks> {
   @override
   Widget build(BuildContext context) {
     bool lightMode = Provider.of<ThemeProvider>(context).isLightMode;
-    return SafeArea(
-        child: Column(
-      children: [
-        Container(
-            margin: const EdgeInsets.all(12),
-            child: VieirosTextInput(
-                lightMode: lightMode,
-                hintText: I18n.translate('tracks_search_hint'),
-                onChanged: _onChanged,
-                controller: _controller,
-                suffix: IconButton(
-                    icon: Icon(
-                        _controller.value.text == ''
-                            ? Icons.search
-                            : Icons.clear,
-                        color: lightMode
-                            ? CustomColors.subText
-                            : CustomColors.subTextDark),
-                    onPressed:
-                        _controller.value.text == '' ? null : _clearValue))),
-        Expanded(
-            child: _files.isEmpty
-                ? Container(
-                    alignment: Alignment.center,
-                    child: Text(I18n.translate('tracks_background_tip'),
-                        style: TextStyle(
+    return Scaffold(
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+        floatingActionButton: FloatingActionButton(
+          heroTag: null,
+          shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(16.0))),
+          onPressed: () => addFileOrDirectory(lightMode),
+          child: const Icon(Icons.add),
+        ),
+        body: SafeArea(
+            child: Column(
+          children: [
+            Container(
+                margin: const EdgeInsets.all(12),
+                child: VieirosTextInput(
+                    lightMode: lightMode,
+                    hintText: I18n.translate('tracks_search_hint'),
+                    onChanged: _onChanged,
+                    controller: _controller,
+                    suffix: IconButton(
+                        icon: Icon(
+                            _controller.value.text == ''
+                                ? Icons.search
+                                : Icons.clear,
                             color: lightMode
                                 ? CustomColors.subText
-                                : CustomColors.subTextDark)))
-                : ReorderableListView.builder(
-                    scrollDirection: Axis.vertical,
-                    padding: const EdgeInsets.all(8),
-                    itemCount: _files.length,
-                    shrinkWrap: true,
-                    itemBuilder: (context, index) {
-                      bool loadedElement =
-                          widget.loadedTrack.path == _files[index].path;
-                      return InkWell(
-                        key: Key(_files[index].path!),
-                        child: Card(
-                            elevation: 0,
-                            color: loadedElement
-                                ? (lightMode
-                                    ? CustomColors.trackBackgroundLight
-                                    : CustomColors.trackBackgroundDark)
-                                : Colors.black12,
-                            child: Padding(
-                                padding: EdgeInsets.only(
-                                    left: loadedElement ? 0 : 16, right: 8),
-                                child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      _files[index].path == '/loading'
-                                          ? SizedBox(
-                                              width: 20,
-                                              height: 20,
-                                              child: CircularProgressIndicator(
-                                                color: lightMode
-                                                    ? Colors.black
-                                                    : Colors.white,
-                                                strokeWidth: 2,
-                                              ))
-                                          : (loadedElement
-                                              ? IconButton(
+                                : CustomColors.subTextDark),
+                        onPressed: _controller.value.text == ''
+                            ? null
+                            : _clearValue))),
+            Expanded(
+                child: _files.isEmpty
+                    ? Container(
+                        alignment: Alignment.center,
+                        child: Text(I18n.translate('tracks_background_tip'),
+                            style: TextStyle(
+                                color: lightMode
+                                    ? CustomColors.subText
+                                    : CustomColors.subTextDark)))
+                    : ReorderableListView.builder(
+                        scrollDirection: Axis.vertical,
+                        padding: const EdgeInsets.all(8),
+                        itemCount: _files.length,
+                        shrinkWrap: true,
+                        itemBuilder: (itemContext, index) {
+                          bool loadedElement =
+                              widget.loadedTrack.path == _files[index].path;
+                          return InkWell(
+                            key: Key(_files[index].path!),
+                            child: Card(
+                                elevation: 0,
+                                color: loadedElement
+                                    ? (lightMode
+                                        ? CustomColors.trackBackgroundLight
+                                        : CustomColors.trackBackgroundDark)
+                                    : Colors.black12,
+                                child: Padding(
+                                    padding: EdgeInsets.only(
+                                        left: loadedElement ? 0 : 16, right: 8),
+                                    child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          _files[index].path == '/loading'
+                                              ? SizedBox(
+                                                  width: 20,
+                                                  height: 20,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    color: lightMode
+                                                        ? Colors.black
+                                                        : Colors.white,
+                                                    strokeWidth: 2,
+                                                  ))
+                                              : (loadedElement
+                                                  ? IconButton(
+                                                      onPressed: () =>
+                                                          _unloadTrack(
+                                                              index, true),
+                                                      icon: const Icon(
+                                                          Icons.landscape))
+                                                  : Container()),
+                                          Flexible(
+                                              fit: FlexFit.tight,
+                                              child: Text(
+                                                  _files[index].path ==
+                                                          '/loading'
+                                                      ? ''
+                                                      : _files[index].name,
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis)),
+                                          _files[index].path == '/loading'
+                                              ? const SizedBox(
+                                                  width: 50, height: 50)
+                                              : IconButton(
+                                                  alignment: Alignment
+                                                      .centerRight,
                                                   onPressed: () =>
-                                                      _unloadTrack(index, true),
+                                                      _showBottomSheet(
+                                                          'trackManager',
+                                                          index,
+                                                          lightMode,
+                                                          MediaQuery.of(context)
+                                                              .size
+                                                              .height),
                                                   icon: const Icon(
-                                                      Icons.landscape))
-                                              : Container()),
-                                      Flexible(
-                                          fit: FlexFit.tight,
-                                          child: Text(
-                                              _files[index].path == '/loading'
-                                                  ? ''
-                                                  : _files[index].name,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis)),
-                                      _files[index].path == '/loading'
-                                          ? const SizedBox(
-                                              width: 50, height: 50)
-                                          : IconButton(
-                                              alignment: Alignment.centerRight,
-                                              onPressed: () => _showBottomSheet(
-                                                  'trackManager',
-                                                  index,
-                                                  lightMode),
-                                              icon: const Icon(Icons.more_vert))
-                                    ]))),
-                        onTap: () => _navigate(index),
-                      );
-                    },
-                    onReorder: (int oldIndex, int newIndex) {
-                      GpxFile file = _files.removeAt(oldIndex);
-                      if (oldIndex < newIndex) {
-                        newIndex--;
-                      }
-                      _files.insert(newIndex, file);
-                      setState(() {
-                        _files = _files;
-                      });
-                      Preferences().set('files', json.encode(_files));
-                    },
-                  ))
-      ],
-    ));
+                                                      Icons.more_vert))
+                                        ]))),
+                            onTap: () => _navigate(index),
+                          );
+                        },
+                        onReorder: (int oldIndex, int newIndex) {
+                          GpxFile file = _files.removeAt(oldIndex);
+                          if (oldIndex < newIndex) {
+                            newIndex--;
+                          }
+                          _files.insert(newIndex, file);
+                          setState(() {
+                            _files = _files;
+                          });
+                          Preferences().set('files', json.encode(_files));
+                        },
+                      ))
+          ],
+        )));
   }
 }

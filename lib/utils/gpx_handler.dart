@@ -1,7 +1,7 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gpx/gpx.dart';
 import 'package:vieiros/model/current_track.dart';
-import 'package:vieiros/model/loaded_track.dart';
+import 'package:vieiros/model/track.dart';
 
 class GpxHandler {
   
@@ -35,8 +35,8 @@ class GpxHandler {
     return gpx;
   }
   
-  List<LatLng> getPointsFromGpx(LoadedTrack loadedTrack){
-    Gpx gpx = loadedTrack.gpx as Gpx;
+  List<LatLng> getPointsFromGpx(Track track){
+    Gpx gpx = track.gpx as Gpx;
     List<LatLng> points = [];
     double? lat;
     double? lon;

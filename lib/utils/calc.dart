@@ -2,7 +2,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:gpx/gpx.dart';
 import 'package:vieiros/model/track.dart';
 import 'package:vieiros/model/current_track.dart';
-import 'package:vieiros/model/loaded_track.dart';
 
 class Calc {
 

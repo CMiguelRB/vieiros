@@ -4,6 +4,7 @@ class I18n {
   static final _localizations = {
     "en": {
       "common_ok": "OK",
+      "common_add": "Add",
       "common_cancel": "Cancel",
       "common_discard": "Discard",
       "common_delete": "Delete",
@@ -28,8 +29,8 @@ class I18n {
       "tracks_delete_route": "Delete route",
       "tracks_once_permissions_disclaimer":
           "Due to the new Android's permission policies, \"Allow all the time\" permission is now needed for tracking the background location. Otherwise, Vieiros won't be able to track your path while being in the background.\n\nYour location data will be only used locally, it's yours, and stored as a GPX track for your own use.",
-      "tracks_create_directory": "Create folder",
-      "tracks_add_file": "Add track file",
+      "tracks_create_directory": "Folder",
+      "tracks_add_file": "Track",
       "map_waypoint": "Waypoint name",
       "map_channel_name_location": "Background location service",
       "map_notification_title": "Recording track...",
@@ -62,6 +63,7 @@ class I18n {
       "info_daytime_sunset": "Sunset",
       "info_pace": "Avg pace",
       "info_altitude": "Altitude",
+      "info_altitude_min": "Min",
       "info_altitude_current": "Current",
       "info_altitude_top": "Top",
       "info_altitude_gain": "Gain",
@@ -87,6 +89,7 @@ class I18n {
     },
     "es": {
       "common_ok": "Aceptar",
+      "common_add": "Añadir",
       "common_cancel": "Cancelar",
       "common_discard": "Descartar",
       "common_delete": "Eliminar",
@@ -111,8 +114,8 @@ class I18n {
       "tracks_delete_route": "Eliminar ruta",
       "tracks_once_permissions_disclaimer":
           "A causa de las nuevas directivas de permisos de Android, ahora el permiso \"Permitir siempre\" es requerido para grabar la ubicación en segundo plano. De otra manera, Vieiros no sería capaz de grabar tu camino mientras esté en segundo plano.\n\n Tus datos de ubicación sólo serán usados localmente, son tuyos, y almacenados como ruta GPX para tu propio uso.",
-      "tracks_create_directory": "Crear carpeta",
-      "tracks_add_file": "Añadir archivo de ruta",
+      "tracks_create_directory": "Carpeta",
+      "tracks_add_file": "Ruta",
       "map_waypoint": "Nombre punto de ruta",
       "map_channel_name_location": "Servicio ubicación segundo plano",
       "map_notification_title": "Grabando ruta...",
@@ -146,6 +149,7 @@ class I18n {
       "info_pace": "Ritmo medio",
       "info_altitude": "Altitud",
       "info_altitude_current": "Actual",
+      "info_altitude_min": "Min",
       "info_altitude_top": "Top",
       "info_altitude_gain": "Desnivel acumulado",
       "info_chart_altitude": "Altitud",
@@ -170,6 +174,7 @@ class I18n {
     },
     "gl": {
       "common_ok": "Aceptar",
+      "common_add": "Engadir",
       "common_cancel": "Cancelar",
       "common_discard": "Descartar",
       "common_delete": "Eliminar",
@@ -195,8 +200,8 @@ class I18n {
       "tracks_delete_route": "Eliminar ruta",
       "tracks_once_permissions_disclaimer":
           "A causa das novas directivas de permisos de Android, agora o permiso \"Permitir sempre\" é requerido para gravar a localización en segundo plano. Doutra maneria, Vieiros non sería capaz de gravar o teu camiño mentres estea en segundo plano.\n\n Os teus datos de localización só serán usados localmente, son teus, e almacenados coma ruta GPX para o teu propio uso.",
-      "tracks_create_directory": "Crear cartafol",
-      "tracks_add_file": "Engadir arquivo de ruta",
+      "tracks_create_directory": "Cartafol",
+      "tracks_add_file": "Ruta",
       "map_waypoint": "Nome punto de ruta",
       "map_notification_title": "Gravando ruta...",
       "map_channel_name_location": "Servicio localización segundo plano",
@@ -230,6 +235,7 @@ class I18n {
       "info_pace": "Ritmo medio",
       "info_altitude": "Altitude",
       "info_altitude_current": "Actual",
+      "info_altitude_min": "Min",
       "info_altitude_top": "Top",
       "info_altitude_gain": "Desnivel acumulado",
       "info_chart_altitude": "Altitude",

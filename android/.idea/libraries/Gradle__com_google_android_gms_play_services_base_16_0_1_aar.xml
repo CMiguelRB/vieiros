@@ -1,9 +1,9 @@
 <component name="libraryTable">
   <library name="Gradle: com.google.android.gms:play-services-base:16.0.1@aar">
     <CLASSES>
-      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/810507d19fd2f9c6da43a0d5dee7e272/transformed/jetified-play-services-base-16.0.1/jars/classes.jar!/" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/810507d19fd2f9c6da43a0d5dee7e272/transformed/jetified-play-services-base-16.0.1/res" />
-      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/810507d19fd2f9c6da43a0d5dee7e272/transformed/jetified-play-services-base-16.0.1/AndroidManifest.xml" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/1d3af2696c6bf098e03b9a2f747800a8/transformed/jetified-play-services-base-16.0.1/res" />
+      <root url="jar://$USER_HOME$/.gradle/caches/transforms-3/1d3af2696c6bf098e03b9a2f747800a8/transformed/jetified-play-services-base-16.0.1/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/transforms-3/1d3af2696c6bf098e03b9a2f747800a8/transformed/jetified-play-services-base-16.0.1/AndroidManifest.xml" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
