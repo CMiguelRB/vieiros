@@ -35,7 +35,7 @@ class BottomSheetActions extends StatelessWidget {
               ),
               child: IconButton(
                 icon: icon!,
-                color: key.contains('delete') ? CustomColors.error : (lightMode ? CustomColors.subText : CustomColors.subTextDark),
+                color: lightMode ? CustomColors.subText : CustomColors.subTextDark,
                 onPressed: () => action!(),
               ),
             ),
