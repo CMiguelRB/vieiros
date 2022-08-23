@@ -45,6 +45,7 @@ class Tracks extends StatefulWidget {
 class TracksState extends State<Tracks> {
   List<GpxFile> _files = [];
   final TextEditingController _controller = TextEditingController(text: '');
+  bool _showFAB = true;
 
   final Set<Marker> _markers = {};
 
@@ -268,18 +269,18 @@ class TracksState extends State<Tracks> {
         'assets/loaded_pin_end.png');
 
     return TrackInfo(
-        lightMode: lightMode,
-        actions: {
-          "common_share": {
-            "icon": Icons.share,
-            "action": () => _shareFile(index)
-          },
-          "common_delete": {
-            "icon": Icons.delete,
-            "action": () => _showDeleteDialog(index)
-          }
+      lightMode: lightMode,
+      actions: {
+        "common_share": {
+          "icon": Icons.share,
+          "action": () => _shareFile(index)
         },
-        track: track,
+        "common_delete": {
+          "icon": Icons.delete,
+          "action": () => _showDeleteDialog(index)
+        }
+      },
+      track: track,
       iconStart: iconStart,
       iconEnd: iconEnd,
     );
@@ -299,9 +300,12 @@ class TracksState extends State<Tracks> {
         padding: const EdgeInsets.only(top: 20, bottom: 30),
         color:
             lightMode ? CustomColors.background : CustomColors.backgroundDark,
-        child: Column(children:[
-          Text(I18n.translate('common_add'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
-          BottomSheetActions(actions: actions, lightMode: lightMode)]));
+        child: Column(children: [
+          Text(I18n.translate('common_add'),
+              style:
+                  const TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
+          BottomSheetActions(actions: actions, lightMode: lightMode)
+        ]));
   }
 
   _addDirectory() {
@@ -334,13 +338,15 @@ class TracksState extends State<Tracks> {
     bool lightMode = Provider.of<ThemeProvider>(context).isLightMode;
     return Scaffold(
         floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-        floatingActionButton: FloatingActionButton(
-          heroTag: null,
-          shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(16.0))),
-          onPressed: () => openFile()/*addFileOrDirectory(lightMode)*/,
-          child: const Icon(Icons.add),
-        ),
+        floatingActionButton: _showFAB
+            ? FloatingActionButton(
+                heroTag: null,
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(16.0))),
+                onPressed: () => addFileOrDirectory(lightMode),
+                child: const Icon(Icons.add),
+              )
+            : null,
         body: SafeArea(
             child: Column(
           children: [
@@ -371,92 +377,108 @@ class TracksState extends State<Tracks> {
                                 color: lightMode
                                     ? CustomColors.subText
                                     : CustomColors.subTextDark)))
-                    : ReorderableListView.builder(
-                        scrollDirection: Axis.vertical,
-                        padding: const EdgeInsets.all(8),
-                        itemCount: _files.length,
-                        shrinkWrap: true,
-                        itemBuilder: (itemContext, index) {
-                          bool loadedElement =
-                              widget.loadedTrack.path == _files[index].path;
-                          return InkWell(
-                            key: Key(_files[index].path!),
-                            child: Card(
-                                elevation: 0,
-                                color: loadedElement
-                                    ? (lightMode
-                                        ? CustomColors.trackBackgroundLight
-                                        : CustomColors.trackBackgroundDark)
-                                    : Colors.black12,
-                                child: Padding(
-                                    padding: EdgeInsets.only(
-                                        left: loadedElement ? 0 : 16, right: 8),
-                                    child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.max,
-                                        children: [
-                                          _files[index].path == '/loading'
-                                              ? SizedBox(
-                                                  width: 20,
-                                                  height: 20,
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                    color: lightMode
-                                                        ? Colors.black
-                                                        : Colors.white,
-                                                    strokeWidth: 2,
-                                                  ))
-                                              : (loadedElement
-                                                  ? IconButton(
-                                                      onPressed: () =>
-                                                          _unloadTrack(
-                                                              index, true),
-                                                      icon: const Icon(
-                                                          Icons.landscape))
-                                                  : Container()),
-                                          Flexible(
-                                              fit: FlexFit.tight,
-                                              child: Text(
-                                                  _files[index].path ==
-                                                          '/loading'
-                                                      ? ''
-                                                      : _files[index].name,
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis)),
-                                          _files[index].path == '/loading'
-                                              ? const SizedBox(
-                                                  width: 50, height: 50)
-                                              : IconButton(
-                                                  alignment: Alignment
-                                                      .centerRight,
-                                                  onPressed: () =>
-                                                      _showBottomSheet(
-                                                          'trackManager',
-                                                          index,
-                                                          lightMode,
-                                                          MediaQuery.of(context)
-                                                              .size
-                                                              .height),
-                                                  icon: const Icon(
-                                                      Icons.more_vert))
-                                        ]))),
-                            onTap: () => _navigate(index),
-                          );
-                        },
-                        onReorder: (int oldIndex, int newIndex) {
-                          GpxFile file = _files.removeAt(oldIndex);
-                          if (oldIndex < newIndex) {
-                            newIndex--;
+                    : NotificationListener<ScrollUpdateNotification>(
+                        onNotification: (notification) {
+                          if (_showFAB && notification.metrics.pixels > 50) {
+                            setState(() {
+                              _showFAB = false;
+                            });
                           }
-                          _files.insert(newIndex, file);
-                          setState(() {
-                            _files = _files;
-                          });
-                          Preferences().set('files', json.encode(_files));
+                          if (!_showFAB && notification.metrics.pixels < 50) {
+                            setState(() {
+                              _showFAB = true;
+                            });
+                          }
+                          return true;
                         },
-                      ))
+                        child: ReorderableListView.builder(
+                          scrollDirection: Axis.vertical,
+                          padding: const EdgeInsets.all(8),
+                          itemCount: _files.length,
+                          shrinkWrap: true,
+                          itemBuilder: (itemContext, index) {
+                            bool loadedElement =
+                                widget.loadedTrack.path == _files[index].path;
+                            return InkWell(
+                              key: Key(_files[index].path!),
+                              child: Card(
+                                  elevation: 0,
+                                  color: loadedElement
+                                      ? (lightMode
+                                          ? CustomColors.trackBackgroundLight
+                                          : CustomColors.trackBackgroundDark)
+                                      : Colors.black12,
+                                  child: Padding(
+                                      padding: EdgeInsets.only(
+                                          left: loadedElement ? 0 : 16,
+                                          right: 8),
+                                      child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.max,
+                                          children: [
+                                            _files[index].path == '/loading'
+                                                ? SizedBox(
+                                                    width: 20,
+                                                    height: 20,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      color: lightMode
+                                                          ? Colors.black
+                                                          : Colors.white,
+                                                      strokeWidth: 2,
+                                                    ))
+                                                : (loadedElement
+                                                    ? IconButton(
+                                                        onPressed: () =>
+                                                            _unloadTrack(
+                                                                index, true),
+                                                        icon: const Icon(
+                                                            Icons.landscape))
+                                                    : Container()),
+                                            Flexible(
+                                                fit: FlexFit.tight,
+                                                child: Text(
+                                                    _files[index].path ==
+                                                            '/loading'
+                                                        ? ''
+                                                        : _files[index].name,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis)),
+                                            _files[index].path == '/loading'
+                                                ? const SizedBox(
+                                                    width: 50, height: 50)
+                                                : IconButton(
+                                                    alignment:
+                                                        Alignment.centerRight,
+                                                    onPressed: () =>
+                                                        _showBottomSheet(
+                                                            'trackManager',
+                                                            index,
+                                                            lightMode,
+                                                            MediaQuery.of(
+                                                                    context)
+                                                                .size
+                                                                .height),
+                                                    icon: const Icon(
+                                                        Icons.more_vert))
+                                          ]))),
+                              onTap: () => _navigate(index),
+                            );
+                          },
+                          onReorder: (int oldIndex, int newIndex) {
+                            GpxFile file = _files.removeAt(oldIndex);
+                            if (oldIndex < newIndex) {
+                              newIndex--;
+                            }
+                            _files.insert(newIndex, file);
+                            setState(() {
+                              _files = _files;
+                            });
+                            Preferences().set('files', json.encode(_files));
+                          },
+                        )))
           ],
         )));
   }
