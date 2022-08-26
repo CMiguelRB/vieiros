@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:vieiros/components/vieiros_dialog.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:flutter/material.dart';
@@ -21,14 +20,6 @@ class Home extends StatefulWidget {
 
 class HomeState extends State<Home>
     with TickerProviderStateMixin, WidgetsBindingObserver {
-  static const platform = MethodChannel('com.rabocorp.vieiros/opened_file');
-
-  void getOpenedFile() async {
-    String? gpxStringFile = await platform.invokeMethod("getOpenedFile");
-    if (gpxStringFile == null) return;
-    _trackKey.currentState!.openFileFromIntent(gpxStringFile);
-  }
-
   int _tabIndex = 0;
 
   late List<Widget> _tabs;
@@ -39,6 +30,38 @@ class HomeState extends State<Home>
   final _trackKey = GlobalKey<TracksState>();
   final _infoKey = GlobalKey<InfoState>();
   final _settingsKey = GlobalKey<SettingsState>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _tabs = <Widget>[
+      Tracks(
+          key: _trackKey,
+          toTabIndex: _onTabItemTapped,
+          currentTrack: _currentTrack,
+          loadedTrack: widget.loadedTrack,
+          clearTrack: _clearTrack),
+      Map(
+          key: _mapKey,
+          currentTrack: _currentTrack,
+          loadedTrack: widget.loadedTrack),
+      Info(
+          key: _infoKey,
+          currentTrack: _currentTrack,
+          loadedTrack: widget.loadedTrack),
+      Settings(key: _settingsKey)
+    ];
+    _tabController = TabController(
+        vsync: this, length: _tabs.length, initialIndex: _tabIndex);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _tabController.dispose();
+    super.dispose();
+  }
 
   void _onTabItemTapped(int index) async {
     if (_settingsKey.currentState != null &&
@@ -98,39 +121,6 @@ class HomeState extends State<Home>
     if (_infoKey.currentState != null) {
       _infoKey.currentState!.clearLoaded();
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    getOpenedFile();
-    _tabs = <Widget>[
-      Tracks(
-          key: _trackKey,
-          toTabIndex: _onTabItemTapped,
-          currentTrack: _currentTrack,
-          loadedTrack: widget.loadedTrack,
-          clearTrack: _clearTrack),
-      Map(
-          key: _mapKey,
-          currentTrack: _currentTrack,
-          loadedTrack: widget.loadedTrack),
-      Info(
-          key: _infoKey,
-          currentTrack: _currentTrack,
-          loadedTrack: widget.loadedTrack),
-      Settings(key: _settingsKey)
-    ];
-    _tabController = TabController(
-        vsync: this, length: _tabs.length, initialIndex: _tabIndex);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    _tabController.dispose();
-    super.dispose();
   }
 
   Future<bool> _onWillPop(BuildContext context) async {

@@ -35,10 +35,7 @@ class Map extends StatefulWidget {
   final CurrentTrack currentTrack;
   final LoadedTrack loadedTrack;
 
-  const Map(
-      {Key? key,
-      required this.currentTrack,
-      required this.loadedTrack})
+  const Map({Key? key, required this.currentTrack, required this.loadedTrack})
       : super(key: key);
 
   @override
@@ -60,6 +57,42 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   bool offTrack = false;
   bool _showBearingButton = false;
   double _bearing = 0.0;
+
+  //Workaround for choppy Maps initialization
+  bool _showMap = false;
+  bool _showWarning = false;
+
+  @override
+  void initState() {
+    super.initState();
+    loadLoadedTrack();
+    getLocation();
+    _initializeNotifications();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  void _refreshTab() async {
+    bool hasPermission = await PermissionHandler().handleLocationPermission();
+    if (hasPermission) {
+      setState(() {
+        _showMap = true;
+        _showWarning = false;
+      });
+    }
+  }
+
+  _initializeNotifications() async {
+    AndroidInitializationSettings initializationSettingsAndroid =
+        const AndroidInitializationSettings('ic_stat_name');
+    final InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: (payload) => {});
+  }
 
   getLocation() async {
     bool hasPermissions = await PermissionHandler().handleLocationPermission();
@@ -663,43 +696,10 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  //Workaround for choppy Maps initialization
-  bool _showMap = false;
-
-  bool _showWarning = false;
-
-  void _refreshTab() async {
-    bool hasPermission = await PermissionHandler().handleLocationPermission();
-    if (hasPermission) {
-      setState(() {
-        _showMap = true;
-        _showWarning = false;
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    loadLoadedTrack();
-    getLocation();
-    _initializeNotifications();
-  }
-
-  _initializeNotifications() async {
-    AndroidInitializationSettings initializationSettingsAndroid =
-        const AndroidInitializationSettings('ic_stat_name');
-    final InitializationSettings initializationSettings =
-        InitializationSettings(android: initializationSettingsAndroid);
-    await _flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: (payload) => {});
-  }
-
   _showNotification() async {
     setState(() {
       offTrack = true;
     });
-
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails('vieiros_notification_id', 'Vieiros',
             channelDescription: 'Vieiros notifications',
@@ -715,11 +715,6 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         I18n.translate('map_off_track_notification_desc'),
         platformChannelSpecifics,
         payload: 'off track');
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   _resetBearing() async {

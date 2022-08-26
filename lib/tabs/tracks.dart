@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -42,12 +41,25 @@ class Tracks extends StatefulWidget {
   TracksState createState() => TracksState();
 }
 
-class TracksState extends State<Tracks> {
+class TracksState extends State<Tracks> with WidgetsBindingObserver {
   List<GpxFile> _files = [];
   final TextEditingController _controller = TextEditingController(text: '');
+  final ScrollController _scrollController = ScrollController();
   bool _showFAB = true;
+  BitmapDescriptor? _iconStart;
+  BitmapDescriptor? _iconEnd;
 
-  final Set<Marker> _markers = {};
+  @override
+  void initState() {
+    super.initState();
+    _loadPrefs('');
+    _loadIconMarkers();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 
   _loadPrefs(String value) async {
     String? jsonString = Preferences().get('files');
@@ -74,8 +86,7 @@ class TracksState extends State<Tracks> {
     });
   }
 
-  Future<void> openFile() async {
-    //Navigator.of(context).pop();
+  Future<void> openFile(bool lightMode, double height) async {
     Timer(const Duration(milliseconds: 500), () {
       setState(() {
         _files.insert(0, GpxFile(name: 'loading', path: '/loading'));
@@ -84,73 +95,75 @@ class TracksState extends State<Tracks> {
 
     FilePickerResult? result = await FilePicker.platform
         .pickFiles(type: FileType.any, allowMultiple: true);
+
     if (result != null) {
-      setState(() {
-        _files.removeWhere((element) => element.path == '/loading');
-      });
-      if (result.isSinglePick) {
-        _addFile(result.files.single);
-      } else {
-        for (var i = 0; i < result.files.length; i++) {
-          _addFile(result.files.elementAt(i));
+      _addFile(result.files, lightMode, height);
+    }
+    setState(() {
+      _files.removeWhere((element) => element.path == '/loading');
+    });
+  }
+
+  void _addFile(List<PlatformFile> files, bool lightMode, double height) async {
+    Navigator.pop(context);
+    bool plural = files.length > 1;
+
+    files.removeWhere((file) =>
+        file.name.split('.')[file.name.split('.').length - 1] != 'gpx');
+
+    for (var i = 0; i < files.length; i++) {
+      String? path = files[i].path;
+      final xmlFile = File(path!);
+      String gpxString = xmlFile.readAsStringSync();
+      Gpx? gpx;
+      try {
+        gpx = GpxReader().fromString(gpxString);
+      } catch (e) {
+        files.removeAt(i);
+        i--;
+        break;
+      }
+      for (var file in _files) {
+        if (file.name == gpx.trks.first.name!) {
+          files.removeAt(i);
+          i--;
+          break;
         }
       }
-    } else {
+    }
+
+    if (files.isEmpty) {
+      VieirosNotification().showNotification(
+          context,
+          plural
+              ? 'tracks_file_validation_error_plural'
+              : 'tracks_file_validation_error',
+          NotificationType.error);
+      return;
+    }
+
+    List<Track> tracks = [];
+    for (var file in files) {
+      Track track = Track();
+      tracks.add(await track.loadTrack(file.path));
+    }
+    _showBottomSheet(_trackManagerContent(tracks, 0, lightMode, height, true));
+  }
+
+  void _saveFiles(List<Track> tracks) async {
+    Navigator.pop(context);
+    String directory = (await getApplicationDocumentsDirectory()).path;
+    for (var track in tracks) {
+      String newPath = '$directory/${track.name.replaceAll(' ', '_')}.gpx';
+      FilesHandler().writeFile(track.gpxString!, track.name, false);
       setState(() {
-        _files.removeWhere((element) => element.path == '/loading');
+        if (_files
+            .indexWhere((element) => element.path == newPath)
+            .isNegative) {
+          _files.insert(0, GpxFile(name: track.name, path: newPath));
+        }
       });
     }
-  }
-
-  void _addFile(PlatformFile file) async {
-    if (file.name.split('.')[file.name.split('.').length - 1] != 'gpx') {
-      VieirosNotification().showNotification(
-          context, 'tracks_file_validation_error', NotificationType.error);
-      return;
-    }
-    for (var i = 0; i < _files.length; i++) {
-      if (_files[i].path == file.path) return;
-    }
-    String? path = file.path;
-    final xmlFile = File(path!);
-    String gpxString = xmlFile.readAsStringSync();
-    Gpx gpx;
-    try {
-      gpx = GpxReader().fromString(gpxString);
-    } catch (e) {
-      VieirosNotification().showNotification(
-          context, 'tracks_file_validation_error', NotificationType.error);
-      return;
-    }
-    String? name = gpx.trks[0].name;
-    name ??= file.name;
-    String directory = (await getApplicationDocumentsDirectory()).path;
-    String newPath = '$directory/${name.replaceAll(' ', '_')}.gpx';
-    FilesHandler().writeFile(gpxString, name, false);
-    setState(() {
-      if (_files.indexWhere((element) => element.path == newPath).isNegative) {
-        _files.insert(0, GpxFile(name: name!, path: newPath));
-      }
-    });
-  }
-
-  void openFileFromIntent(String gpxStringFile) async {
-    Gpx gpx;
-    try {
-      gpx = GpxReader().fromString(gpxStringFile);
-    } catch (e) {
-      VieirosNotification().showNotification(
-          context, 'tracks_file_validation_error', NotificationType.error);
-      return;
-    }
-    String name = gpx.trks[0].name!;
-    String? path = await FilesHandler().writeFile(gpxStringFile, name, false);
-    setState(() {
-      if (path != null &&
-          _files.indexWhere((element) => element.path == path).isNegative) {
-        _files.insert(0, GpxFile(name: name, path: path));
-      }
-    });
   }
 
   _unloadTrack(int index, bool showNotification) async {
@@ -179,13 +192,18 @@ class TracksState extends State<Tracks> {
     if (current == file.path) {
       await Preferences().remove('currentTrack');
     }
-    setState(() {
-      if (current == file.path) {
-        widget.clearTrack();
-        widget.loadedTrack.clear();
-      }
-      FilesHandler().removeFile(file.path);
-      Navigator.pop(context, I18n.translate("common_ok"));
+    WidgetsBinding.instance.addPostFrameCallback((duration) {
+      setState(() {
+        if (current == file.path) {
+          widget.clearTrack();
+          widget.loadedTrack.clear();
+        }
+        FilesHandler().removeFile(file.path);
+        Navigator.pop(context, I18n.translate("common_ok"));
+        if (!_showFAB && _scrollController.positions.isNotEmpty) {
+          _showFAB = _scrollController.position.maxScrollExtent < 40;
+        }
+      });
     });
   }
 
@@ -196,15 +214,17 @@ class TracksState extends State<Tracks> {
     widget.toTabIndex(1);
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _loadPrefs('');
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
+  void _loadIconMarkers() async {
+    BitmapDescriptor futureIconStart = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(100, 100)),
+        'assets/loaded_pin.png');
+    BitmapDescriptor futureIconEnd = await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(size: Size(100, 100)),
+        'assets/loaded_pin_end.png');
+    setState(() {
+      _iconStart = futureIconStart;
+      _iconEnd = futureIconEnd;
+    });
   }
 
   _onChanged(value) {
@@ -217,19 +237,20 @@ class TracksState extends State<Tracks> {
   }
 
   void addFileOrDirectory(bool lightMode) {
-    _showBottomSheet('fileManager', 0, lightMode, null);
+    _showBottomSheet(_fileManagerContent(lightMode));
   }
 
-  _showBottomSheet(
-      String type, int index, bool lightMode, double? height) async {
-    Widget content;
+  _showTrackInfo(int index, bool lightMode, double height) async {
+    GpxFile file = _files.elementAt(index);
 
-    if (type == 'fileManager') {
-      content = _fileManagerContent(lightMode);
-    } else {
-      content = await _trackManagerContent(index, lightMode, height);
-    }
+    Track track = Track();
+    await track.loadTrack(file.path);
 
+    _showBottomSheet(
+        _trackManagerContent([track], index, lightMode, height, false));
+  }
+
+  _showBottomSheet(Widget content) async {
     showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -244,33 +265,23 @@ class TracksState extends State<Tracks> {
         });
   }
 
-  Future<Widget> _trackManagerContent(
-      int index, bool lightMode, double? height) async {
-    GpxFile file = _files.elementAt(index);
+  Widget _trackManagerContent(List<Track> tracks, int index, bool lightMode,
+      double? height, bool isNewTrack) {
+    Map<String, Map<String, dynamic>> actions = {};
 
-    Track track = await Track().loadTrack(file.path);
-
-    double lat = track.gpx!.trks.first.trksegs.first.trkpts.first.lat!;
-    double lon = track.gpx!.trks.first.trksegs.first.trkpts.first.lon!;
-
-    Marker marker = Marker(
-        markerId: const MarkerId('12345'),
-        position: LatLng(lat, lon),
-        icon: BitmapDescriptor.defaultMarker);
-    setState(() {
-      _markers.add(marker);
-    });
-
-    BitmapDescriptor iconStart = await BitmapDescriptor.fromAssetImage(
-        const ImageConfiguration(size: Size(100, 100)),
-        'assets/loaded_pin.png');
-    BitmapDescriptor iconEnd = await BitmapDescriptor.fromAssetImage(
-        const ImageConfiguration(size: Size(100, 100)),
-        'assets/loaded_pin_end.png');
-
-    return TrackInfo(
-      lightMode: lightMode,
-      actions: {
+    if (isNewTrack) {
+      actions = {
+        "common_save": {
+          "icon": Icons.save_outlined,
+          "action": () => _saveFiles(tracks)
+        },
+        "common_cancel": {
+          "icon": Icons.cancel_outlined,
+          "action": () => Navigator.pop(context)
+        }
+      };
+    } else {
+      actions = {
         "common_share": {
           "icon": Icons.share,
           "action": () => _shareFile(index)
@@ -279,20 +290,27 @@ class TracksState extends State<Tracks> {
           "icon": Icons.delete,
           "action": () => _showDeleteDialog(index)
         }
-      },
-      track: track,
-      iconStart: iconStart,
-      iconEnd: iconEnd,
-    );
+      };
+    }
+
+    return TrackInfo(
+        lightMode: lightMode,
+        actions: actions,
+        tracks: tracks,
+        iconStart: _iconStart!,
+        iconEnd: _iconEnd!);
   }
 
   Widget _fileManagerContent(bool lightMode) {
     Map<String, Map<String, dynamic>> actions = {
-      "tracks_add_file": {"icon": Icons.file_download, "action": openFile},
-      "tracks_create_directory": {
+      "tracks_add_file": {
+        "icon": Icons.file_download,
+        "action": () => openFile(lightMode, MediaQuery.of(context).size.height)
+      },
+      /*"tracks_create_directory": {
         "icon": Icons.create_new_folder_outlined,
         "action": _addDirectory
-      }
+      }*/
     };
 
     return Ink(
@@ -308,12 +326,12 @@ class TracksState extends State<Tracks> {
         ]));
   }
 
-  _addDirectory() {
+  /*_addDirectory() {
     Navigator.of(context).pop();
     if (kDebugMode) {
       print('add directory');
     }
-  }
+  }*/
 
   _shareFile(int index) {
     Navigator.of(context).pop();
@@ -343,7 +361,8 @@ class TracksState extends State<Tracks> {
                 heroTag: null,
                 shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(16.0))),
-                onPressed: () => addFileOrDirectory(lightMode),
+                onPressed: () =>
+                    _showBottomSheet(_fileManagerContent(lightMode)),
                 child: const Icon(Icons.add),
               )
             : null,
@@ -379,12 +398,12 @@ class TracksState extends State<Tracks> {
                                     : CustomColors.subTextDark)))
                     : NotificationListener<ScrollUpdateNotification>(
                         onNotification: (notification) {
-                          if (_showFAB && notification.metrics.pixels > 50) {
+                          if (_showFAB && notification.metrics.pixels > 30) {
                             setState(() {
                               _showFAB = false;
                             });
                           }
-                          if (!_showFAB && notification.metrics.pixels < 50) {
+                          if (!_showFAB && notification.metrics.pixels < 30) {
                             setState(() {
                               _showFAB = true;
                             });
@@ -393,9 +412,11 @@ class TracksState extends State<Tracks> {
                         },
                         child: ReorderableListView.builder(
                           scrollDirection: Axis.vertical,
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.only(
+                              top: 8, left: 8, right: 8, bottom: 60),
                           itemCount: _files.length,
                           shrinkWrap: true,
+                          scrollController: _scrollController,
                           itemBuilder: (itemContext, index) {
                             bool loadedElement =
                                 widget.loadedTrack.path == _files[index].path;
@@ -450,11 +471,10 @@ class TracksState extends State<Tracks> {
                                                 ? const SizedBox(
                                                     width: 50, height: 50)
                                                 : IconButton(
-                                                    alignment:
-                                                        Alignment.centerRight,
+                                                    alignment: Alignment
+                                                        .centerRight,
                                                     onPressed: () =>
-                                                        _showBottomSheet(
-                                                            'trackManager',
+                                                        _showTrackInfo(
                                                             index,
                                                             lightMode,
                                                             MediaQuery.of(

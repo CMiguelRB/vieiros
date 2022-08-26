@@ -10,7 +10,6 @@ class CurrentTrack extends Track {
   DateTime? dateTime;
   final List<RecordedPosition> positions = [];
   final List<Waypoint> waypoints = [];
-  String name = '';
   final StreamController event = StreamController.broadcast();
 
   setRecording(willBeRecording) {

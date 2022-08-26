@@ -10,6 +10,7 @@ class Track {
   String? gpxString;
   Gpx? gpx;
 
+  String name = '';
   int distance = 0;
   int altitudeTop = 0;
   int altitudeMin = 8849;
@@ -29,6 +30,9 @@ class Track {
       final String gpxString = xmlFile.readAsStringSync();
       this.gpxString = gpxString;
       gpx = GpxReader().fromString(gpxString);
+      String? name = gpx!.trks[0].name;
+      name ??= xmlFile.path.split('/')[(xmlFile.path.split('/').length-1)].split('.gpx')[0];
+      this.name = name;
     } on Exception catch (exception) {
       if (kDebugMode) {
         print(exception);
