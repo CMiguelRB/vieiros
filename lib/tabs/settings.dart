@@ -66,6 +66,11 @@ class SettingsState extends State<Settings> {
     });
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   _getLicenses() async {
     List<dynamic> tpJSON =
         json.decode(await rootBundle.loadString('assets/licenses.json'));
@@ -74,11 +79,6 @@ class SettingsState extends State<Settings> {
         thirdParties.add(TPLibrary.fromJson(tpJSON[i]));
       }
     });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   _onChangeDarkMode(Map<String, String> element, context) {

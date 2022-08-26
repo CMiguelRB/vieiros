@@ -77,6 +77,9 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
     super.dispose();
   }
 
+  @override
+  bool get wantKeepAlive => true;
+
   void recordingListener() {
     if (widget.currentTrack.isRecording) {
       if (widget.currentTrack.positions.isNotEmpty) {
@@ -373,7 +376,4 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           ]))
     ]));
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
