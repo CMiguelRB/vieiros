@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:path_provider/path_provider.dart';
 import 'package:vieiros/components/vieiros_dialog.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +38,7 @@ class HomeState extends State<Home>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _initTracksFolder();
     _tabs = <Widget>[
       Tracks(
           key: _trackKey,
@@ -54,6 +58,20 @@ class HomeState extends State<Home>
     ];
     _tabController = TabController(
         vsync: this, length: _tabs.length, initialIndex: _tabIndex);
+  }
+
+  _initTracksFolder() async {
+    Directory appFolder = await getApplicationDocumentsDirectory();
+    Directory tracksFolder = Directory('${appFolder.path}/tracks');
+    if(!tracksFolder.existsSync()){
+      tracksFolder.createSync();
+      List<FileSystemEntity> files = appFolder.listSync();
+      for (var file in files) {
+        if(FileSystemEntity.isFileSync(file.path) && file.path.endsWith('.gpx')){
+          file.rename('${appFolder.path}/tracks/${file.path.split('/')[file.path.split('/').length-1]}');
+        }
+      }
+    }
   }
 
   @override
@@ -134,7 +152,9 @@ class HomeState extends State<Home>
           },
           bodyTag: 'app_close_warning');
       return exitResult ?? false;
-    } else {
+    } else if(_trackKey.currentState != null){
+      return await _trackKey.currentState!.navigateUp();
+    }else {
       return true;
     }
   }
