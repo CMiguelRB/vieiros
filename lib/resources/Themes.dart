@@ -50,7 +50,7 @@ class Themes {
       backgroundColor: CustomColors.background,
       bottomAppBarColor: CustomColors.background,
       elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(onPrimary: Colors.white, primary: CustomColors.accent)
+        style: ElevatedButton.styleFrom(foregroundColor: Colors.white, backgroundColor: CustomColors.accent)
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
           foregroundColor: Colors.white,
@@ -59,6 +59,7 @@ class Themes {
       indicatorColor: CustomColors.accent,
       scaffoldBackgroundColor: CustomColors.background,
       navigationBarTheme: NavigationBarThemeData(
+          surfaceTintColor: CustomColors.background,
           backgroundColor: CustomColors.background,
           indicatorColor: CustomColors.faintedAccent,
           labelTextStyle: MaterialStateProperty.all(const TextStyle(color: CustomColors.backgroundDark)),
@@ -98,7 +99,7 @@ class Themes {
       primaryColor: CustomColors.backgroundDark,
       backgroundColor: CustomColors.backgroundDark,
       elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(onPrimary: Colors.white, primary: CustomColors.accent)),
+          style: ElevatedButton.styleFrom(foregroundColor: Colors.white, backgroundColor: CustomColors.accent)),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
           foregroundColor: Colors.white,
           backgroundColor: CustomColors.accent,
@@ -110,6 +111,7 @@ class Themes {
       ),
       scaffoldBackgroundColor: CustomColors.backgroundDark,
       navigationBarTheme: NavigationBarThemeData(
+          surfaceTintColor: CustomColors.backgroundDark,
           backgroundColor: CustomColors.backgroundDark,
           indicatorColor: CustomColors.faintedAccent,
           labelTextStyle: MaterialStateProperty.all(const TextStyle(color: Colors.white)),

@@ -14,13 +14,16 @@ class TrackInfo extends StatefulWidget {
   final Map<String, Map<String, dynamic>> actions;
   final BitmapDescriptor iconStart;
   final BitmapDescriptor iconEnd;
+  final Function onIndexChange;
 
   const TrackInfo({Key? key,
     required this.lightMode,
     required this.tracks,
     required this.actions,
     required this.iconStart,
-    required this.iconEnd})
+    required this.iconEnd,
+    required this.onIndexChange
+  })
       : super(key: key);
 
   @override
@@ -28,7 +31,15 @@ class TrackInfo extends StatefulWidget {
 }
 
 class TrackInfoState extends State<TrackInfo> {
-  int _currentIndex = 0;
+
+  int _currentTrackIndex = 0;
+
+  _onIndexChange({required int value}){
+    setState((){
+      _currentTrackIndex = value;
+    });
+    widget.onIndexChange(value: value);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,9 +56,7 @@ class TrackInfoState extends State<TrackInfo> {
                 Expanded(flex: 1, child: PageView.builder(
                     itemCount: widget.tracks.length,
                     pageSnapping: true,
-                    onPageChanged: (value) => setState(() {
-                      _currentIndex = value;
-                    }),
+                    onPageChanged: (value) => _onIndexChange(value: value),
                     itemBuilder: (context,index){
                       Track track = widget.tracks.elementAt(index);
                       List<LatLng> points = GpxHandler().getPointsFromGpx(track);
@@ -226,7 +235,7 @@ class TrackInfoState extends State<TrackInfo> {
                         width: 5,
                         height: 5,
                         decoration: BoxDecoration(
-                            color: _currentIndex == index ? (widget.lightMode ? CustomColors.subText : CustomColors.subTextDark) : (widget.lightMode ? CustomColors.faintedText : CustomColors.subText),
+                            color: _currentTrackIndex == index ? (widget.lightMode ? CustomColors.subText : CustomColors.subTextDark) : (widget.lightMode ? CustomColors.faintedText : CustomColors.subText),
                             shape: BoxShape.circle),
                       );
                     })) : Container()

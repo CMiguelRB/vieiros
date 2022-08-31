@@ -29,16 +29,14 @@ class BottomSheetActions extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
           child:
           Column(children: [
-            Ink(
-              decoration:  ShapeDecoration(
-                shape: CircleBorder(side: BorderSide(color: lightMode ? Colors.black26 : Colors.white24, width: 1)),
-              ),
-              child: IconButton(
+             IconButton(
                 icon: icon!,
                 color: lightMode ? CustomColors.subText : CustomColors.subTextDark,
                 onPressed: () => action!(),
+               style: IconButton.styleFrom(
+                 side: BorderSide(color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
+               ),
               ),
-            ),
             Container(margin: const EdgeInsets.only(top: 8), child: Text(I18n.translate(key), style: TextStyle(color: lightMode ? CustomColors.subText : CustomColors.subTextDark, fontSize: 12)))]))
         );
     });
