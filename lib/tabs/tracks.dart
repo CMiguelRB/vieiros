@@ -49,12 +49,14 @@ class TracksState extends State<Tracks> {
   BitmapDescriptor? _iconStart;
   BitmapDescriptor? _iconEnd;
   Directory? _currentDirectory;
+  List<Track> _trackList = [];
+  int _currentTrackIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _loadCurrentPath();
-    _loadFiles(true);
+    _loadFiles(init: true);
     _loadIconMarkers();
   }
 
@@ -68,13 +70,14 @@ class TracksState extends State<Tracks> {
         Directory('${(await getApplicationDocumentsDirectory()).path}/tracks');
   }
 
-  _loadFiles(bool init) {
+  _loadFiles({bool? init, String? searchValue}) {
     setState(() {
       _files = [];
       _files.add(
           TrackListEntity(name: 'loading', path: '/loading', isFile: true));
     });
-    Future.delayed(Duration(milliseconds: init ? 400 : 0), () {
+    Future.delayed(
+        Duration(milliseconds: (init != null && init == true) ? 400 : 0), () {
       List<TrackListEntity> files = [];
       getApplicationDocumentsDirectory().then((baseDir) {
         List<FileSystemEntity> entities = _currentDirectory!.listSync();
@@ -88,16 +91,25 @@ class TracksState extends State<Tracks> {
           }
           return false;
         });
-        directories.sort((FileSystemEntity a, FileSystemEntity b) =>
-            a.path.compareTo(b.path));
-        entities.insertAll(0, directories);
+        if (searchValue == null || searchValue == '') {
+          directories.sort((FileSystemEntity a, FileSystemEntity b) =>
+              a.path.compareTo(b.path));
+          entities.insertAll(0, directories);
+        }
         for (FileSystemEntity entity in entities) {
           bool isFile = FileSystemEntity.isFileSync(entity.path);
           if (isFile) {
             String gpxString = (entity as File).readAsStringSync();
             Gpx gpx = GpxReader().fromString(gpxString);
-            files.add(TrackListEntity(
-                name: gpx.trks.first.name!, path: entity.path, isFile: true));
+            if (searchValue == null ||
+                searchValue == '' ||
+                (searchValue != '' &&
+                    gpx.trks.first.name!
+                        .toLowerCase()
+                        .contains(searchValue.toLowerCase()))) {
+              files.add(TrackListEntity(
+                  name: gpx.trks.first.name!, path: entity.path, isFile: true));
+            }
           } else {
             files.add(TrackListEntity(
                 name: entity.path.split('/')[entity.path.split('/').length - 1],
@@ -126,7 +138,7 @@ class TracksState extends State<Tracks> {
         .pickFiles(type: FileType.any, allowMultiple: true);
 
     if (result != null) {
-      _addFile(result.files, lightMode, height);
+      _addFiles(result.files, lightMode, height);
     }
     setState(() {
       _files.removeWhere((element) => element.path == '/loading');
@@ -137,10 +149,10 @@ class TracksState extends State<Tracks> {
     setState(() {
       _currentDirectory = Directory(path);
     });
-    _loadFiles(false);
+    _loadFiles(init: false);
   }
 
-  void _addFile(List<PlatformFile> files, bool lightMode, double height) async {
+  void _addFiles(List<PlatformFile> files, bool lightMode, double height) async {
     Navigator.pop(context);
     bool plural = files.length > 1;
 
@@ -183,24 +195,34 @@ class TracksState extends State<Tracks> {
       Track track = Track();
       tracks.add(await track.loadTrack(file.path));
     }
-    _showBottomSheet(_trackManagerContent(tracks, 0, lightMode, height, true));
+    setState(() {
+      _trackList = tracks;
+      _showBottomSheet(_trackManagerContent(0, lightMode, height, true));
+    });
   }
 
   void _saveFiles(List<Track> tracks) async {
-    Navigator.pop(context);
-    String directory =
-        '${(await getApplicationDocumentsDirectory()).path}/tracks';
-    for (var track in tracks) {
-      String newPath = '$directory/${track.name.replaceAll(' ', '_')}.gpx';
-      FilesHandler().writeFile(track.gpxString!, track.name, false);
-      setState(() {
-        if (_files
-            .indexWhere((element) => element.path == newPath)
-            .isNegative) {
-          _files.insert(0,
-              TrackListEntity(name: track.name, path: newPath, isFile: true));
-        }
-      });
+    String directory = _currentDirectory!.path;
+    List<TrackListEntity> files = _files;
+    List<Track> trackList = _trackList;
+    for (var i = 0; i<tracks.length;i++) {
+      String newPath = '$directory/${tracks[i].name.replaceAll(' ', '_')}.gpx';
+      FilesHandler().writeFile(tracks[i].gpxString!, tracks[i].name, false);
+      if (files.indexWhere((element) => element.path == newPath).isNegative) {
+        files.insert(
+            0, TrackListEntity(name: tracks[i].name, path: newPath, isFile: true));
+        trackList.removeWhere((element) => element.path == tracks[i].path);
+        tracks.removeAt(i);
+      }
+    }
+    setState(() {
+      _files = files;
+      //TODO remove tracks from track sheet array.
+      _trackList = trackList;
+    });
+    if(_trackList.isEmpty){
+      Navigator.pop(context);
+      _currentTrackIndex = 0;
     }
   }
 
@@ -259,13 +281,9 @@ class TracksState extends State<Tracks> {
     });
   }
 
-  _onChanged(value) {
-    _loadFiles(false);
-  }
-
   _clearValue() {
     _controller.clear();
-    _loadFiles(false);
+    _loadFiles();
   }
 
   void addFileOrDirectory(bool lightMode) {
@@ -278,8 +296,10 @@ class TracksState extends State<Tracks> {
     Track track = Track();
     await track.loadTrack(file.path);
 
-    _showBottomSheet(
-        _trackManagerContent([track], index, lightMode, height, false));
+    setState(() {
+      _trackList = [track];
+    });
+    _showBottomSheet(_trackManagerContent(index, lightMode, height, false));
   }
 
   _showBottomSheet(Widget content) async {
@@ -297,21 +317,29 @@ class TracksState extends State<Tracks> {
         });
   }
 
-  Widget _trackManagerContent(List<Track> tracks, int index, bool lightMode,
-      double? height, bool isNewTrack) {
+  Widget _trackManagerContent(
+      int index, bool lightMode, double? height, bool isNewTrack) {
     Map<String, Map<String, dynamic>> actions = {};
 
     if (isNewTrack) {
-      actions = {
+      if (_trackList.length > 1) {
+        actions.addAll({
+          "common_save_all": {
+            "icon": Icons.save_outlined,
+            "action": () => _saveFiles(_trackList)
+          }
+        });
+      }
+      actions.addAll({
         "common_save": {
           "icon": Icons.save_outlined,
-          "action": () => _saveFiles(tracks)
+          "action": () => _saveFiles([_trackList[_currentTrackIndex]])
         },
         "common_cancel": {
           "icon": Icons.cancel_outlined,
           "action": () => Navigator.pop(context)
         }
-      };
+      });
     } else {
       actions = {
         "common_share": {
@@ -328,9 +356,15 @@ class TracksState extends State<Tracks> {
     return TrackInfo(
         lightMode: lightMode,
         actions: actions,
-        tracks: tracks,
+        tracks: _trackList,
         iconStart: _iconStart!,
-        iconEnd: _iconEnd!);
+        iconEnd: _iconEnd!,
+        onIndexChange: _onIndexChange,
+    );
+  }
+
+  void _onIndexChange({required int value}){
+    _currentTrackIndex = value;
   }
 
   Widget _fileManagerContent(bool lightMode) {
@@ -374,11 +408,11 @@ class TracksState extends State<Tracks> {
         height: 180,
         padding: const EdgeInsets.only(top: 20, bottom: 30),
         color:
-        lightMode ? CustomColors.background : CustomColors.backgroundDark,
+            lightMode ? CustomColors.background : CustomColors.backgroundDark,
         child: Column(children: [
           Text(I18n.translate('common_edit'),
               style:
-              const TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
+                  const TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
           BottomSheetActions(actions: actions, lightMode: lightMode)
         ]));
   }
@@ -406,19 +440,27 @@ class TracksState extends State<Tracks> {
     Navigator.pop(context, '');
     Directory newDirectory = Directory('${_currentDirectory!.path}/$name');
     newDirectory.createSync();
-    _loadFiles(false);
+    _loadFiles();
   }
 
-  _moveFile(String directory, TrackListEntity trackListEntity){
-    File(trackListEntity.path!).renameSync('$directory/${trackListEntity.name}.gpx');
-    _loadFiles(false);
+  _moveFile(String directory, TrackListEntity trackListEntity) {
+    if (trackListEntity.isFile) {
+      File(trackListEntity.path!)
+          .renameSync('$directory/${trackListEntity.name}.gpx');
+    } else {
+      if(directory != trackListEntity.path){
+        Directory(trackListEntity.path!)
+            .renameSync('$directory/${trackListEntity.name}');
+      }
+    }
+    _loadFiles();
   }
 
-  _showDirectoryActions(int index, bool lightMode){
+  _showDirectoryActions(int index, bool lightMode) {
     _showBottomSheet(_directoryManagerContent(index, lightMode));
   }
 
-  _showRenameDirectoryModal(int index, bool lightMode){
+  _showRenameDirectoryModal(int index, bool lightMode) {
     Navigator.pop(context, '');
     String name = '';
     VieirosDialog().inputDialog(
@@ -437,29 +479,28 @@ class TracksState extends State<Tracks> {
             )));
   }
 
-  _renameDirectory(index, name){
+  _renameDirectory(index, name) {
     Navigator.pop(context, '');
     Directory directory = Directory(_files[index].path!);
     directory.renameSync('${directory.parent.path}/$name');
-    _loadFiles(false);
+    _loadFiles();
   }
 
-  _deleteDirectory(int index){
+  _deleteDirectory(int index) {
     _showDeleteDialog(index, false);
   }
 
   Future<bool> navigateUp() async {
     //TODO: move files & directories
-    //TODO: drag directories
-    //TODO: global search
     //TODO: accept tracks one by one
-    if(_currentDirectory!.parent.path != (await getApplicationDocumentsDirectory()).path){
+    if (_currentDirectory!.parent.path !=
+        (await getApplicationDocumentsDirectory()).path) {
       setState(() {
         _currentDirectory = _currentDirectory!.parent;
       });
-      _loadFiles(false);
+      _loadFiles();
       return false;
-    }else{
+    } else {
       return true;
     }
   }
@@ -502,7 +543,7 @@ class TracksState extends State<Tracks> {
                 child: VieirosTextInput(
                     lightMode: lightMode,
                     hintText: I18n.translate('tracks_search_hint'),
-                    onChanged: _onChanged,
+                    onChanged: (text) => _loadFiles(searchValue: text),
                     controller: _controller,
                     suffix: IconButton(
                         icon: Icon(
@@ -531,21 +572,10 @@ class TracksState extends State<Tracks> {
                         itemCount: _files.length,
                         shrinkWrap: true,
                         itemBuilder: (itemContext, index) {
-                          return _files[index].isFile
-                              ? LongPressDraggable<TrackListEntity>(
-                                  data: _files[index],
-                                  feedback: Opacity(
-                                      opacity: .75,
-                                      child: TrackListElement(
-                                        lightMode: lightMode,
-                                        loadedTrack: widget.loadedTrack,
-                                        trackListEntity: _files[index],
-                                        index: index,
-                                        navigate: _navigate,
-                                        showTrackInfo: _showTrackInfo,
-                                        unloadTrack: _unloadTrack,
-                                      )),
-                                  dragAnchorStrategy: pointerDragAnchorStrategy,
+                          return LongPressDraggable<TrackListEntity>(
+                              data: _files[index],
+                              feedback: Opacity(
+                                  opacity: .75,
                                   child: TrackListElement(
                                     lightMode: lightMode,
                                     loadedTrack: widget.loadedTrack,
@@ -554,26 +584,35 @@ class TracksState extends State<Tracks> {
                                     navigate: _navigate,
                                     showTrackInfo: _showTrackInfo,
                                     unloadTrack: _unloadTrack,
-                                  ))
-                              : DragTarget<TrackListEntity>(
-                                  builder:
-                                      (context, candidateItems, rejectedItems) {
-                                    if (candidateItems.isNotEmpty) {
-                                      candidateItems.clear();
-                                      candidateItems.add(_files[index]);
-                                    }
-                                    return DirectoryListElement(
-                                        trackListEntity: _files[index],
-                                        lightMode: lightMode,
-                                        navigate: _setCurrentDirectory,
-                                        highlighted: candidateItems.isNotEmpty,
-                                        index: index,
-                                        showDirectoryActions: _showDirectoryActions);
-                                  },
-                                  onAccept: (file) {
-                                    _moveFile(_files[index].path!, file);
-                                  },
-                                );
+                                  )),
+                              dragAnchorStrategy: pointerDragAnchorStrategy,
+                              child: _files[index].isFile
+                                  ? TrackListElement(
+                                      lightMode: lightMode,
+                                      loadedTrack: widget.loadedTrack,
+                                      trackListEntity: _files[index],
+                                      index: index,
+                                      navigate: _navigate,
+                                      showTrackInfo: _showTrackInfo,
+                                      unloadTrack: _unloadTrack,
+                                    )
+                                  : DragTarget<TrackListEntity>(
+                                      builder: (context, candidateItems,
+                                          rejectedItems) {
+                                        return DirectoryListElement(
+                                            trackListEntity: _files[index],
+                                            lightMode: lightMode,
+                                            navigate: _setCurrentDirectory,
+                                            highlighted:
+                                                candidateItems.isNotEmpty,
+                                            index: index,
+                                            showDirectoryActions:
+                                                _showDirectoryActions);
+                                      },
+                                      onAccept: (file) {
+                                        _moveFile(_files[index].path!, file);
+                                      },
+                                    ));
                         }))
           ],
         )));
