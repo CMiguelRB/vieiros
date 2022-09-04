@@ -27,31 +27,17 @@ class DirectoryListElement extends StatelessWidget {
         key: Key(trackListEntity.path!),
         child: Card(
             elevation: 2,
-            color: highlighted
-                ? (lightMode ? Colors.white : Colors.black)
-                : (lightMode
-                    ? CustomColors.background
-                    : CustomColors.backgroundDark),
+            color: highlighted ? (lightMode ? Colors.white : Colors.black) : (lightMode ? CustomColors.background : CustomColors.backgroundDark),
             surfaceTintColor: Colors.transparent,
             child: Padding(
-              padding: const EdgeInsets.only(
-                  left: 10, right: 8, top: 10, bottom: 10),
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    const SizedBox(
-                        width: 20, height: 20, child: Icon(Icons.folder)),
-                    Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 10)),
-                    Expanded(
-                        child: Text(trackListEntity.name,
-                            maxLines: 1, overflow: TextOverflow.ellipsis)),
-                    IconButton(
-                        alignment: Alignment.centerRight,
-                        onPressed: () => showDirectoryActions(index, lightMode),
-                        icon: const Icon(Icons.more_vert))
-                  ]),
+              padding: const EdgeInsets.only(left: 10, right: 8, top: 10, bottom: 10),
+              child: Row(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.max, children: [
+                const SizedBox(width: 20, height: 20, child: Icon(Icons.folder)),
+                Container(margin: const EdgeInsets.symmetric(horizontal: 10)),
+                Expanded(child: Text(trackListEntity.name, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                IconButton(
+                    alignment: Alignment.centerRight, onPressed: () => showDirectoryActions(index, lightMode), icon: const Icon(Icons.more_vert))
+              ]),
             )));
   }
 }

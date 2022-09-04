@@ -9,20 +9,11 @@ class VieirosSwitch extends StatelessWidget {
   final String? descTag;
   final bool lightMode;
 
-  const VieirosSwitch(
-      {Key? key,
-      required this.onChanged,
-      required this.value,
-      required this.titleTag,
-      required this.lightMode,
-      this.descTag})
+  const VieirosSwitch({Key? key, required this.onChanged, required this.value, required this.titleTag, required this.lightMode, this.descTag})
       : super(key: key);
 
   Color _getTextColor(Set<MaterialState> states, isTrack) {
-    const Set<MaterialState> interactiveStates = <MaterialState>{
-      MaterialState.pressed,
-      MaterialState.selected
-    };
+    const Set<MaterialState> interactiveStates = <MaterialState>{MaterialState.pressed, MaterialState.selected};
     if (states.any(interactiveStates.contains)) {
       return isTrack ? CustomColors.faintedAccent : CustomColors.accent;
     }
@@ -34,33 +25,23 @@ class VieirosSwitch extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(10),
       margin: const EdgeInsets.only(left: 10),
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(I18n.translate(titleTag),
-                      style: const TextStyle(fontSize: 16)),
-                  descTag != null
-                      ? Container(margin: const EdgeInsets.only(top: 5),child: Text(I18n.translate(descTag!),
-                          style: TextStyle(
-                              fontSize: 13,
-                              color: lightMode
-                                  ? CustomColors.subText
-                                  : CustomColors.subTextDark)))
-                      : const Text('')
-                ]),
-            Switch(
-              value: value,
-              onChanged: (value) => onChanged(value, context),
-              thumbColor: MaterialStateColor.resolveWith(
-                  (states) => _getTextColor(states, false)),
-              trackColor: MaterialStateColor.resolveWith(
-                  (states) => _getTextColor(states, true)),
-            )
-          ]),
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, mainAxisSize: MainAxisSize.max, children: [
+        Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(I18n.translate(titleTag), style: const TextStyle(fontSize: 16)),
+          descTag != null
+              ? Container(
+                  margin: const EdgeInsets.only(top: 5),
+                  child: Text(I18n.translate(descTag!),
+                      style: TextStyle(fontSize: 13, color: lightMode ? CustomColors.subText : CustomColors.subTextDark)))
+              : const Text('')
+        ]),
+        Switch(
+          value: value,
+          onChanged: (value) => onChanged(value, context),
+          thumbColor: MaterialStateColor.resolveWith((states) => _getTextColor(states, false)),
+          trackColor: MaterialStateColor.resolveWith((states) => _getTextColor(states, true)),
+        )
+      ]),
     );
   }
 }

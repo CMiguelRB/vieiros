@@ -21,8 +21,7 @@ class Home extends StatefulWidget {
   HomeState createState() => HomeState();
 }
 
-class HomeState extends State<Home>
-    with TickerProviderStateMixin, WidgetsBindingObserver {
+class HomeState extends State<Home> with TickerProviderStateMixin, WidgetsBindingObserver {
   int _tabIndex = 0;
 
   late List<Widget> _tabs;
@@ -40,35 +39,23 @@ class HomeState extends State<Home>
     WidgetsBinding.instance.addObserver(this);
     _initTracksFolder();
     _tabs = <Widget>[
-      Tracks(
-          key: _trackKey,
-          toTabIndex: _onTabItemTapped,
-          currentTrack: _currentTrack,
-          loadedTrack: widget.loadedTrack,
-          clearTrack: _clearTrack),
-      Map(
-          key: _mapKey,
-          currentTrack: _currentTrack,
-          loadedTrack: widget.loadedTrack),
-      Info(
-          key: _infoKey,
-          currentTrack: _currentTrack,
-          loadedTrack: widget.loadedTrack),
+      Tracks(key: _trackKey, toTabIndex: _onTabItemTapped, currentTrack: _currentTrack, loadedTrack: widget.loadedTrack, clearTrack: _clearTrack),
+      Map(key: _mapKey, currentTrack: _currentTrack, loadedTrack: widget.loadedTrack),
+      Info(key: _infoKey, currentTrack: _currentTrack, loadedTrack: widget.loadedTrack),
       Settings(key: _settingsKey)
     ];
-    _tabController = TabController(
-        vsync: this, length: _tabs.length, initialIndex: _tabIndex);
+    _tabController = TabController(vsync: this, length: _tabs.length, initialIndex: _tabIndex);
   }
 
   _initTracksFolder() async {
     Directory appFolder = await getApplicationDocumentsDirectory();
     Directory tracksFolder = Directory('${appFolder.path}/tracks');
-    if(!tracksFolder.existsSync()){
+    if (!tracksFolder.existsSync()) {
       tracksFolder.createSync();
       List<FileSystemEntity> files = appFolder.listSync();
       for (var file in files) {
-        if(FileSystemEntity.isFileSync(file.path) && file.path.endsWith('.gpx')){
-          file.rename('${appFolder.path}/tracks/${file.path.split('/')[file.path.split('/').length-1]}');
+        if (FileSystemEntity.isFileSync(file.path) && file.path.endsWith('.gpx')) {
+          file.rename('${appFolder.path}/tracks/${file.path.split('/')[file.path.split('/').length - 1]}');
         }
       }
     }
@@ -82,8 +69,7 @@ class HomeState extends State<Home>
   }
 
   void _onTabItemTapped(int index) async {
-    if (_settingsKey.currentState != null &&
-        _settingsKey.currentState!.tpOpen) {
+    if (_settingsKey.currentState != null && _settingsKey.currentState!.tpOpen) {
       _settingsKey.currentState!.closeThirdParties();
     }
     if (index == 1) {
@@ -152,9 +138,9 @@ class HomeState extends State<Home>
           },
           bodyTag: 'app_close_warning');
       return exitResult ?? false;
-    } else if(_trackKey.currentState != null){
+    } else if (_trackKey.currentState != null) {
       return await _trackKey.currentState!.navigateUp();
-    }else {
+    } else {
       return true;
     }
   }
@@ -165,29 +151,17 @@ class HomeState extends State<Home>
         onWillPop: () => _onWillPop(context),
         child: Scaffold(
             resizeToAvoidBottomInset: false,
-            body: TabBarView(
-                physics: const NeverScrollableScrollPhysics(),
-                controller: _tabController,
-                children: _tabs),
-            bottomNavigationBar: NavigationBar(
-                selectedIndex: _tabIndex,
-                onDestinationSelected: _onTabItemTapped,
-                destinations: <Widget>[
-                  NavigationDestination(
-                      icon: const Icon(Icons.timeline_outlined),
-                      label: I18n.translate('appbar_tab_tracks')),
-                  NavigationDestination(
-                      icon: const Icon(Icons.terrain_outlined),
-                      selectedIcon: const Icon(Icons.terrain),
-                      label: I18n.translate('appbar_tab_map')),
-                  NavigationDestination(
-                      icon: const Icon(Icons.insert_chart_outlined),
-                      selectedIcon: const Icon(Icons.insert_chart),
-                      label: I18n.translate('appbar_tab_info')),
-                  NavigationDestination(
-                      icon: const Icon(Icons.settings_outlined),
-                      selectedIcon: const Icon(Icons.settings),
-                      label: I18n.translate('appbar_tab_settings'))
-                ])));
+            body: TabBarView(physics: const NeverScrollableScrollPhysics(), controller: _tabController, children: _tabs),
+            bottomNavigationBar: NavigationBar(selectedIndex: _tabIndex, onDestinationSelected: _onTabItemTapped, destinations: <Widget>[
+              NavigationDestination(icon: const Icon(Icons.timeline_outlined), label: I18n.translate('appbar_tab_tracks')),
+              NavigationDestination(
+                  icon: const Icon(Icons.terrain_outlined), selectedIcon: const Icon(Icons.terrain), label: I18n.translate('appbar_tab_map')),
+              NavigationDestination(
+                  icon: const Icon(Icons.insert_chart_outlined),
+                  selectedIcon: const Icon(Icons.insert_chart),
+                  label: I18n.translate('appbar_tab_info')),
+              NavigationDestination(
+                  icon: const Icon(Icons.settings_outlined), selectedIcon: const Icon(Icons.settings), label: I18n.translate('appbar_tab_settings'))
+            ])));
   }
 }

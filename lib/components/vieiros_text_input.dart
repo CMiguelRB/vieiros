@@ -9,21 +9,24 @@ class VieirosTextInput extends StatelessWidget {
   final Widget? suffix;
   final TextEditingController? controller;
   final bool lightMode;
+  final FocusNode? focusNode;
 
-  const VieirosTextInput({
-    Key? key,
-    required this.hintText,
-    required this.onChanged,
-    required this.lightMode,
-    this.initialValue,
-    this.suffix,
-    this.controller,
-  }) : super(key: key);
+  const VieirosTextInput(
+      {Key? key,
+      required this.hintText,
+      required this.onChanged,
+      required this.lightMode,
+      this.initialValue,
+      this.suffix,
+      this.controller,
+      this.focusNode})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
         autofocus: false,
+        focusNode: focusNode,
         cursorColor: CustomColors.accent,
         initialValue: initialValue,
         controller: controller,
@@ -32,12 +35,10 @@ class VieirosTextInput extends StatelessWidget {
             filled: true,
             fillColor: lightMode ? CustomColors.faintedFaintedAccent : CustomColors.subText,
             hintText: I18n.translate(hintText),
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+            contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
             counterStyle: const TextStyle(color: CustomColors.accent),
             enabledBorder: const OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(24)),
-                borderSide: BorderSide(color: CustomColors.subTextDark)),
+                borderRadius: BorderRadius.all(Radius.circular(24)), borderSide: BorderSide(color: CustomColors.subTextDark)),
             focusedBorder: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(24)),
               borderSide: BorderSide(color: CustomColors.accent),

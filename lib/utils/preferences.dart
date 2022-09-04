@@ -9,13 +9,12 @@ class Preferences {
   Map<String, dynamic> preferences = {};
 
   Future<void> loadPreferences() async {
-    final file = File(
-        '${(await getApplicationDocumentsDirectory()).path}/$_fileName.json');
+    final file = File('${(await getApplicationDocumentsDirectory()).path}/$_fileName.json');
     if (!await file.exists()) {
       return;
     }
     String str = file.readAsStringSync();
-    if(str.isNotEmpty) {
+    if (str.isNotEmpty) {
       Map<String, dynamic> map = json.decode(str);
       preferences = map;
     }
@@ -23,8 +22,7 @@ class Preferences {
 
   Future<void> set(String key, String value) async {
     preferences[key] = value;
-    final file = File(
-        '${(await getApplicationDocumentsDirectory()).path}/$_fileName.json');
+    final file = File('${(await getApplicationDocumentsDirectory()).path}/$_fileName.json');
     file.writeAsString(json.encode(preferences));
   }
 
@@ -34,8 +32,7 @@ class Preferences {
 
   Future<void> remove(String key) async {
     preferences.remove(key);
-    final file = File(
-        '${(await getApplicationDocumentsDirectory()).path}/$_fileName.json');
+    final file = File('${(await getApplicationDocumentsDirectory()).path}/$_fileName.json');
     file.writeAsStringSync(json.encode(preferences));
   }
 

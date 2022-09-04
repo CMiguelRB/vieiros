@@ -27,30 +27,31 @@ class VieirosSelect extends StatelessWidget {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            elevation: 2,
+              elevation: 2,
               title: Text(I18n.translate('settings_dark_mode')),
               actions: [
-                Container(margin: const EdgeInsets.only(right: 24, bottom: 10), child: TextButton(
-                  child: Text(
-                    I18n.translate('common_cancel'),
-                    style: const TextStyle(
-                        color: CustomColors.accent, fontSize: 15),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                )),
+                Container(
+                    margin: const EdgeInsets.only(right: 24, bottom: 10),
+                    child: TextButton(
+                      child: Text(
+                        I18n.translate('common_cancel'),
+                        style: const TextStyle(color: CustomColors.accent, fontSize: 15),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    )),
               ],
               content: SingleChildScrollView(
                   child: ListBody(
                       children: items.map((element) {
                 return ListTile(
-                  onTap: () => _onElementPressed(element),
+                    onTap: () => _onElementPressed(element),
                     title: Text(I18n.translate(element['tag']!)),
                     leading: Radio(
                         value: element['value']!,
                         groupValue: value,
-                        activeColor:  CustomColors.accent,
+                        activeColor: CustomColors.accent,
                         onChanged: (value) => _onElementPressed(element)));
               }).toList())));
         });
@@ -73,16 +74,11 @@ class VieirosSelect extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  Text(I18n.translate(titleTag),
-                      style: const TextStyle(fontSize: 16)),
+                  Text(I18n.translate(titleTag), style: const TextStyle(fontSize: 16)),
                   Container(
                       margin: const EdgeInsets.only(top: 5),
                       child: Text(I18n.translate(valueTag),
-                          style: TextStyle(
-                              fontSize: 13,
-                              color: lightMode
-                                  ? CustomColors.subText
-                                  : CustomColors.subTextDark)))
+                          style: TextStyle(fontSize: 13, color: lightMode ? CustomColors.subText : CustomColors.subTextDark)))
                 ])));
   }
 }

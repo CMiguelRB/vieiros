@@ -17,9 +17,7 @@ class ThemeProvider extends ChangeNotifier {
         themeMode = ThemeMode.dark;
         break;
       default:
-        SchedulerBinding.instance.window.platformBrightness == Brightness.dark
-            ? themeMode = ThemeMode.dark
-            : themeMode = ThemeMode.light;
+        SchedulerBinding.instance.window.platformBrightness == Brightness.dark ? themeMode = ThemeMode.dark : themeMode = ThemeMode.light;
     }
 
     if (themeMode == ThemeMode.light) {
@@ -49,13 +47,10 @@ class Themes {
       primaryColor: CustomColors.background,
       backgroundColor: CustomColors.background,
       bottomAppBarColor: CustomColors.background,
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(foregroundColor: Colors.white, backgroundColor: CustomColors.accent)
-      ),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          foregroundColor: Colors.white,
-          backgroundColor: CustomColors.accent,
-          elevation: 2),
+      elevatedButtonTheme:
+          ElevatedButtonThemeData(style: ElevatedButton.styleFrom(foregroundColor: Colors.white, backgroundColor: CustomColors.accent)),
+      floatingActionButtonTheme:
+          const FloatingActionButtonThemeData(foregroundColor: Colors.white, backgroundColor: CustomColors.accent, elevation: 2),
       indicatorColor: CustomColors.accent,
       scaffoldBackgroundColor: CustomColors.background,
       navigationBarTheme: NavigationBarThemeData(
@@ -63,8 +58,7 @@ class Themes {
           backgroundColor: CustomColors.background,
           indicatorColor: CustomColors.faintedAccent,
           labelTextStyle: MaterialStateProperty.all(const TextStyle(color: CustomColors.backgroundDark)),
-          iconTheme: MaterialStateProperty.all(const IconThemeData(color: CustomColors.backgroundDark))
-      ),
+          iconTheme: MaterialStateProperty.all(const IconThemeData(color: CustomColors.backgroundDark))),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: CustomColors.background,
         selectedLabelStyle: TextStyle(color: CustomColors.backgroundDark),
@@ -76,34 +70,23 @@ class Themes {
       ),
       fontFamily: 'Lato',
       textTheme: const TextTheme(
-        headline1: TextStyle(
-            fontSize: 24.0,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Rubik',
-            color: Colors.black87),
-        bodyText1: TextStyle(
-            fontSize: 14.0, fontFamily: 'Lato', color: Colors.black87),
+        headline1: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, fontFamily: 'Rubik', color: Colors.black87),
+        bodyText1: TextStyle(fontSize: 14.0, fontFamily: 'Lato', color: Colors.black87),
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
       dialogTheme: const DialogTheme(
-          backgroundColor: CustomColors.background,
-          elevation: 2,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(24)))),
-      snackBarTheme: const SnackBarThemeData(
-          contentTextStyle: TextStyle(color: CustomColors.background)));
+          backgroundColor: CustomColors.background, elevation: 2, shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(24)))),
+      snackBarTheme: const SnackBarThemeData(contentTextStyle: TextStyle(color: CustomColors.background)));
 
   static final darkTheme = ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
       primaryColor: CustomColors.backgroundDark,
       backgroundColor: CustomColors.backgroundDark,
-      elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(foregroundColor: Colors.white, backgroundColor: CustomColors.accent)),
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          foregroundColor: Colors.white,
-          backgroundColor: CustomColors.accent,
-          elevation: 2),
+      elevatedButtonTheme:
+          ElevatedButtonThemeData(style: ElevatedButton.styleFrom(foregroundColor: Colors.white, backgroundColor: CustomColors.accent)),
+      floatingActionButtonTheme:
+          const FloatingActionButtonThemeData(foregroundColor: Colors.white, backgroundColor: CustomColors.accent, elevation: 2),
       indicatorColor: CustomColors.accent,
       buttonTheme: const ButtonThemeData(
         buttonColor: CustomColors.accent,
@@ -117,31 +100,22 @@ class Themes {
           labelTextStyle: MaterialStateProperty.all(const TextStyle(color: Colors.white)),
           iconTheme: MaterialStateProperty.resolveWith((states) {
             IconThemeData iconThemeData;
-            if(states.isNotEmpty && states.first == MaterialState.selected){
+            if (states.isNotEmpty && states.first == MaterialState.selected) {
               iconThemeData = const IconThemeData(color: CustomColors.backgroundDark);
-            }else {
+            } else {
               iconThemeData = const IconThemeData(color: Colors.white);
             }
             return iconThemeData;
-          }
-      )
-      ),
+          })),
       fontFamily: 'Lato',
       textTheme: const TextTheme(
-        headline1: TextStyle(
-            fontSize: 24.0,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Rubik',
-            color: Colors.white),
-        bodyText1:
-            TextStyle(fontSize: 14.0, fontFamily: 'Lato', color: Colors.white),
+        headline1: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, fontFamily: 'Rubik', color: Colors.white),
+        bodyText1: TextStyle(fontSize: 14.0, fontFamily: 'Lato', color: Colors.white),
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
       dialogTheme: const DialogTheme(
           backgroundColor: CustomColors.backgroundDark,
           elevation: 2,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(24)))),
-      snackBarTheme: const SnackBarThemeData(
-          contentTextStyle: TextStyle(color: CustomColors.background)));
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(24)))),
+      snackBarTheme: const SnackBarThemeData(contentTextStyle: TextStyle(color: CustomColors.background)));
 }

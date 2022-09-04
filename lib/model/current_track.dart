@@ -24,7 +24,7 @@ class CurrentTrack extends Track {
 
   List<LatLng> getPoints() {
     List<LatLng> latLngList = [];
-    for (var i = 0; i < positions.length; i++) {
+    for (int i = 0; i < positions.length; i++) {
       if (positions[i].latitude != null && positions[i].longitude != null) {
         latLngList.add(LatLng(positions[i].latitude!, positions[i].longitude!));
       }

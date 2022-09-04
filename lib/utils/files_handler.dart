@@ -23,15 +23,15 @@ class FilesHandler {
     }
     return null;
   }
-  
+
   void removeFile(String? path) async {
-    if(path != null){
+    if (path != null) {
       bool hasPermission = await PermissionHandler().handleWritePermission();
       if (hasPermission) {
-        if(FileSystemEntity.isFileSync(path)){
+        if (FileSystemEntity.isFileSync(path)) {
           File deleteFile = File(path);
           deleteFile.delete();
-        }else{
+        } else {
           Directory deleteDirectory = Directory(path);
           deleteDirectory.deleteSync(recursive: true);
         }
