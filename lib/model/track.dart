@@ -31,7 +31,7 @@ class Track {
       this.gpxString = gpxString;
       gpx = GpxReader().fromString(gpxString);
       String? name = gpx!.trks[0].name;
-      name ??= xmlFile.path.split('/')[(xmlFile.path.split('/').length-1)].split('.gpx')[0];
+      name ??= xmlFile.path.split('/')[(xmlFile.path.split('/').length - 1)].split('.gpx')[0];
       this.name = name;
     } on Exception catch (exception) {
       if (kDebugMode) {
@@ -64,8 +64,7 @@ class Track {
     altitudePoints.add(AltitudePoint(distance, altitude));
   }
 
-  clear(){
-  }
+  clear() {}
 
   Track();
 }

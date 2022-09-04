@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:vieiros/resources/custom_colors.dart';
 import 'package:vieiros/resources/i18n.dart';
 
-class VieirosDropdown extends StatelessWidget{
-
+class VieirosDropdown extends StatelessWidget {
   final bool lightMode;
   final String value;
   final Function onChanged;
   final List<Map<String, String>> items;
-
 
   const VieirosDropdown({Key? key, required this.lightMode, required this.onChanged, required this.value, required this.items}) : super(key: key);
 
@@ -17,8 +15,7 @@ class VieirosDropdown extends StatelessWidget{
     return Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          color:
-          lightMode ? CustomColors.subTextDark : CustomColors.subText,
+          color: lightMode ? CustomColors.subTextDark : CustomColors.subText,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
         child: DropdownButton(
@@ -30,10 +27,8 @@ class VieirosDropdown extends StatelessWidget{
             borderRadius: const BorderRadius.all(Radius.circular(5)),
             elevation: 2,
             focusColor: CustomColors.accent,
-            items: items.map((element) {return DropdownMenuItem(value: element["value"], child: Text(I18n.translate(element["tag"]!)));}).toList()
-            ));
+            items: items.map((element) {
+              return DropdownMenuItem(value: element["value"], child: Text(I18n.translate(element["tag"]!)));
+            }).toList()));
   }
-
-
-
 }

@@ -4,7 +4,6 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:vieiros/resources/i18n.dart';
 
 class VieirosTts {
-
   void speakDistance(int distance, DateTime dateTime) async {
     FlutterTts flutterTts = FlutterTts();
     final String lang = Platform.localeName.replaceAll("_", "-");
@@ -13,8 +12,12 @@ class VieirosTts {
     await flutterTts.awaitSpeakCompletion(true);
     DateTime start = dateTime;
     int secs = DateTime.now().difference(start).abs().inSeconds;
-    String hText = secs >= 7200 ?  I18n.translate('map_voice_notification_h') : I18n.translate('map_voice_notification_h').substring(0, I18n.translate('map_voice_notification_h').length-1);
-    String mnText = secs > 120 ? I18n.translate('map_voice_notification_m') : I18n.translate('map_voice_notification_m').substring(0, I18n.translate('map_voice_notification_m').length-1);
+    String hText = secs >= 7200
+        ? I18n.translate('map_voice_notification_h')
+        : I18n.translate('map_voice_notification_h').substring(0, I18n.translate('map_voice_notification_h').length - 1);
+    String mnText = secs > 120
+        ? I18n.translate('map_voice_notification_m')
+        : I18n.translate('map_voice_notification_m').substring(0, I18n.translate('map_voice_notification_m').length - 1);
     String hours = '';
     String minutes = '';
     String seconds = '';
@@ -32,14 +35,15 @@ class VieirosTts {
     String km = (distance ~/ 1000).toString();
     await flutterTts.speak(I18n.translate('map_voice_notification_pace'));
     String kText = distance >= 2000 ? km.toString() : I18n.translate('map_voice_notification_km_first');
-    String kmText = distance >= 2000 ? I18n.translate('map_voice_notification_km') : I18n.translate('map_voice_notification_km').substring(0, I18n.translate('map_voice_notification_km').length-1);
-    await flutterTts.speak(
-        kText +
+    String kmText = distance >= 2000
+        ? I18n.translate('map_voice_notification_km')
+        : I18n.translate('map_voice_notification_km').substring(0, I18n.translate('map_voice_notification_km').length - 1);
+    await flutterTts.speak(kText +
         kmText +
         I18n.translate('map_voice_notification_in') +
-            hours +
+        hours +
         (hours != '' ? hText : '') +
-            minutes +
+        minutes +
         (minutes != '' ? mnText : '') +
         seconds +
         I18n.translate('map_voice_notification_s'));

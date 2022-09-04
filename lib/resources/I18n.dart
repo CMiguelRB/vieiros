@@ -30,8 +30,6 @@ class I18n {
       "tracks_file_validation_error_plural": "Either tracks already exists or they were not valid",
       "tracks_unloaded": "Track cleared from the map",
       "tracks_delete_route": "Delete route",
-      "tracks_once_permissions_disclaimer":
-          "Due to the new Android's permission policies, \"Allow all the time\" permission is now needed for tracking the background location. Otherwise, Vieiros won't be able to track your path while being in the background.\n\nYour location data will be only used locally, it's yours, and stored as a GPX track for your own use.",
       "tracks_create_directory": "Folder",
       "tracks_add_file": "Tracks",
       "tracks_delete_directory": "Delete folder",
@@ -51,8 +49,7 @@ class I18n {
       "map_voice_notification_in": "in",
       "map_stop_save": "Stop recording and save your track?",
       "map_track_name": "Track name",
-      "map_permissions_request":
-          "This app needs all times location permissions for tracking your position even while working on the background.",
+      "map_permissions_request": "This app needs all times location permissions for tracking your position even while working on the background.",
       "map_grant_permissions": "Grant permissions",
       "map_finish_tracking": "Finish tracking",
       "map_track_pin_start": "Start",
@@ -88,8 +85,7 @@ class I18n {
       "settings_dark_mode_item_system": "System default",
       "settings_dark_mode_item_light": "Light theme",
       "settings_dark_mode_item_dark": "Dark theme",
-      "settings_third_party_thanks":
-          "This application would not exist without the support of these great third-party libraries."
+      "settings_third_party_thanks": "This application would not exist without the support of these great third-party libraries."
     },
     "es": {
       "common_ok": "Aceptar",
@@ -119,8 +115,6 @@ class I18n {
       "tracks_file_validation_error_plural": "Las rutas ya existen o ha habido problemas de validación",
       "tracks_unloaded": "Ruta limpiada del mapa",
       "tracks_delete_route": "Eliminar ruta",
-      "tracks_once_permissions_disclaimer":
-          "A causa de las nuevas directivas de permisos de Android, ahora el permiso \"Permitir siempre\" es requerido para grabar la ubicación en segundo plano. De otra manera, Vieiros no sería capaz de grabar tu camino mientras esté en segundo plano.\n\n Tus datos de ubicación sólo serán usados localmente, son tuyos, y almacenados como ruta GPX para tu propio uso.",
       "tracks_create_directory": "Carpeta",
       "tracks_add_file": "Rutas",
       "tracks_delete_directory": "Eliminar carpeta",
@@ -177,8 +171,7 @@ class I18n {
       "settings_dark_mode_item_system": "Predeterminado del sistema",
       "settings_dark_mode_item_light": "Tema claro",
       "settings_dark_mode_item_dark": "Tema oscuro",
-      "settings_third_party_thanks":
-          "Esta aplicación no existiría sin el apoyo de estas geniales librerías de terceros."
+      "settings_third_party_thanks": "Esta aplicación no existiría sin el apoyo de estas geniales librerías de terceros."
     },
     "gl": {
       "common_ok": "Aceptar",
@@ -203,14 +196,11 @@ class I18n {
       "app_close_warning_title": "Aviso",
       "app_close_warning": "¿Queres pechar a apliación?",
       "tracks_search_hint": "Buscar rutas",
-      "tracks_background_tip":
-          "Presiona + para cargares un arquivo de ruta gpx",
+      "tracks_background_tip": "Presiona + para cargares un arquivo de ruta gpx",
       "tracks_file_validation_error": "A ruta xa existe ou houbo problemas de validación",
       "tracks_file_validation_error_plural": "As rutas xa existen ou houbo problemas de validación",
       "tracks_unloaded": "Ruta limpada do mapa",
       "tracks_delete_route": "Eliminar ruta",
-      "tracks_once_permissions_disclaimer":
-          "A causa das novas directivas de permisos de Android, agora o permiso \"Permitir sempre\" é requerido para gravar a localización en segundo plano. Doutra maneria, Vieiros non sería capaz de gravar o teu camiño mentres estea en segundo plano.\n\n Os teus datos de localización só serán usados localmente, son teus, e almacenados coma ruta GPX para o teu propio uso.",
       "tracks_create_directory": "Cartafol",
       "tracks_add_file": "Rutas",
       "tracks_delete_directory": "Eliminar cartafol",
@@ -267,15 +257,12 @@ class I18n {
       "settings_dark_mode_item_system": "Predeterminado do sistema",
       "settings_dark_mode_item_light": "Tema claro",
       "settings_dark_mode_item_dark": "Tema escuro",
-      "settings_third_party_thanks":
-          "Esta aplicación non existiría de non ser polo apoio destas xeniais librarías de terceiros."
+      "settings_third_party_thanks": "Esta aplicación non existiría de non ser polo apoio destas xeniais librarías de terceiros."
     }
   };
 
   static String translate(String tag) {
     String systemLocale = Platform.localeName.split('_')[0];
-    return _localizations[systemLocale] != null
-        ? _localizations[systemLocale]![tag] ?? tag
-        : _localizations['en']![tag] ?? tag;
+    return _localizations[systemLocale] != null ? _localizations[systemLocale]![tag] ?? tag : _localizations['en']![tag] ?? tag;
   }
 }

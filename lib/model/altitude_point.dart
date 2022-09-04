@@ -1,4 +1,4 @@
-class AltitudePoint{
+class AltitudePoint {
   int totalDistance;
   double altitude;
 

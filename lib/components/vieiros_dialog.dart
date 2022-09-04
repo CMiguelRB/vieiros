@@ -3,9 +3,7 @@ import 'package:vieiros/resources/custom_colors.dart';
 import 'package:vieiros/resources/i18n.dart';
 
 class VieirosDialog {
-  infoDialog(
-      BuildContext context, String titleTag, Map<String, Function> actions,
-      {String? bodyTag}) async {
+  infoDialog(BuildContext context, String titleTag, Map<String, Function> actions, {String? bodyTag}) async {
     return showDialog(
       context: context,
       barrierColor: CustomColors.dimming,
@@ -17,9 +15,7 @@ class VieirosDialog {
     );
   }
 
-  inputDialog(
-      BuildContext context, String titleTag, Map<String, Function> actions,
-      {Form? form}) {
+  inputDialog(BuildContext context, String titleTag, Map<String, Function> actions, {Form? form}) {
     showDialog(
         context: context,
         barrierColor: CustomColors.dimming,
@@ -33,20 +29,14 @@ class VieirosDialog {
                     Container(
                         margin: const EdgeInsets.only(bottom: 16),
                         alignment: Alignment.topCenter,
-                        child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(I18n.translate(titleTag),
-                                  style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold)),
-                              IconButton(
-                                  padding: EdgeInsets.zero,
-                                  alignment: Alignment.centerRight,
-                                  onPressed: () => Navigator.pop(context, ''),
-                                  icon: const Icon(Icons.close))
-                            ])),
+                        child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                          Text(I18n.translate(titleTag), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                          IconButton(
+                              padding: EdgeInsets.zero,
+                              alignment: Alignment.centerRight,
+                              onPressed: () => Navigator.pop(context, ''),
+                              icon: const Icon(Icons.close))
+                        ])),
                     Container(
                       alignment: Alignment.center,
                       margin: const EdgeInsets.only(bottom: 24),
@@ -69,12 +59,10 @@ class VieirosDialog {
     actions.forEach((tag, function) {
       dialogActions.add(TextButton(
         style: ButtonStyle(
-          overlayColor: MaterialStateColor.resolveWith(
-              (states) => CustomColors.subTextDark),
+          overlayColor: MaterialStateColor.resolveWith((states) => CustomColors.subTextDark),
         ),
         onPressed: () => function(),
-        child: Text(I18n.translate(tag),
-            style: const TextStyle(color: CustomColors.accent, fontSize: 15)),
+        child: Text(I18n.translate(tag), style: const TextStyle(color: CustomColors.accent, fontSize: 15)),
       ));
     });
 

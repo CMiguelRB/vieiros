@@ -33,8 +33,7 @@ class ChartWidget extends StatelessWidget {
       text = altitude;
     }
 
-    return Text(text,
-        style: const TextStyle(fontSize: 10), textAlign: TextAlign.left);
+    return Text(text, style: const TextStyle(fontSize: 10), textAlign: TextAlign.left);
   }
 
   Widget leftTitleWidgets(double value, TitleMeta meta) {
@@ -46,8 +45,7 @@ class ChartWidget extends StatelessWidget {
       text = distance;
     }
 
-    return Text(text,
-        style: const TextStyle(fontSize: 10), textAlign: TextAlign.right);
+    return Text(text, style: const TextStyle(fontSize: 10), textAlign: TextAlign.right);
   }
 
   @override
@@ -57,26 +55,18 @@ class ChartWidget extends StatelessWidget {
       baselineY: altitudeMin.toDouble(),
       minY: altitudeMin.toDouble(),
       borderData: FlBorderData(
-          show: true,
-          border: Border(
-              bottom: BorderSide(
-                  color: lightMode
-                      ? CustomColors.subText
-                      : CustomColors.subTextDark,
-                  width: 0.5))),
+          show: true, border: Border(bottom: BorderSide(color: lightMode ? CustomColors.subText : CustomColors.subTextDark, width: 0.5))),
       lineTouchData: LineTouchData(
           enabled: true,
           getTouchLineEnd: (barData, spotIndex) => 0,
           getTouchLineStart: (barData, spotIndex) => 0,
-          getTouchedSpotIndicator:
-              (LineChartBarData barData, List<int> spotIndexes) {
+          getTouchedSpotIndicator: (LineChartBarData barData, List<int> spotIndexes) {
             return spotIndexes.map((index) {
               return TouchedSpotIndicatorData(
                 FlLine(),
                 FlDotData(
                   show: true,
-                  getDotPainter: (spot, percent, barData, index) =>
-                      FlDotCirclePainter(
+                  getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
                     radius: 4,
                     color: Colors.white,
                     strokeWidth: 1.5,
@@ -90,43 +80,27 @@ class ChartWidget extends StatelessWidget {
               showOnTopOfTheChartBoxArea: true,
               tooltipMargin: 10,
               tooltipPadding: const EdgeInsets.all(5),
-              tooltipBgColor: lightMode
-                  ? CustomColors.trackBackgroundLight
-                  : CustomColors.trackBackgroundDark,
+              tooltipBgColor: lightMode ? CustomColors.trackBackgroundLight : CustomColors.trackBackgroundDark,
               fitInsideHorizontally: true,
               getTooltipItems: (List<LineBarSpot> spots) {
                 return spots.map((spot) {
                   double d = spot.x;
                   String ds;
                   if (d >= 10000) {
-                    ds = '${(spot.x / 1000)
-                            .toString()
-                            .padRight(4, '0')
-                            .substring(0, 5)} Km)';
+                    ds = '${(spot.x / 1000).toString().padRight(4, '0').substring(0, 5)} Km)';
                   } else {
-                    ds = '${(spot.x / 1000)
-                            .toString()
-                            .padRight(4, '0')
-                            .substring(0, 4)} Km)';
+                    ds = '${(spot.x / 1000).toString().padRight(4, '0').substring(0, 4)} Km)';
                   }
-                  return LineTooltipItem('${formatter.format(spot.y)} m ($ds',
-                      const TextStyle(fontSize: 14));
+                  return LineTooltipItem('${formatter.format(spot.y)} m ($ds', const TextStyle(fontSize: 14));
                 }).toList();
               })),
       gridData: FlGridData(
         show: true,
         getDrawingHorizontalLine: (value) {
-          return FlLine(
-              color:
-                  lightMode ? CustomColors.subText : CustomColors.subTextDark,
-              strokeWidth: 0.2);
+          return FlLine(color: lightMode ? CustomColors.subText : CustomColors.subTextDark, strokeWidth: 0.2);
         },
-        horizontalInterval: ((double.parse(altitude != '-' ? altitude : '0') -
-                        altitudeMin) /
-                    3) >
-                0
-            ? ((double.parse(altitude != '-' ? altitude : '0') - altitudeMin) /
-                3)
+        horizontalInterval: ((double.parse(altitude != '-' ? altitude : '0') - altitudeMin) / 3) > 0
+            ? ((double.parse(altitude != '-' ? altitude : '0') - altitudeMin) / 3)
             : 1,
         drawVerticalLine: false,
         drawHorizontalLine: true,
@@ -140,21 +114,13 @@ class ChartWidget extends StatelessWidget {
                   showTitles: true,
                   reservedSize: altitude.length * 11,
                   getTitlesWidget: (value, titleMetaData) {
-                    if (value.toInt() == titleMetaData.min.toInt() ||
-                        value.toInt() == titleMetaData.max.toInt()) {
+                    if (value.toInt() == titleMetaData.min.toInt() || value.toInt() == titleMetaData.max.toInt()) {
                       return Container();
                     }
-                    return Text(
-                        formatter.format(!value.isNaN ? value.toInt() : ''),
-                        style: const TextStyle(fontSize: 10));
+                    return Text(formatter.format(!value.isNaN ? value.toInt() : ''), style: const TextStyle(fontSize: 10));
                   },
-                  interval: ((double.parse(altitude != '-' ? altitude : '0') -
-                                  altitudeMin) /
-                              3) >
-                          0
-                      ? ((double.parse(altitude != '-' ? altitude : '0') -
-                              altitudeMin) /
-                          3)
+                  interval: ((double.parse(altitude != '-' ? altitude : '0') - altitudeMin) / 3) > 0
+                      ? ((double.parse(altitude != '-' ? altitude : '0') - altitudeMin) / 3)
                       : 1)),
           bottomTitles: AxisTitles(
               sideTitles: SideTitles(
@@ -168,34 +134,24 @@ class ChartWidget extends StatelessWidget {
                       if (value.isNaN) {
                         return Container();
                       }
-                      if (value.toInt() >
-                              (double.parse(distance) * 1000 / 3) * 2 &&
-                          value.toInt() < titleMetaData.max.toInt()) {
+                      if (value.toInt() > (double.parse(distance) * 1000 / 3) * 2 && value.toInt() < titleMetaData.max.toInt()) {
                         return Container();
                       }
                       return Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 0),
-                          child: Text(formatter.format(value.toInt()),
-                              style: const TextStyle(fontSize: 10)));
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                          child: Text(formatter.format(value.toInt()), style: const TextStyle(fontSize: 10)));
                     } catch (e) {
                       return Container();
                     }
                   },
-                  interval: double.parse(distance) * 1000 / 3 > 0
-                      ? double.parse(distance) * 1000 / 3
-                      : 1))),
+                  interval: double.parse(distance) * 1000 / 3 > 0 ? double.parse(distance) * 1000 / 3 : 1))),
       lineBarsData: [
         LineChartBarData(
           belowBarData: BarAreaData(
             show: true,
-            color: Color.fromARGB(lightMode ? 150 : 20, chartColorFainted.red,
-                chartColorFainted.green, chartColorFainted.blue),
+            color: Color.fromARGB(lightMode ? 150 : 20, chartColorFainted.red, chartColorFainted.green, chartColorFainted.blue),
           ),
-          spots: altitudeData
-              .map((e) => FlSpot(
-                  e.totalDistance.toDouble(), e.altitude.toInt().toDouble()))
-              .toList(),
+          spots: altitudeData.map((e) => FlSpot(e.totalDistance.toDouble(), e.altitude.toInt().toDouble())).toList(),
           color: chartColor,
           isCurved: false,
           barWidth: 1,

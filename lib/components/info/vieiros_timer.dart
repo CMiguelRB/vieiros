@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-class TimerWidget extends StatefulWidget{
-
+class TimerWidget extends StatefulWidget {
   final int time;
 
   const TimerWidget({Key? key, required this.time}) : super(key: key);
@@ -12,8 +11,7 @@ class TimerWidget extends StatefulWidget{
   TimerState createState() => TimerState();
 }
 
-class TimerState extends State<TimerWidget>{
-
+class TimerState extends State<TimerWidget> {
   String _totalTime = '--:--';
   int _baseTime = 0;
   Timer? timer;
@@ -25,11 +23,11 @@ class TimerState extends State<TimerWidget>{
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => _updateTimer());
   }
 
-  _updateTimer(){
+  _updateTimer() {
     setState(() {
       int diff = DateTime.now().millisecondsSinceEpoch - _baseTime;
       _totalTime = Duration(milliseconds: diff).abs().toString().split('.')[0];
-      if(_totalTime.split(':')[0].length < 2){
+      if (_totalTime.split(':')[0].length < 2) {
         _totalTime = '0$_totalTime';
       }
     });
@@ -43,9 +41,6 @@ class TimerState extends State<TimerWidget>{
 
   @override
   Widget build(BuildContext context) {
-   return Text(_totalTime,
-       style: const TextStyle(
-           fontSize: 35,
-           fontWeight: FontWeight.bold));
+    return Text(_totalTime, style: const TextStyle(fontSize: 35, fontWeight: FontWeight.bold));
   }
 }

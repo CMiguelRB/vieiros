@@ -11,7 +11,6 @@ import 'package:vieiros/resources/themes.dart';
 import 'package:vieiros/utils/preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -43,9 +42,7 @@ void loadStatusBarTheme() {
       light = false;
       break;
     default:
-      SchedulerBinding.instance.window.platformBrightness == Brightness.dark
-          ? light = false
-          : light = true;
+      SchedulerBinding.instance.window.platformBrightness == Brightness.dark ? light = false : light = true;
   }
   if (light) {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -85,10 +82,7 @@ class MyApp extends StatelessWidget {
             prefsMode = false;
             break;
           default:
-            SchedulerBinding.instance.window.platformBrightness ==
-                    Brightness.dark
-                ? prefsMode = false
-                : prefsMode = true;
+            SchedulerBinding.instance.window.platformBrightness == Brightness.dark ? prefsMode = false : prefsMode = true;
         }
         if (currentMode != prefsMode) {
           provider.setThemeMode(currentPrefs);
@@ -100,11 +94,7 @@ class MyApp extends StatelessWidget {
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            supportedLocales: const [
-              Locale('en', ''),
-              Locale('es', ''),
-              Locale('gl', '')
-            ],
+            supportedLocales: const [Locale('en', ''), Locale('es', ''), Locale('gl', '')],
             themeMode: provider.themeMode,
             theme: Themes.lightTheme,
             darkTheme: Themes.darkTheme,

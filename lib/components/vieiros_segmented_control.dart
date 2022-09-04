@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
-class VieirosSegmentedControl extends StatelessWidget{
-
-  final Map<int,Widget> tabMap;
+class VieirosSegmentedControl extends StatelessWidget {
+  final Map<int, Widget> tabMap;
   final int slideState;
   final Function onValueChanged;
 
@@ -12,10 +11,6 @@ class VieirosSegmentedControl extends StatelessWidget{
   Widget build(BuildContext context) {
     return Container(
         padding: const EdgeInsets.only(top: 20),
-        child: CupertinoSlidingSegmentedControl(
-            children: tabMap,
-            groupValue: slideState,
-            onValueChanged: (value) => onValueChanged(value)));
+        child: CupertinoSlidingSegmentedControl(children: tabMap, groupValue: slideState, onValueChanged: (value) => onValueChanged(value)));
   }
-
 }

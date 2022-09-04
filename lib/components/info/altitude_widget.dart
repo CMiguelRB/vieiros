@@ -31,11 +31,7 @@ class AltitudeWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(I18n.translate('info_altitude'),
-                style: TextStyle(
-                    color: lightMode
-                        ? CustomColors.subText
-                        : CustomColors.subTextDark)),
+            Text(I18n.translate('info_altitude'), style: TextStyle(color: lightMode ? CustomColors.subText : CustomColors.subTextDark)),
             Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -49,37 +45,23 @@ class AltitudeWidget extends StatelessWidget {
                     SizedBox(
                         width: width / 3,
                         child: Text(
-                          I18n.translate(isAltitudeMin
-                              ? 'info_altitude_min'
-                              : 'info_altitude_current'),
+                          I18n.translate(isAltitudeMin ? 'info_altitude_min' : 'info_altitude_current'),
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: lightMode
-                                  ? CustomColors.subText
-                                  : CustomColors.subTextDark,
-                              fontSize: 12),
+                          style: TextStyle(color: lightMode ? CustomColors.subText : CustomColors.subTextDark, fontSize: 12),
                         )),
                     SizedBox(
                         width: width / 3,
                         child: Text(
                           I18n.translate('info_altitude_top'),
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: lightMode
-                                  ? CustomColors.subText
-                                  : CustomColors.subTextDark,
-                              fontSize: 12),
+                          style: TextStyle(color: lightMode ? CustomColors.subText : CustomColors.subTextDark, fontSize: 12),
                         )),
                     SizedBox(
                         width: width / 3,
                         child: Text(
                           I18n.translate('info_altitude_gain'),
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: lightMode
-                                  ? CustomColors.subText
-                                  : CustomColors.subTextDark,
-                              fontSize: 12),
+                          style: TextStyle(color: lightMode ? CustomColors.subText : CustomColors.subTextDark, fontSize: 12),
                         )),
                   ],
                 ),
@@ -96,12 +78,8 @@ class AltitudeWidget extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.baseline,
                           textBaseline: TextBaseline.alphabetic,
                           children: [
-                            Text(altitudeCurrent,
-                                style: const TextStyle(
-                                    fontSize: 25, fontWeight: FontWeight.bold)),
-                            Text(altitudeCurrent != '-' ? altitudeUnit : '',
-                                style: const TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.bold))
+                            Text(altitudeCurrent, style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+                            Text(altitudeCurrent != '-' ? altitudeUnit : '', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold))
                           ],
                         )),
                     SizedBox(
@@ -112,12 +90,8 @@ class AltitudeWidget extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.baseline,
                           textBaseline: TextBaseline.alphabetic,
                           children: [
-                            Text(altitude,
-                                style: const TextStyle(
-                                    fontSize: 25, fontWeight: FontWeight.bold)),
-                            Text(altitude != '-' ? altitudeUnit : '',
-                                style: const TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.bold))
+                            Text(altitude, style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+                            Text(altitude != '-' ? altitudeUnit : '', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold))
                           ],
                         )),
                     SizedBox(
@@ -128,12 +102,8 @@ class AltitudeWidget extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.baseline,
                           textBaseline: TextBaseline.alphabetic,
                           children: [
-                            Text(altitudeGain,
-                                style: const TextStyle(
-                                    fontSize: 25, fontWeight: FontWeight.bold)),
-                            Text(altitudeGain != '-' ? altitudeUnit : '',
-                                style: const TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.bold))
+                            Text(altitudeGain, style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+                            Text(altitudeGain != '-' ? altitudeUnit : '', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold))
                           ],
                         ))
                   ],

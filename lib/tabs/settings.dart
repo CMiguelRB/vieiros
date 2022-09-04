@@ -51,8 +51,7 @@ class SettingsState extends State<Settings> {
       _gradientSelectedValue = Preferences().get('gradient_mode');
     }
     setState(() {
-      _voiceAlerts = Preferences().get("voice_alerts") == 'true' ||
-          Preferences().get("voice_alerts") == null;
+      _voiceAlerts = Preferences().get("voice_alerts") == 'true' || Preferences().get("voice_alerts") == null;
       for (int i = 0; i < _themes.length; i++) {
         if (_themes[i]['value'] == _themeSelectValue) {
           _themeSelectTag = _themes[i]['tag'];
@@ -72,8 +71,7 @@ class SettingsState extends State<Settings> {
   }
 
   _getLicenses() async {
-    List<dynamic> tpJSON =
-        json.decode(await rootBundle.loadString('assets/licenses.json'));
+    List<dynamic> tpJSON = json.decode(await rootBundle.loadString('assets/licenses.json'));
     setState(() {
       for (int i = 0; i < tpJSON.length; i++) {
         thirdParties.add(TPLibrary.fromJson(tpJSON[i]));
@@ -127,86 +125,56 @@ class SettingsState extends State<Settings> {
     showBottomSheet(
         enableDrag: false,
         context: context,
-        builder: (context) => StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
+        builder: (context) => StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
               return Container(
-                  color: lightMode
-                      ? CustomColors.background
-                      : CustomColors.backgroundDark,
+                  color: lightMode ? CustomColors.background : CustomColors.backgroundDark,
                   alignment: Alignment.bottomCenter,
                   height: MediaQuery.of(context).size.height,
-                  child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Container(
-                            margin: const EdgeInsets.only(
-                                top: 80, left: 24, right: 24, bottom: 20),
-                            child: Text(
-                              I18n.translate('settings_third_party_thanks'),
-                              style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
-                            )),
-                        Expanded(
-                            child: ListView.builder(
-                                scrollDirection: Axis.vertical,
-                                padding: const EdgeInsets.all(8),
-                                itemCount: thirdParties.length,
-                                shrinkWrap: true,
-                                itemBuilder: (context, index) {
-                                  return ExpansionTile(
-                                    collapsedBackgroundColor: lightMode
-                                        ? CustomColors.background
-                                        : CustomColors.backgroundDark,
-                                    backgroundColor: lightMode
-                                        ? CustomColors.background
-                                        : CustomColors.backgroundDark,
-                                    iconColor: CustomColors.accent,
-                                    textColor: lightMode
-                                        ? CustomColors.subText
-                                        : CustomColors.subTextDark,
-                                    title: Text(
-                                      thirdParties.elementAt(index).title,
-                                      style: const TextStyle(fontSize: 14),
-                                    ),
-                                    children: [
-                                      Container(
-                                          color: lightMode
-                                              ? Colors.white
-                                              : CustomColors.backgroundDark,
-                                          padding: const EdgeInsets.all(5),
-                                          child: Text(
-                                              thirdParties
-                                                  .elementAt(index)
-                                                  .license,
-                                              textAlign: TextAlign.justify,
-                                              style: const TextStyle(
-                                                  fontSize: 8,
-                                                  fontFamily: 'monospace')))
-                                    ],
-                                    onExpansionChanged: (expanded) => {
-                                      setState(() {
-                                        if (!expanded) {
-                                          thirdParties
-                                              .toList()
-                                              .elementAt(index)
-                                              .setExpanded(true);
-                                        } else {
-                                          thirdParties
-                                              .toList()
-                                              .elementAt(index)
-                                              .setExpanded(false);
-                                        }
-                                      })
-                                    },
-                                  );
-                                })),
-                        Container(
-                            margin: const EdgeInsets.all(10),
-                            child: ElevatedButton(
-                                onPressed: closeThirdParties,
-                                child: Text(I18n.translate('common_close'))))
-                      ]));
+                  child: Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, mainAxisSize: MainAxisSize.max, children: [
+                    Container(
+                        margin: const EdgeInsets.only(top: 80, left: 24, right: 24, bottom: 20),
+                        child: Text(
+                          I18n.translate('settings_third_party_thanks'),
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        )),
+                    Expanded(
+                        child: ListView.builder(
+                            scrollDirection: Axis.vertical,
+                            padding: const EdgeInsets.all(8),
+                            itemCount: thirdParties.length,
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) {
+                              return ExpansionTile(
+                                collapsedBackgroundColor: lightMode ? CustomColors.background : CustomColors.backgroundDark,
+                                backgroundColor: lightMode ? CustomColors.background : CustomColors.backgroundDark,
+                                iconColor: CustomColors.accent,
+                                textColor: lightMode ? CustomColors.subText : CustomColors.subTextDark,
+                                title: Text(
+                                  thirdParties.elementAt(index).title,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                                children: [
+                                  Container(
+                                      color: lightMode ? Colors.white : CustomColors.backgroundDark,
+                                      padding: const EdgeInsets.all(5),
+                                      child: Text(thirdParties.elementAt(index).license,
+                                          textAlign: TextAlign.justify, style: const TextStyle(fontSize: 8, fontFamily: 'monospace')))
+                                ],
+                                onExpansionChanged: (expanded) => {
+                                  setState(() {
+                                    if (!expanded) {
+                                      thirdParties.toList().elementAt(index).setExpanded(true);
+                                    } else {
+                                      thirdParties.toList().elementAt(index).setExpanded(false);
+                                    }
+                                  })
+                                },
+                              );
+                            })),
+                    Container(
+                        margin: const EdgeInsets.all(10),
+                        child: ElevatedButton(onPressed: closeThirdParties, child: Text(I18n.translate('common_close'))))
+                  ]));
             }));
   }
 
@@ -228,9 +196,7 @@ class SettingsState extends State<Settings> {
           Container(
               margin: const EdgeInsets.only(left: 20, top: 40),
               alignment: Alignment.centerLeft,
-              child: Text(I18n.translate('settings_appearance'),
-                  style: const TextStyle(
-                      fontSize: 14, color: CustomColors.accent))),
+              child: Text(I18n.translate('settings_appearance'), style: const TextStyle(fontSize: 14, color: CustomColors.accent))),
           Container(
               margin: const EdgeInsets.only(left: 15, top: 5),
               child: VieirosSelect(
@@ -246,13 +212,10 @@ class SettingsState extends State<Settings> {
           Container(
               margin: const EdgeInsets.only(left: 20, top: 30),
               alignment: Alignment.centerLeft,
-              child: Text(I18n.translate('settings_alerts'),
-                  style: const TextStyle(
-                      fontSize: 14, color: CustomColors.accent))),
+              child: Text(I18n.translate('settings_alerts'), style: const TextStyle(fontSize: 14, color: CustomColors.accent))),
           VieirosSwitch(
               lightMode: lightMode,
-              onChanged: (value, context) =>
-                  _onChangeSwitchValue(value, context, 'voice_alerts'),
+              onChanged: (value, context) => _onChangeSwitchValue(value, context, 'voice_alerts'),
               value: _voiceAlerts,
               titleTag: 'settings_voice_alerts',
               descTag: 'settings_voice_alerts_desc'),
@@ -260,15 +223,12 @@ class SettingsState extends State<Settings> {
             Container(
                 margin: const EdgeInsets.only(left: 20, top: 30),
                 alignment: Alignment.centerLeft,
-                child: Text(I18n.translate('settings_track'),
-                    style: const TextStyle(
-                        fontSize: 14, color: CustomColors.accent))),
+                child: Text(I18n.translate('settings_track'), style: const TextStyle(fontSize: 14, color: CustomColors.accent))),
             Container(
                 margin: const EdgeInsets.only(left: 15, top: 5),
                 child: VieirosSelect(
                     lightMode: lightMode,
-                    onChanged: (element) =>
-                        _onChangeGradientMode(element, context),
+                    onChanged: (element) => _onChangeGradientMode(element, context),
                     titleTag: 'settings_gradient_polyline',
                     valueTag: _gradientSelectedTag!,
                     value: _gradientSelectedValue!,
@@ -284,9 +244,7 @@ class SettingsState extends State<Settings> {
             margin: const EdgeInsets.only(bottom: 10),
           ),
           TextButton(
-              onPressed: () => _showThirdParties(lightMode),
-              child: const Text('Vieiros v1.5.0',
-                  style: TextStyle(color: CustomColors.faintedText))),
+              onPressed: () => _showThirdParties(lightMode), child: const Text('Vieiros v1.5.0', style: TextStyle(color: CustomColors.faintedText))),
           Container(
             margin: const EdgeInsets.only(bottom: 10),
           )
