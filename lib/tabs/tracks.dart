@@ -65,7 +65,13 @@ class TracksState extends State<Tracks> {
   }
 
   _loadCurrentPath() async {
-    _currentDirectory = Directory('${(await getApplicationDocumentsDirectory()).path}/tracks');
+    String? directoryPrefs = Preferences().get('current_directory');
+    if(directoryPrefs != ''){
+      _currentDirectory = Directory(directoryPrefs!);
+    }else{
+      _currentDirectory = Directory('${(await getApplicationDocumentsDirectory()).path}/tracks');
+      Preferences().set('current_directory', _currentDirectory!.path);
+    }
   }
 
   _loadFiles({bool? init, String? searchValue}) {
@@ -119,6 +125,7 @@ class TracksState extends State<Tracks> {
     return files;
   }
   _setCurrentDirectory(String path) {
+    Preferences().set('current_directory', path);
     setState(() {
       _currentDirectory = Directory(path);
     });
@@ -451,9 +458,8 @@ class TracksState extends State<Tracks> {
 
   Future<bool> navigateUp() async {
     //TODO: move files & directories
-    //TODO: mark the folder of the loaded track, if any
-    //TODO: allow multiple selection
     if (_currentDirectory!.parent.path != (await getApplicationDocumentsDirectory()).path) {
+      Preferences().set('current_directory', _currentDirectory!.parent.path);
       setState(() {
         _currentDirectory = _currentDirectory!.parent;
       });
@@ -547,6 +553,7 @@ class TracksState extends State<Tracks> {
                                           builder: (context, candidateItems, rejectedItems) {
                                             return DirectoryListElement(
                                                 trackListEntity: _files[index],
+                                                loadedTrack: widget.loadedTrack,
                                                 lightMode: lightMode,
                                                 navigate: _setCurrentDirectory,
                                                 highlighted: candidateItems.isNotEmpty,
