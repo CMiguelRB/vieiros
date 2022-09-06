@@ -47,6 +47,7 @@ class TrackInfoState extends State<TrackInfo> {
   @override
   void initState() {
     super.initState();
+    _trackList = widget.tracks;
     _pageController = PageController(initialPage: 0);
     if(_trackList.isNotEmpty){
       setTrackList(tracks: widget.tracks);
