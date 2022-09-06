@@ -28,6 +28,7 @@ void main() async {
   } on Exception {
     loadedTrack = LoadedTrack();
   }
+  Preferences().set('current_directory', '');
   runApp(MyApp(loadedTrack));
 }
 
