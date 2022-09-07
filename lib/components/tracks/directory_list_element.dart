@@ -25,7 +25,7 @@ class DirectoryListElement extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool loadedElement = loadedTrack.path!.contains(trackListEntity.path!);
+    bool loadedElement = loadedTrack.path != null ? loadedTrack.path!.contains(trackListEntity.path!) : false;
     return InkWell(
         onTap: () => navigate(trackListEntity.path!),
         key: Key(trackListEntity.path!),
