@@ -29,13 +29,13 @@ dependencies:
   path_provider: ^2.0.11
   sunrise_sunset_calc: ^3.0.0
   provider: ^6.0.3
-  flutter_tts: ^3.5.1
+  flutter_tts: ^3.5.3
   flutter_native_splash: ^2.2.8
   flutter_local_notifications: ^9.9.1
   firebase_crashlytics: ^2.8.9
   firebase_core: ^1.21.1
   location: ^4.4.0
-  share_plus: ^4.0.10+1
+  share_plus: ^4.1.0
   fl_chart: ^0.55.1
   image: ^3.2.0
   intl: ^0.17.0

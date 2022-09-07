@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:vieiros/components/tracks/bottom_sheet_actions.dart';
 import 'package:vieiros/components/tracks/directory_list_element.dart';
+import 'package:vieiros/components/tracks/move_entity_component.dart';
 import 'package:vieiros/components/tracks/track_info.dart';
 import 'package:vieiros/components/tracks/track_list_element.dart';
 import 'package:vieiros/components/vieiros_dialog.dart';
@@ -46,8 +47,10 @@ class TracksState extends State<Tracks> {
   BitmapDescriptor? _iconStart;
   BitmapDescriptor? _iconEnd;
   Directory? _currentDirectory;
+  String? _rootPath;
   List<Track> _trackList = [];
   int _currentTrackIndex = 0;
+  String _moveDestinationPath = '';
 
   @override
   void initState() {
@@ -66,12 +69,18 @@ class TracksState extends State<Tracks> {
 
   _loadCurrentPath() async {
     String? directoryPrefs = Preferences().get('current_directory');
-    if(directoryPrefs != ''){
-      _currentDirectory = Directory(directoryPrefs!);
-    }else{
-      _currentDirectory = Directory('${(await getApplicationDocumentsDirectory()).path}/tracks');
-      Preferences().set('current_directory', _currentDirectory!.path);
+    String rootPath = '${(await getApplicationDocumentsDirectory()).path}/tracks';
+    Directory? currentDirectory;
+    if (directoryPrefs != '') {
+      currentDirectory = Directory(directoryPrefs!);
+    } else {
+      currentDirectory = Directory(rootPath);
     }
+    Preferences().set('current_directory', currentDirectory.path);
+    setState(() {
+      _rootPath = rootPath;
+      _currentDirectory = currentDirectory;
+    });
   }
 
   _loadFiles({bool? init, String? searchValue}) {
@@ -81,30 +90,29 @@ class TracksState extends State<Tracks> {
     });
     Future.delayed(Duration(milliseconds: (init != null && init == true) ? 400 : 0), () {
       List<TrackListEntity> files = [];
-      getApplicationDocumentsDirectory().then((baseDir) {
-        List<FileSystemEntity> entities = _currentDirectory!.listSync();
-        for (FileSystemEntity entity in entities) {
-          bool isFile = FileSystemEntity.isFileSync(entity.path);
-          if (isFile) {
-            String gpxString = (entity as File).readAsStringSync();
-            Gpx gpx = GpxReader().fromString(gpxString);
-            if (searchValue == null ||
-                searchValue == '' ||
-                (searchValue != '' && gpx.trks.first.name!.toLowerCase().contains(searchValue.toLowerCase()))) {
-              files.add(TrackListEntity(name: gpx.trks.first.name!, path: entity.path, isFile: true));
-            }
-          } else {
-            files.add(TrackListEntity(name: entity.path.split('/')[entity.path.split('/').length - 1], path: entity.path, isFile: false));
+
+      List<FileSystemEntity> entities = _currentDirectory!.listSync();
+      for (FileSystemEntity entity in entities) {
+        bool isFile = FileSystemEntity.isFileSync(entity.path);
+        if (isFile) {
+          String gpxString = (entity as File).readAsStringSync();
+          Gpx gpx = GpxReader().fromString(gpxString);
+          if (searchValue == null ||
+              searchValue == '' ||
+              (searchValue != '' && gpx.trks.first.name!.toLowerCase().contains(searchValue.toLowerCase()))) {
+            files.add(TrackListEntity(name: gpx.trks.first.name!, path: entity.path, isFile: true));
           }
+        } else {
+          files.add(TrackListEntity(name: entity.path.split('/')[entity.path.split('/').length - 1], path: entity.path, isFile: false));
         }
-        //DO this with files, not entities
-        files = _filesSorter(files: files, searchValue: searchValue);
-        if (mounted) {
-          setState(() {
-            _files = files;
-          });
-        }
-      });
+      }
+      //DO this with files, not entities
+      files = _filesSorter(files: files, searchValue: searchValue);
+      if (mounted) {
+        setState(() {
+          _files = files;
+        });
+      }
     });
   }
 
@@ -124,6 +132,7 @@ class TracksState extends State<Tracks> {
     }
     return files;
   }
+
   _setCurrentDirectory(String path) {
     Preferences().set('current_directory', path);
     setState(() {
@@ -143,8 +152,8 @@ class TracksState extends State<Tracks> {
 
     if (result != null) {
       _addFiles(result.files, lightMode, height);
-    }else{
-      if(mounted){
+    } else {
+      if (mounted) {
         Navigator.pop(context, '');
       }
     }
@@ -190,7 +199,7 @@ class TracksState extends State<Tracks> {
     }
     setState(() {
       _trackList = tracks;
-      if(_trackInfoKey.currentState != null && _trackInfoKey.currentState!.mounted){
+      if (_trackInfoKey.currentState != null && _trackInfoKey.currentState!.mounted) {
         _trackInfoKey.currentState!.setTrackList(tracks: tracks, index: 0, fromSave: false);
       }
       //_showBottomSheet(_trackManagerContent(0, lightMode, height, true));
@@ -340,11 +349,12 @@ class TracksState extends State<Tracks> {
           "icon": Icons.save_outlined,
           "action": () => _saveFiles([_trackList[_currentTrackIndex]])
         },
-        "common_cancel": {"icon": Icons.cancel_outlined, "action": () => Navigator.pop(context)}
+        "common_cancel": {"icon": Icons.close, "action": () => Navigator.pop(context)}
       });
     } else {
       actions = {
         "common_share": {"icon": Icons.share, "action": () => _shareFile(index)},
+        "common_move": {"icon": Icons.drive_file_move_outline, "action": () => _showBottomSheet(_moveManagerContent(lightMode: lightMode, trackListEntity: _files[index]))},
         "common_delete": {"icon": Icons.delete, "action": () => _showDeleteDialog(index, true)}
       };
     }
@@ -383,6 +393,7 @@ class TracksState extends State<Tracks> {
   Widget _directoryManagerContent(int index, bool lightMode) {
     Map<String, Map<String, dynamic>> actions = {
       "common_rename": {"icon": Icons.drive_file_rename_outline, "action": () => _showRenameDirectoryModal(index, lightMode)},
+      "common_move": {"icon": Icons.drive_file_move_outline, "action": () => _showBottomSheet(_moveManagerContent(lightMode: lightMode, trackListEntity: _files[index]))},
       "common_delete": {"icon": Icons.delete, "action": () => _deleteDirectory(index)}
     };
 
@@ -394,6 +405,21 @@ class TracksState extends State<Tracks> {
           Text(I18n.translate('common_edit'), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
           BottomSheetActions(actions: actions, lightMode: lightMode)
         ]));
+  }
+
+  _moveManagerContent({required bool lightMode, required TrackListEntity trackListEntity}) {
+    Navigator.pop(context, '');
+    Map<String, Map<String, dynamic>> actions = {
+      "common_cancel": {"icon": Icons.check, "action": () => _moveFile(_moveDestinationPath, trackListEntity)},
+      "common_move": {"icon": Icons.close, "action": () => Navigator.pop(context, '')}
+    };
+    return MoveEntityComponent(actions: actions, lightMode: lightMode, setMoveDirectory: _setMoveDirectory, rootPath: _rootPath!);
+  }
+
+  _setMoveDirectory({required String directoryPath}) {
+    setState(() {
+      _moveDestinationPath = directoryPath;
+    });
   }
 
   _addDirectoryModal(bool lightMode) {
@@ -458,7 +484,7 @@ class TracksState extends State<Tracks> {
 
   Future<bool> navigateUp() async {
     //TODO: move files & directories
-    if (_currentDirectory!.parent.path != (await getApplicationDocumentsDirectory()).path) {
+    if (_currentDirectory!.parent.path != _rootPath!.substring(0,_rootPath!.length-7)) {
       Preferences().set('current_directory', _currentDirectory!.parent.path);
       setState(() {
         _currentDirectory = _currentDirectory!.parent;
