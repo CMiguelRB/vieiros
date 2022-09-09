@@ -36,16 +36,17 @@ class TrackListElement extends StatelessWidget {
               ? Shimmer.fromColors(
                   highlightColor: lightMode ? CustomColors.background : CustomColors.backgroundDark,
                   baseColor: Colors.black12,
-                  child: Column(children: [Container(
-                    height: 48,
-                    decoration: const BoxDecoration(color: CustomColors.subText, borderRadius: BorderRadius.all(Radius.circular(12))),
-                    margin: const EdgeInsets.only(bottom: 8, top:4, left: 4, right: 4),
-                  ),
+                  child: Column(children: [
+                    Container(
+                      height: 48,
+                      decoration: const BoxDecoration(color: CustomColors.subText, borderRadius: BorderRadius.all(Radius.circular(12))),
+                      margin: const EdgeInsets.only(bottom: 8, top: 4, left: 4, right: 4),
+                    ),
                     Container(
                       height: 48,
                       decoration: const BoxDecoration(color: CustomColors.subText, borderRadius: BorderRadius.all(Radius.circular(12))),
                       margin: const EdgeInsets.only(bottom: 8, left: 4, right: 4),
-                    ) ,
+                    ),
                     Container(
                       height: 48,
                       decoration: const BoxDecoration(color: CustomColors.subText, borderRadius: BorderRadius.all(Radius.circular(12))),

@@ -51,6 +51,8 @@ class TracksState extends State<Tracks> {
   List<Track> _trackList = [];
   int _currentTrackIndex = 0;
   String _moveDestinationPath = '';
+  String _sortDirection = 'asc';
+  double _backButtonWidth = 0;
 
   @override
   void initState() {
@@ -111,13 +113,18 @@ class TracksState extends State<Tracks> {
       if (mounted) {
         setState(() {
           _files = files;
+          if (_currentDirectory!.path != _rootPath) {
+            _backButtonWidth = 50;
+          } else {
+            _backButtonWidth = 0;
+          }
         });
       }
     });
   }
 
   List<TrackListEntity> _filesSorter({required List<TrackListEntity> files, String? searchValue}) {
-    files.sort((TrackListEntity a, TrackListEntity b) => a.path!.compareTo(b.path!));
+    files.sort((TrackListEntity a, TrackListEntity b) => _sortDirection == 'asc' ? a.path!.compareTo(b.path!) : b.path!.compareTo(a.path!));
     List<TrackListEntity> directories = [];
     files.removeWhere((element) {
       if (!element.isFile) {
@@ -127,10 +134,17 @@ class TracksState extends State<Tracks> {
       return false;
     });
     if (searchValue == null || searchValue == '') {
-      directories.sort((TrackListEntity a, TrackListEntity b) => a.path!.compareTo(b.path!));
+      directories.sort((TrackListEntity a, TrackListEntity b) => _sortDirection == 'asc' ? a.path!.compareTo(b.path!) : b.path!.compareTo(a.path!));
       files.insertAll(0, directories);
     }
     return files;
+  }
+
+  _setSortDirection({required String sortDirection}) {
+    setState(() {
+      _sortDirection = sortDirection;
+    });
+    _loadFiles();
   }
 
   _setCurrentDirectory(String path) {
@@ -354,7 +368,10 @@ class TracksState extends State<Tracks> {
     } else {
       actions = {
         "common_share": {"icon": Icons.share, "action": () => _shareFile(index)},
-        "common_move": {"icon": Icons.drive_file_move_outline, "action": () => _showBottomSheet(_moveManagerContent(lightMode: lightMode, trackListEntity: _files[index]))},
+        "common_move": {
+          "icon": Icons.drive_file_move_outline,
+          "action": () => _showBottomSheet(_moveManagerContent(lightMode: lightMode, trackListEntity: _files[index]))
+        },
         "common_delete": {"icon": Icons.delete, "action": () => _showDeleteDialog(index, true)}
       };
     }
@@ -393,7 +410,10 @@ class TracksState extends State<Tracks> {
   Widget _directoryManagerContent(int index, bool lightMode) {
     Map<String, Map<String, dynamic>> actions = {
       "common_rename": {"icon": Icons.drive_file_rename_outline, "action": () => _showRenameDirectoryModal(index, lightMode)},
-      "common_move": {"icon": Icons.drive_file_move_outline, "action": () => _showBottomSheet(_moveManagerContent(lightMode: lightMode, trackListEntity: _files[index]))},
+      "common_move": {
+        "icon": Icons.drive_file_move_outline,
+        "action": () => _showBottomSheet(_moveManagerContent(lightMode: lightMode, trackListEntity: _files[index]))
+      },
       "common_delete": {"icon": Icons.delete, "action": () => _deleteDirectory(index)}
     };
 
@@ -409,14 +429,23 @@ class TracksState extends State<Tracks> {
 
   _moveManagerContent({required bool lightMode, required TrackListEntity trackListEntity}) {
     Navigator.pop(context, '');
+
+    _setMoveDirectory(_rootPath!);
     Map<String, Map<String, dynamic>> actions = {
-      "common_cancel": {"icon": Icons.check, "action": () => _moveFile(_moveDestinationPath, trackListEntity)},
-      "common_move": {"icon": Icons.close, "action": () => Navigator.pop(context, '')}
+      "common_move": {"icon": Icons.check, "action": () => _moveFileAction(_moveDestinationPath, trackListEntity)},
+      "common_cancel": {"icon": Icons.close, "action": () => _cancelMove()}
     };
-    return MoveEntityComponent(actions: actions, lightMode: lightMode, setMoveDirectory: _setMoveDirectory, rootPath: _rootPath!);
+    return MoveEntityComponent(
+      actions: actions,
+      lightMode: lightMode,
+      setMoveDirectory: _setMoveDirectory,
+      rootPath: _rootPath!,
+      moveElement: trackListEntity,
+      filesSorter: _filesSorter,
+    );
   }
 
-  _setMoveDirectory({required String directoryPath}) {
+  _setMoveDirectory(String directoryPath) async {
     setState(() {
       _moveDestinationPath = directoryPath;
     });
@@ -425,7 +454,7 @@ class TracksState extends State<Tracks> {
   _addDirectoryModal(bool lightMode) {
     Navigator.of(context).pop();
     String name = '';
-    VieirosDialog().inputDialog(context, 'common_name', {'common_ok': () => _addDirectory(name), 'common_cancel': () => Navigator.pop(context, '')},
+    VieirosDialog().inputDialog(context, 'common_name', {'common_ok': () => _addDirectory(name), 'common_cancel': () => _cancelMove},
         form: Form(
             key: _formKeyAddDirectory,
             child: VieirosTextInput(
@@ -440,6 +469,20 @@ class TracksState extends State<Tracks> {
     Directory newDirectory = Directory('${_currentDirectory!.path}/$name');
     newDirectory.createSync();
     _loadFiles();
+  }
+
+  _moveFileAction(String directory, TrackListEntity trackListEntity) {
+    if (directory != '') {
+      _moveFile(directory, trackListEntity);
+      _cancelMove();
+    }
+  }
+
+  _cancelMove() {
+    Navigator.pop(context, '');
+    setState(() {
+      _moveDestinationPath = '';
+    });
   }
 
   _moveFile(String directory, TrackListEntity trackListEntity) {
@@ -483,8 +526,7 @@ class TracksState extends State<Tracks> {
   }
 
   Future<bool> navigateUp() async {
-    //TODO: move files & directories
-    if (_currentDirectory!.parent.path != _rootPath!.substring(0,_rootPath!.length-7)) {
+    if (_currentDirectory!.parent.path != _rootPath!.substring(0, _rootPath!.length - 7)) {
       Preferences().set('current_directory', _currentDirectory!.parent.path);
       setState(() {
         _currentDirectory = _currentDirectory!.parent;
@@ -529,16 +571,35 @@ class TracksState extends State<Tracks> {
               children: [
                 Container(
                     margin: const EdgeInsets.all(12),
-                    child: VieirosTextInput(
-                        lightMode: lightMode,
-                        hintText: I18n.translate('tracks_search_hint'),
-                        onChanged: (text) => _loadFiles(searchValue: text),
-                        controller: _controller,
-                        focusNode: _searchFocusNode,
-                        suffix: IconButton(
-                            icon: Icon(_controller.value.text == '' ? Icons.search : Icons.clear,
-                                color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
-                            onPressed: _controller.value.text == '' ? null : _clearValue))),
+                    child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            width: _backButtonWidth,
+                            curve: Curves.fastOutSlowIn,
+                            child: IconButton(
+                                icon: const Icon(Icons.arrow_back),
+                                enableFeedback: _currentDirectory != null && _currentDirectory!.parent.path != _rootPath,
+                                onPressed: () => navigateUp()),
+                          ),
+                          Expanded(
+                              child: VieirosTextInput(
+                                  lightMode: lightMode,
+                                  hintText: I18n.translate('tracks_search_hint'),
+                                  onChanged: (text) => _loadFiles(searchValue: text),
+                                  controller: _controller,
+                                  focusNode: _searchFocusNode,
+                                  suffix: IconButton(
+                                      icon: Icon(_controller.value.text == '' ? Icons.search : Icons.clear,
+                                          color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
+                                      onPressed: _controller.value.text == '' ? null : _clearValue))),
+                          IconButton(
+                              icon: const Icon(Icons.sort),
+                              onPressed: () => _setSortDirection(sortDirection: _sortDirection == 'asc' ? 'desc' : 'asc'))
+                        ])),
                 Expanded(
                     child: _files.isEmpty
                         ? Container(
