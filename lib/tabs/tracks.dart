@@ -90,7 +90,7 @@ class TracksState extends State<Tracks> {
       _files = [];
       _files.add(TrackListEntity(name: 'loading', path: '/loading', isFile: true));
     });
-    Future.delayed(Duration(milliseconds: (init != null && init == true) ? 400 : 0), () {
+    Future.delayed(Duration(milliseconds: (init != null && init == true) ? 400 : 200), () {
       List<TrackListEntity> files = [];
 
       List<FileSystemEntity> entities = _currentDirectory!.listSync();
@@ -108,7 +108,6 @@ class TracksState extends State<Tracks> {
           files.add(TrackListEntity(name: entity.path.split('/')[entity.path.split('/').length - 1], path: entity.path, isFile: false));
         }
       }
-      //DO this with files, not entities
       files = _filesSorter(files: files, searchValue: searchValue);
       if (mounted) {
         setState(() {

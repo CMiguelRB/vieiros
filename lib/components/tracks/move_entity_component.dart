@@ -53,7 +53,10 @@ class MoveEntityComponentState extends State<MoveEntityComponent> {
       }
     }
     moveListEntities = widget.filesSorter(files: moveListEntities);
-    //TODO: handle _hideMove cases
+    if (!widget.moveElement.isFile) {
+      String pat = Directory(widget.moveElement.path!).parent.path;
+      hideMove = directoryPath == widget.rootPath && _moveListEntities.isEmpty && widget.rootPath == pat;
+    }
     setState(() {
       _moveListEntities = moveListEntities;
       _currentDirectory = directoryPath;
@@ -112,15 +115,35 @@ class MoveEntityComponentState extends State<MoveEntityComponent> {
                     decoration: BoxDecoration(
                         color: widget.lightMode ? CustomColors.faintedFaintedAccent : CustomColors.trackBackgroundDark,
                         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8))),
-                    child: ListView.builder(
-                        scrollDirection: Axis.vertical,
-                        padding: const EdgeInsets.only(top: 4, left: 4, right: 4, bottom: 4),
-                        itemCount: _moveListEntities.length,
-                        shrinkWrap: true,
-                        itemBuilder: (itemContext, index) {
-                          return MoveListElement(
-                              lightMode: widget.lightMode, trackListEntity: _moveListEntities.elementAt(index), setMoveDirectory: _setMoveDirectory);
-                        }))),
+                    child: _hideMove
+                        ? Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                                Column(
+                                    mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                          width: MediaQuery.of(context).size.width * .8,
+                                          margin: const EdgeInsets.only(bottom: 10),
+                                          child: Text(I18n.translate('tracks_move_forbidden'), maxLines: 3, textAlign: TextAlign.center)),
+                                      const Icon(Icons.cancel_outlined, size: 80, color: Colors.black54)
+                                    ])
+                              ])
+                        : ListView.builder(
+                            scrollDirection: Axis.vertical,
+                            padding: const EdgeInsets.only(top: 4, left: 4, right: 4, bottom: 4),
+                            itemCount: _moveListEntities.length,
+                            shrinkWrap: true,
+                            itemBuilder: (itemContext, index) {
+                              return MoveListElement(
+                                  lightMode: widget.lightMode,
+                                  trackListEntity: _moveListEntities.elementAt(index),
+                                  setMoveDirectory: _setMoveDirectory);
+                            }))),
             Container(
                 margin: const EdgeInsets.only(bottom: 30), child: BottomSheetActions(actions: actions, lightMode: widget.lightMode, loading: false))
           ],
