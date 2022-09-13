@@ -126,10 +126,7 @@ class MoveEntityComponentState extends State<MoveEntityComponent> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
-                                      Container(
-                                          width: MediaQuery.of(context).size.width * .8,
-                                          margin: const EdgeInsets.only(bottom: 10),
-                                          child: Text(I18n.translate('tracks_move_forbidden'), maxLines: 3, textAlign: TextAlign.center)),
+                                      Container(width: MediaQuery.of(context).size.width*.8, margin: const EdgeInsets.only(bottom: 10), child: Text(I18n.translate('tracks_move_forbidden'), maxLines: 3,textAlign: TextAlign.center)),
                                       const Icon(Icons.cancel_outlined, size: 80, color: Colors.black54)
                                     ])
                               ])

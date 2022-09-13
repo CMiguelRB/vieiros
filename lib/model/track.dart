@@ -1,9 +1,9 @@
 import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:gpx/gpx.dart';
 import 'package:vieiros/utils/calc.dart';
 import 'package:vieiros/model/altitude_point.dart';
+import 'package:vieiros/utils/files_handler.dart';
 
 class Track {
   String? path;
@@ -27,7 +27,7 @@ class Track {
 
     try {
       final xmlFile = File(path);
-      final String gpxString = xmlFile.readAsStringSync();
+      final String gpxString = await FilesHandler().readAsStringAsync(xmlFile);
       this.gpxString = gpxString;
       gpx = GpxReader().fromString(gpxString);
       String? name = gpx!.trks[0].name;

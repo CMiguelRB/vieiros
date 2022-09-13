@@ -12,6 +12,7 @@ class TrackListElement extends StatelessWidget {
   final Function showTrackInfo;
   final Function navigate;
   final Function unloadTrack;
+  final double? elevation;
 
   const TrackListElement(
       {Key? key,
@@ -21,7 +22,9 @@ class TrackListElement extends StatelessWidget {
       required this.index,
       required this.showTrackInfo,
       required this.navigate,
-      required this.unloadTrack})
+      required this.unloadTrack,
+      this.elevation
+      })
       : super(key: key);
 
   @override
@@ -35,31 +38,31 @@ class TrackListElement extends StatelessWidget {
           child: trackListEntity.path == '/loading'
               ? Shimmer.fromColors(
                   highlightColor: lightMode ? CustomColors.background : CustomColors.backgroundDark,
-                  baseColor: Colors.black12,
+                  baseColor: lightMode ? CustomColors.faintedFaintedAccent : CustomColors.subText,
                   child: Column(children: [
                     Container(
                       height: 48,
-                      decoration: const BoxDecoration(color: CustomColors.subText, borderRadius: BorderRadius.all(Radius.circular(12))),
+                      decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(12))),
                       margin: const EdgeInsets.only(bottom: 8, top: 4, left: 4, right: 4),
                     ),
                     Container(
                       height: 48,
-                      decoration: const BoxDecoration(color: CustomColors.subText, borderRadius: BorderRadius.all(Radius.circular(12))),
+                      decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(12))),
                       margin: const EdgeInsets.only(bottom: 8, left: 4, right: 4),
                     ),
                     Container(
                       height: 48,
-                      decoration: const BoxDecoration(color: CustomColors.subText, borderRadius: BorderRadius.all(Radius.circular(12))),
+                      decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(12))),
                       margin: const EdgeInsets.only(left: 4, right: 4),
                     )
                   ]))
               : Card(
-                  elevation: 0,
+                  elevation: elevation ?? 0,
                   color: loadedElement ? (lightMode ? CustomColors.trackBackgroundLight : CustomColors.trackBackgroundDark) : Colors.black12,
                   child: Padding(
                       padding: EdgeInsets.only(left: loadedElement ? 0 : 16, right: 8),
                       child: SizedBox(
-                          width: 200,
+                          width: MediaQuery.of(context).size.width-48,
                           child: Row(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.max, children: [
                             loadedElement ? IconButton(onPressed: () => unloadTrack(index, true), icon: const Icon(Icons.landscape)) : Container(),
                             Flexible(fit: FlexFit.tight, child: Text(trackListEntity.name, maxLines: 1, overflow: TextOverflow.ellipsis)),

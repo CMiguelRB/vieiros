@@ -23,10 +23,14 @@ void main() async {
   String? theme = Preferences().get("dark_mode");
   if (theme == null) Preferences().set('dark_mode', 'system');
   LoadedTrack loadedTrack;
-  try {
-    loadedTrack = await LoadedTrack().loadTrack(path) as LoadedTrack;
-  } on Exception {
+  if(path != null && path == '/loading'){
     loadedTrack = LoadedTrack();
+  }else{
+    try {
+      loadedTrack = await LoadedTrack().loadTrack(path) as LoadedTrack;
+    } on Exception {
+      loadedTrack = LoadedTrack();
+    }
   }
   Preferences().set('current_directory', '');
   runApp(MyApp(loadedTrack));
