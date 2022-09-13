@@ -556,7 +556,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     //add namespaces
     gpxString = gpxString.replaceFirst(RegExp('creator="vieiros"'),
         'creator="vieiros" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"');
-    String? result = await FilesHandler().writeFile(gpxString, name, true);
+    String? result = await FilesHandler().writeFile(gpxString, name,'', true);
     if (result == '###file_exists') {
       if (!mounted) return;
       return VieirosNotification().showNotification(context, I18n.translate('map_save_error_file_exists'), NotificationType.error);
