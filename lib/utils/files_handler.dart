@@ -60,20 +60,6 @@ class FilesHandler {
     sendPort.send(stringFile);
   }
 
-  /*Future<String> getHash(String path) async {
-    ReceivePort receivePort = ReceivePort();
-    Isolate isolate = await Isolate.spawn(computeGetHash, [path, receivePort.sendPort]);
-    String hash = await receivePort.first;
-    isolate.kill(priority: Isolate.immediate);
-    return hash;
-  }
-
-  void computeGetHash(List<dynamic> params){
-    SendPort sendPort = params[1];
-    String hash = sha256.convert(utf8.encode(params[0])).toString();
-    sendPort.send(hash);
-  }*/
-
   FilesHandler._privateConstructor();
 
   static final FilesHandler _instance = FilesHandler._privateConstructor();

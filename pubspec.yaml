@@ -16,7 +16,6 @@ environment:
 
 dependencies:
   cupertino_icons: ^1.0.5
-  crypto: ^3.0.2
   device_info_plus: ^4.1.2
   file_picker: ^5.0.1
   firebase_core: ^1.22.0
