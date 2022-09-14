@@ -109,18 +109,18 @@ class Calc {
     double minX = 90;
     double maxY = -180;
     double minY = 180;
-    for (LatLng latLng in points) {
-      if (latLng.latitude > maxY) {
-        maxY = latLng.latitude;
+    for (int i = 0; i < points.length; i++) {
+      if (points[i].latitude > maxY) {
+        maxY = points[i].latitude;
       }
-      if (latLng.latitude < minY) {
-        minY = latLng.latitude;
+      if (points[i].latitude < minY) {
+        minY = points[i].latitude;
       }
-      if (latLng.longitude > maxX) {
-        maxX = latLng.longitude;
+      if (points[i].longitude > maxX) {
+        maxX = points[i].longitude;
       }
-      if (latLng.longitude < minX) {
-        minX = latLng.longitude;
+      if (points[i].longitude < minX) {
+        minX = points[i].longitude;
       }
     }
 

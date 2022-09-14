@@ -53,9 +53,9 @@ class HomeState extends State<Home> with TickerProviderStateMixin, WidgetsBindin
     if (!tracksFolder.existsSync()) {
       tracksFolder.createSync();
       List<FileSystemEntity> files = appFolder.listSync();
-      for (var file in files) {
-        if (FileSystemEntity.isFileSync(file.path) && file.path.endsWith('.gpx')) {
-          file.rename('${appFolder.path}/tracks/${file.path.split('/')[file.path.split('/').length - 1]}');
+      for (int i = 0; i < files.length; i++) {
+        if (FileSystemEntity.isFileSync(files[i].path) && files[i].path.endsWith('.gpx')) {
+          files[i].rename('${appFolder.path}/tracks/${files[i].path.split('/')[files[i].path.split('/').length - 1]}');
         }
       }
     }

@@ -4,6 +4,7 @@ import 'package:gpx/gpx.dart';
 import 'package:vieiros/utils/calc.dart';
 import 'package:vieiros/model/altitude_point.dart';
 import 'package:vieiros/utils/files_handler.dart';
+import 'package:vieiros/utils/preferences.dart';
 
 class Track {
   String? path;
@@ -27,11 +28,12 @@ class Track {
 
     try {
       final xmlFile = File(path);
-      final String gpxString = await FilesHandler().readAsStringAsync(xmlFile);
+      String? gpxString = await FilesHandler().readAsStringAsync(xmlFile);
       this.gpxString = gpxString;
       gpx = GpxReader().fromString(gpxString);
       String? name = gpx!.trks[0].name;
       name ??= xmlFile.path.split('/')[(xmlFile.path.split('/').length - 1)].split('.gpx')[0];
+      Preferences().set(path, name);
       this.name = name;
     } on Exception catch (exception) {
       if (kDebugMode) {

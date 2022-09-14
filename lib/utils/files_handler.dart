@@ -2,20 +2,21 @@ import 'dart:io';
 import 'dart:isolate';
 import 'package:path_provider/path_provider.dart';
 import 'package:vieiros/utils/permission_handler.dart';
+import 'package:vieiros/utils/preferences.dart';
 
 class FilesHandler {
   Future<String?> writeFile(String gpxString, String name, newPath, bool downloads) async {
     bool hasPermission = await PermissionHandler().handleWritePermission();
     if (hasPermission) {
-      String directory;
+      String path;
       if (downloads) {
-        directory = '${(await getApplicationDocumentsDirectory()).path}/tracks';
+        path = '${(await getApplicationDocumentsDirectory()).path}/tracks/${name.replaceAll(' ', '_')}.gpx';
       } else {
-        directory = newPath;
+        path = newPath;
       }
-      String path = '$directory/${name.replaceAll(' ', '_')}.gpx';
       if (!File(path).existsSync()) {
         File(path).writeAsStringSync(gpxString);
+        Preferences().set(path, name);
       } else {
         return '###file_exists';
       }
@@ -29,6 +30,7 @@ class FilesHandler {
       bool hasPermission = await PermissionHandler().handleWritePermission();
       if (hasPermission) {
         if (FileSystemEntity.isFileSync(path)) {
+          Preferences().remove(path);
           File deleteFile = File(path);
           deleteFile.delete();
         } else {
@@ -37,21 +39,6 @@ class FilesHandler {
         }
       }
     }
-  }
-
-  Future<List<FileSystemEntity>> listFiles (Directory directory) async {
-      List<FileSystemEntity> files = [];
-      ReceivePort receivePort = ReceivePort();
-      Isolate isolate = await Isolate.spawn(computeListFiles, [directory, receivePort.sendPort]);
-      files = await receivePort.first;
-      isolate.kill(priority: Isolate.immediate);
-      return files;
-  }
-
-  void computeListFiles(List<dynamic> params){
-    SendPort sendPort = params[1];
-     List<FileSystemEntity> files = params[0].listSync();
-     sendPort.send(files);
   }
 
   Future<String> readAsStringAsync(File file) async {
@@ -73,20 +60,19 @@ class FilesHandler {
     sendPort.send(stringFile);
   }
 
-  Future<bool> isFile(String path) async {
-    bool isFile = false;
+  /*Future<String> getHash(String path) async {
     ReceivePort receivePort = ReceivePort();
-    Isolate isolate = await Isolate.spawn(computeIsFile, [path, receivePort.sendPort]);
-    isFile = await receivePort.first;
+    Isolate isolate = await Isolate.spawn(computeGetHash, [path, receivePort.sendPort]);
+    String hash = await receivePort.first;
     isolate.kill(priority: Isolate.immediate);
-    return isFile;
+    return hash;
   }
 
-  void computeIsFile(List<dynamic> params){
+  void computeGetHash(List<dynamic> params){
     SendPort sendPort = params[1];
-    bool isFile = FileSystemEntity.isFileSync(params[0]);
-    sendPort.send(isFile);
-  }
+    String hash = sha256.convert(utf8.encode(params[0])).toString();
+    sendPort.send(hash);
+  }*/
 
   FilesHandler._privateConstructor();
 

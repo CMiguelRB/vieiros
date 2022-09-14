@@ -163,8 +163,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
       setState(() {
         _polyline.removeWhere((element) => element.polylineId.value.contains('loadedTrack'));
         _markers.removeWhere((element) => !element.markerId.value.contains('##'));
-        for (var element in _currentMarkers) {
-          _markers.add(element);
+        for (int i = 0; i < _currentMarkers.length; i++) {
+          _markers.add(_currentMarkers[i]);
         }
       });
     }
@@ -185,9 +185,9 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     if (widget.loadedTrack.gpx != null) {
       Gpx gpx = widget.loadedTrack.gpx!;
       List<Wpt> points = gpx.trks.first.trksegs.first.trkpts;
-      for (var element in gpx.wpts) {
-        if (element.lat == null || element.lon == null) return;
-        addMarkerSet(LatLng(element.lat!, element.lon!), true, element.name, controller);
+      for (int i = 0; i < gpx.wpts.length; i++) {
+        if (gpx.wpts[i].lat == null || gpx.wpts[i].lon == null) return;
+        addMarkerSet(LatLng(gpx.wpts[i].lat!, gpx.wpts[i].lon!), true, gpx.wpts[i].name, controller);
       }
       String? gradientPolyline = Preferences().get("gradient_mode");
       int referenceDistance = 1000;
@@ -556,7 +556,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     //add namespaces
     gpxString = gpxString.replaceFirst(RegExp('creator="vieiros"'),
         'creator="vieiros" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"');
-    String? result = await FilesHandler().writeFile(gpxString, name,'', true);
+    String? result = await FilesHandler().writeFile(gpxString, name, '', true);
     if (result == '###file_exists') {
       if (!mounted) return;
       return VieirosNotification().showNotification(context, I18n.translate('map_save_error_file_exists'), NotificationType.error);
