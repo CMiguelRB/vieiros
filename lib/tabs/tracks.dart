@@ -56,6 +56,8 @@ class TracksState extends State<Tracks> {
   String _sortDirection = 'asc';
   double _backButtonWidth = 0;
   bool _loadingFiles = true;
+  String? _searchValue;
+  bool _add = false;
 
   @override
   void initState() {
@@ -72,9 +74,6 @@ class TracksState extends State<Tracks> {
   }
 
   _loadFiles({bool? init, String? searchValue}) async {
-    if (_animatedListKey.currentState != null) {
-      _animatedListKey = GlobalKey<AnimatedListState>();
-    }
     if (_loadingFiles != true) {
       setState(() {
         _loadingFiles = true;
@@ -114,6 +113,7 @@ class TracksState extends State<Tracks> {
     files = _filesSorter(files: files, searchValue: searchValue);
     if (mounted) {
       setState(() {
+        _searchValue = searchValue;
         _files = files;
         if (rootPath != null) {
           _rootPath = rootPath;
@@ -128,11 +128,24 @@ class TracksState extends State<Tracks> {
         }
         _loadingFiles = false;
       });
-      await Future.delayed(const Duration(milliseconds: 200));
-      if (_animatedListKey.currentState != null) {
-        for (int i = 1; i < _files.length; i++) {
-          _animatedListKey.currentState!.insertItem(i, duration: const Duration(milliseconds: 250));
-        }
+      await _generateList(files);
+    }
+  }
+
+  _generateList(List<TrackListEntity> files) async {
+    setState(() {
+      _add = false;
+    });
+    if (_animatedListKey.currentState != null) {
+      _animatedListKey = GlobalKey<AnimatedListState>();
+    }
+    await Future.delayed(const Duration(milliseconds: 150));
+    if (_animatedListKey.currentState != null && _add == false) {
+      setState(() {
+        _add = true;
+      });
+      for (int i = 0; i < _files.length; i++) {
+        _animatedListKey.currentState!.insertItem(i, duration: const Duration(milliseconds: 250));
       }
     }
   }
@@ -276,8 +289,8 @@ class TracksState extends State<Tracks> {
     }
     Future.delayed(const Duration(milliseconds: 200));
     if (_animatedListKey.currentState != null) {
-      for (int i = 1; i < files.length; i++) {
-        _animatedListKey.currentState!.insertItem(0, duration: const Duration(milliseconds: 250));
+      for (int i = 0; i < files.length; i++) {
+        _animatedListKey.currentState!.insertItem(i, duration: const Duration(milliseconds: 250));
       }
     }
   }
@@ -338,6 +351,9 @@ class TracksState extends State<Tracks> {
     _controller.clear();
     _searchFocusNode!.unfocus();
     _loadFiles();
+    setState(() {
+      _searchValue = null;
+    });
   }
 
   void addFileOrDirectory(bool lightMode) {
@@ -612,6 +628,13 @@ class TracksState extends State<Tracks> {
     );
   }
 
+  _onSearchChanged(String text) async {
+    if(_searchValue == text){
+      return;
+    }
+    _loadFiles(searchValue: text);
+  }
+
   @override
   Widget build(BuildContext context) {
     bool lightMode = Provider.of<ThemeProvider>(context).isLightMode;
@@ -648,7 +671,7 @@ class TracksState extends State<Tracks> {
                               child: VieirosTextInput(
                                   lightMode: lightMode,
                                   hintText: I18n.translate('tracks_search_hint'),
-                                  onChanged: (text) => _loadFiles(searchValue: text),
+                                  onChanged: (text) => _onSearchChanged(text),
                                   controller: _controller,
                                   focusNode: _searchFocusNode,
                                   suffix: IconButton(
@@ -679,7 +702,7 @@ class TracksState extends State<Tracks> {
                                 key: _animatedListKey,
                                 scrollDirection: Axis.vertical,
                                 padding: const EdgeInsets.only(top: 8, left: 8, right: 8, bottom: 75),
-                                initialItemCount: 1,
+                                initialItemCount: 0,
                                 shrinkWrap: true,
                                 itemBuilder: (itemContext, index, animation) {
                                   return SlideTransition(
