@@ -76,7 +76,7 @@ class MoveEntityComponentState extends State<MoveEntityComponent> {
     await Future.delayed(const Duration(milliseconds: 200));
     if (_animatedListKey.currentState != null) {
       for (int i = 0; i < moveListEntities.length; i++) {
-        _animatedListKey.currentState!.insertItem(i, duration: const Duration(milliseconds: 250));
+        _animatedListKey.currentState!.insertItem(i, duration: const Duration(milliseconds: 100));
       }
     }
   }
