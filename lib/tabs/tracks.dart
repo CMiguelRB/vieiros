@@ -145,7 +145,7 @@ class TracksState extends State<Tracks> {
         _add = true;
       });
       for (int i = 0; i < _files.length; i++) {
-        _animatedListKey.currentState!.insertItem(i, duration: const Duration(milliseconds: 250));
+        _animatedListKey.currentState!.insertItem(i, duration: const Duration(milliseconds: 100));
       }
     }
   }
@@ -290,7 +290,7 @@ class TracksState extends State<Tracks> {
     Future.delayed(const Duration(milliseconds: 200));
     if (_animatedListKey.currentState != null) {
       for (int i = 0; i < files.length; i++) {
-        _animatedListKey.currentState!.insertItem(i, duration: const Duration(milliseconds: 250));
+        _animatedListKey.currentState!.insertItem(i, duration: const Duration(milliseconds: 100));
       }
     }
   }
@@ -316,7 +316,7 @@ class TracksState extends State<Tracks> {
   _removeFile(context, index) async {
     TrackListEntity file = _files.removeAt(index);
     String? current = Preferences().get('currentTrack');
-    _animatedListKey.currentState!.removeItem(index, (context, i) => Container(), duration: const Duration(milliseconds: 250));
+    _animatedListKey.currentState!.removeItem(index, (context, i) => Container(), duration: const Duration(milliseconds: 100));
     if (current == file.path) {
       await Preferences().remove('currentTrack');
     }
@@ -524,7 +524,7 @@ class TracksState extends State<Tracks> {
       _files = files;
     });
     if (_animatedListKey.currentState != null) {
-      _animatedListKey.currentState!.insertItem(0, duration: const Duration(milliseconds: 250));
+      _animatedListKey.currentState!.insertItem(0, duration: const Duration(milliseconds: 100));
     }
   }
 
