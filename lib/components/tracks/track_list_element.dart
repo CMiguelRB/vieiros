@@ -78,26 +78,32 @@ class TrackListElement extends StatelessWidget {
                   elevation: 0,
                   color: backgroundColor,
                   child: Padding(
-                      padding: EdgeInsets.only(left: loadedElement || isSelected ? 0 : 16, right: 8),
+                      padding: const EdgeInsets.only(right: 8),
                       child: SizedBox(
                           width: MediaQuery.of(context).size.width - 48,
                           child: Row(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.max, children: [
-                            AnimatedContainer(
-                                duration: const Duration(milliseconds: 250),
-                                width: selectedIconWidth,
-                                curve: Curves.fastOutSlowIn,
-                                child: isSelected ? const Icon(Icons.check_circle) : const SizedBox(width: 48,)),
-                            AnimatedContainer(
-                                duration: const Duration(milliseconds: 250),
-                                width: loadedElement && !isSelectionMode ? 48 : 0,
-                                curve: Curves.fastOutSlowIn,
-                                child: loadedElement && !isSelectionMode
-                                    ? IconButton(onPressed: () => unloadTrack(index, true), icon: const Icon(Icons.landscape))
-                                    : const SizedBox()),
-                            Expanded(child: Container(margin: EdgeInsets.only(left: loadedElement && isSelectionMode ? 15: 0), child: Text(trackListEntity.name,  maxLines: 1, overflow: TextOverflow.ellipsis))),
-                            //Todo check text animation
+                            SizedBox(width: 48, child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.min,
+                              children: [
+                              AnimatedContainer(
+                                  duration: const Duration(milliseconds: 250),
+                                  width: selectedIconWidth,
+                                  curve: Curves.fastOutSlowIn,
+                                  child: isSelected ? const Icon(Icons.check_circle) : const SizedBox()),
+                              AnimatedContainer(
+                                  duration: const Duration(milliseconds: 250),
+                                  width: loadedElement && !isSelectionMode ? 48 : 0,
+                                  curve: Curves.fastOutSlowIn,
+                                  child: loadedElement && !isSelectionMode
+                                      ? IconButton(onPressed: () => unloadTrack(index, true), icon: const Icon(Icons.landscape))
+                                      : const SizedBox()
+                              )
+
+                            ])),
+                            Expanded(child: Text(trackListEntity.name,  maxLines: 1, overflow: TextOverflow.ellipsis)),
                             //Todo move feature
-                            //Todo delete feature
+                            //Todo Save animatedListError
+                            //Todo animatedList side animation
                             AnimatedOpacity(
                                 duration: const Duration(milliseconds: 250),
                                 opacity: !isSelectionMode ? 1 : 0,

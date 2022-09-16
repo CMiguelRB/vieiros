@@ -239,6 +239,7 @@ class TracksState extends State<Tracks> {
       setState(() {
         _loadingFiles = false;
       });
+      _loadFiles();
       return;
     }
 
@@ -315,19 +316,27 @@ class TracksState extends State<Tracks> {
     }
   }
 
-  _removeFile(context, index) async {
-    TrackListEntity file = _files.removeAt(index);
-    String? current = Preferences().get('currentTrack');
-    _animatedListKey.currentState!.removeItem(index, (context, i) => Container(), duration: const Duration(milliseconds: 100));
-    if (current == file.path) {
-      await Preferences().remove('currentTrack');
+  _removeFile(context, List<int> indexList) async {
+    bool loadedRemoved = false;
+    List<TrackListEntity> files = [..._files];
+    for (var i = 0; i < indexList.length; i++) {
+      TrackListEntity file = files.removeAt(indexList[i] - i);
+      _animatedListKey.currentState!.removeItem(indexList[i] - i, (context, i) => Container(), duration: const Duration(milliseconds: 100));
+      await FilesHandler().removeFile(file.path);
+      String? current = Preferences().get('currentTrack');
+      if (current == file.path) {
+        Preferences().remove('currentTrack');
+        loadedRemoved = true;
+      }
     }
     setState(() {
-      if (current == file.path) {
+      _files = files;
+      _selectedItems.clear();
+      _selectionMode = false;
+      if (loadedRemoved) {
         widget.clearTrack();
         widget.loadedTrack.clear();
       }
-      FilesHandler().removeFile(file.path);
       Navigator.pop(context, I18n.translate("common_ok"));
     });
   }
@@ -375,7 +384,7 @@ class TracksState extends State<Tracks> {
   }
 
   _showBottomSheet(Widget content) async {
-    if(_selectionMode){
+    if (_selectionMode) {
       setState(() {
         _selectionMode = false;
         _selectedItems.clear();
@@ -424,7 +433,10 @@ class TracksState extends State<Tracks> {
           "icon": Icons.drive_file_move_outline,
           "action": () => _showBottomSheet(_moveManagerContent(lightMode: lightMode, trackListEntity: _files[index]))
         },
-        "common_delete": {"icon": Icons.delete, "action": () => _showDeleteDialog(index, true)}
+        "common_delete": {
+          "icon": Icons.delete,
+          "action": () => _showDeleteDialog([index], true)
+        }
       };
     }
 
@@ -605,7 +617,7 @@ class TracksState extends State<Tracks> {
   }
 
   _deleteDirectory(int index) {
-    _showDeleteDialog(index, false);
+    _showDeleteDialog([index], false);
   }
 
   Future<bool> navigateUp() async {
@@ -626,12 +638,23 @@ class TracksState extends State<Tracks> {
     Share.shareFiles([_files[index].path!], text: _files[index].name);
   }
 
-  _showDeleteDialog(int index, isTrack) {
-    Navigator.of(context).pop();
+  _showDeleteDialog(List<int> indexList, bool? isTrack) {
+    if (isTrack != null) {
+      Navigator.of(context).pop();
+    }
     VieirosDialog().infoDialog(
       context,
-      isTrack ? 'tracks_delete_route' : 'tracks_delete_directory',
-      {'common_ok': () => _removeFile(context, index), 'common_cancel': () => Navigator.pop(context, '')},
+      isTrack == null ? 'tracks_delete_selection' : (isTrack ? 'tracks_delete_route' : 'tracks_delete_directory'),
+      {
+        'common_ok': () => _removeFile(context, indexList),
+        'common_cancel': () => {
+              Navigator.pop(context, ''),
+              setState(() {
+                _selectionMode = false;
+                _selectedItems.clear();
+              })
+            }
+      },
       bodyTag: 'common_confirm',
     );
   }
@@ -667,78 +690,80 @@ class TracksState extends State<Tracks> {
                 child: Column(
               children: [
                 Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: 40,
-                  margin: const EdgeInsets.all(12),
-                  child:
-                Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      AnimatedContainer(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.fastOutSlowIn,
-                          width: _selectionMode ? MediaQuery.of(context).size.width - 24 : 0,
-                          child: _selectionMode ? Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.close),
-                                onPressed: () => setState(() {
-                                  _selectionMode = false;
-                                  _selectedItems.clear();
-                                }),
-                              ),
-                              Expanded(child: const SizedBox()),
-                              IconButton(
-                                icon: Icon(Icons.drive_file_move_outline, color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
-                                onPressed: () =>{},
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.delete, color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
-                                onPressed: () =>{},
-                              ),
-                            ],
-                          ): const SizedBox()),
-                      AnimatedContainer(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.fastOutSlowIn,
-                          width: !_selectionMode ? MediaQuery.of(context).size.width - 24 : 0,
-                          child: !_selectionMode
-                              ? Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                      AnimatedContainer(
-                                        duration: const Duration(milliseconds: 250),
-                                        width: _backButtonWidth,
-                                        curve: Curves.fastOutSlowIn,
-                                        child: IconButton(
-                                            icon: const Icon(Icons.arrow_back),
-                                            enableFeedback: _currentDirectory != null && _currentDirectory!.parent.path != _rootPath,
-                                            onPressed: () => navigateUp()),
-                                      ),
-                                      Expanded(
-                                          child: VieirosTextInput(
-                                              lightMode: lightMode,
-                                              hintText: I18n.translate('tracks_search_hint'),
-                                              onChanged: (text) => _onSearchChanged(text),
-                                              controller: _controller,
-                                              focusNode: _searchFocusNode,
-                                              suffix: IconButton(
-                                                  icon: Icon(_controller.value.text == '' ? Icons.search : Icons.clear,
-                                                      color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
-                                                  onPressed: _controller.value.text == '' ? null : _clearValue))),
-                                      IconButton(
-                                          icon: const Icon(Icons.sort),
-                                          onPressed: () => _setSortDirection(sortDirection: _sortDirection == 'asc' ? 'desc' : 'asc'))
-                                    ])
-                              : const SizedBox())
-                    ])),
+                    width: MediaQuery.of(context).size.width,
+                    height: 40,
+                    margin: const EdgeInsets.all(12),
+                    child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.fastOutSlowIn,
+                              width: _selectionMode ? MediaQuery.of(context).size.width - 24 : 0,
+                              child: _selectionMode
+                                  ? Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.close),
+                                          onPressed: () => setState(() {
+                                            _selectionMode = false;
+                                            _selectedItems.clear();
+                                          }),
+                                        ),
+                                        const Expanded(child: SizedBox()),
+                                        IconButton(
+                                          icon:
+                                              Icon(Icons.drive_file_move_outline, color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
+                                          onPressed: () => {},
+                                        ),
+                                        IconButton(
+                                          icon: Icon(Icons.delete, color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
+                                          onPressed: () => _showDeleteDialog(_selectedItems, null),
+                                        ),
+                                      ],
+                                    )
+                                  : const SizedBox()),
+                          AnimatedContainer(
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.fastOutSlowIn,
+                              width: !_selectionMode ? MediaQuery.of(context).size.width - 24 : 0,
+                              child: !_selectionMode
+                                  ? Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                          AnimatedContainer(
+                                            duration: const Duration(milliseconds: 250),
+                                            width: _backButtonWidth,
+                                            curve: Curves.fastOutSlowIn,
+                                            child: IconButton(
+                                                icon: const Icon(Icons.arrow_back),
+                                                enableFeedback: _currentDirectory != null && _currentDirectory!.parent.path != _rootPath,
+                                                onPressed: () => navigateUp()),
+                                          ),
+                                          Expanded(
+                                              child: VieirosTextInput(
+                                                  lightMode: lightMode,
+                                                  hintText: I18n.translate('tracks_search_hint'),
+                                                  onChanged: (text) => _onSearchChanged(text),
+                                                  controller: _controller,
+                                                  focusNode: _searchFocusNode,
+                                                  suffix: IconButton(
+                                                      icon: Icon(_controller.value.text == '' ? Icons.search : Icons.clear,
+                                                          color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
+                                                      onPressed: _controller.value.text == '' ? null : _clearValue))),
+                                          IconButton(
+                                              icon: const Icon(Icons.sort),
+                                              onPressed: () => _setSortDirection(sortDirection: _sortDirection == 'asc' ? 'desc' : 'asc'))
+                                        ])
+                                  : const SizedBox())
+                        ])),
                 Expanded(
                     child: _files.isEmpty && !_loadingFiles
                         ? Container(
