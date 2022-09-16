@@ -53,7 +53,7 @@ class DirectoryListElement extends StatelessWidget {
           color: backgroundColor,
           surfaceTintColor: Colors.transparent,
           child: Padding(
-              padding: EdgeInsets.only(left: loadedElement || isSelected ? 0 : 16, right: 8, top: 10, bottom: 10),
+              padding: const EdgeInsets.only( right: 8, top: 10, bottom: 10),
               child: Row(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.max, children: [
                 AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
@@ -68,12 +68,11 @@ class DirectoryListElement extends StatelessWidget {
                     duration: const Duration(milliseconds: 250),
                     width: isSelected ? 0 : 48,
                     curve: Curves.fastOutSlowIn,
-                    child: !isSelected ? const Icon(Icons.folder) : const SizedBox()),
+                    child: !isSelected ? const Icon(Icons.folder) : const SizedBox(width: 48,)),
                 Expanded(child: Text(trackListEntity.name, maxLines: 1, overflow: TextOverflow.ellipsis)),
-          AnimatedContainer(
+                AnimatedOpacity(
               duration: const Duration(milliseconds: 250),
-              width: !isSelectionMode ? 48 : 0,
-              curve: Curves.fastLinearToSlowEaseIn,
+              opacity: !isSelectionMode ? 1 : 0,
               child: !isSelectionMode ?IconButton(
                     alignment: Alignment.centerRight, onPressed: () => showDirectoryActions(index, lightMode), icon: const Icon(Icons.more_vert)):const SizedBox(height: 48))
               ]))),
