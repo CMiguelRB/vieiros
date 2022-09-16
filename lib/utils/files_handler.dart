@@ -25,7 +25,7 @@ class FilesHandler {
     return null;
   }
 
-  void removeFile(String? path) async {
+  Future<void> removeFile(String? path) async {
     if (path != null) {
       bool hasPermission = await PermissionHandler().handleWritePermission();
       if (hasPermission) {
