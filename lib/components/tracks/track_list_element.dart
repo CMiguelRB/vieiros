@@ -87,18 +87,20 @@ class TrackListElement extends StatelessWidget {
                                 width: selectedIconWidth,
                                 curve: Curves.fastOutSlowIn,
                                 child: isSelected ? const Icon(Icons.check_circle) : const SizedBox(width: 48,)),
-                            (AnimatedContainer(
+                            AnimatedContainer(
                                 duration: const Duration(milliseconds: 250),
                                 width: loadedElement && !isSelectionMode ? 48 : 0,
                                 curve: Curves.fastOutSlowIn,
                                 child: loadedElement && !isSelectionMode
                                     ? IconButton(onPressed: () => unloadTrack(index, true), icon: const Icon(Icons.landscape))
-                                    : const SizedBox())),
-                            Expanded(child: Container(margin: EdgeInsets.only(left: loadedElement && isSelectionMode ? 15: 0, right: isSelectionMode ? 15:0), child: Text(trackListEntity.name,  maxLines: 1, overflow: TextOverflow.ellipsis))),
-                            AnimatedContainer(
+                                    : const SizedBox()),
+                            Expanded(child: Container(margin: EdgeInsets.only(left: loadedElement && isSelectionMode ? 15: 0), child: Text(trackListEntity.name,  maxLines: 1, overflow: TextOverflow.ellipsis))),
+                            //Todo check text animation
+                            //Todo move feature
+                            //Todo delete feature
+                            AnimatedOpacity(
                                 duration: const Duration(milliseconds: 250),
-                                width: !isSelectionMode ? 48 : 0,
-                                curve: Curves.fastLinearToSlowEaseIn,
+                                opacity: !isSelectionMode ? 1 : 0,
                                 child: !isSelectionMode ? IconButton(
                                 alignment: Alignment.centerRight,
                                 onPressed: () => showTrackInfo(index, lightMode, MediaQuery.of(context).size.height),
