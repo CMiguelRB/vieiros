@@ -12,28 +12,46 @@ class TrackListElement extends StatelessWidget {
   final Function showTrackInfo;
   final Function navigate;
   final Function unloadTrack;
-  final double? elevation;
+  final Function? selectItem;
+  final bool? selectionMode;
+  final bool? selected;
 
-  const TrackListElement(
-      {Key? key,
-      required this.lightMode,
-      required this.trackListEntity,
-      required this.loadedTrack,
-      required this.index,
-      required this.showTrackInfo,
-      required this.navigate,
-      required this.unloadTrack,
-      this.elevation
-      })
-      : super(key: key);
+  const TrackListElement({
+    Key? key,
+    required this.lightMode,
+    required this.trackListEntity,
+    required this.loadedTrack,
+    required this.index,
+    required this.showTrackInfo,
+    required this.navigate,
+    required this.unloadTrack,
+    this.selectItem,
+    this.selectionMode,
+    this.selected,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     bool loadedElement = loadedTrack.path == trackListEntity.path;
+    bool isSelected = selected != null && selected!;
+    bool isSelectionMode = selectionMode != null && selectionMode!;
+    double selectedIconWidth = 0;
+    if (isSelected) {
+      selectedIconWidth = 48;
+    }
+    Color backgroundColor;
+    if(loadedElement && !isSelectionMode){
+      backgroundColor = lightMode ? CustomColors.trackBackgroundLight : CustomColors.trackBackgroundDark;
+    }else if(isSelected){
+      backgroundColor = lightMode ? CustomColors.trackBackgroundLight : CustomColors.trackBackgroundDark;
+    }else{
+      backgroundColor = Colors.black12;
+    }
     return Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => navigate(index),
+          onLongPress: () => selectItem != null ? selectItem!(index) : {},
+          onTap: () => selectionMode != null && selectionMode! ? selectItem!(index) : navigate(index),
           key: Key(trackListEntity.path!),
           child: trackListEntity.path == '/loading'
               ? Shimmer.fromColors(
@@ -57,19 +75,34 @@ class TrackListElement extends StatelessWidget {
                     )
                   ]))
               : Card(
-                  elevation: elevation ?? 0,
-                  color: loadedElement ? (lightMode ? CustomColors.trackBackgroundLight : CustomColors.trackBackgroundDark) : Colors.black12,
+                  elevation: 0,
+                  color: backgroundColor,
                   child: Padding(
-                      padding: EdgeInsets.only(left: loadedElement ? 0 : 16, right: 8),
+                      padding: EdgeInsets.only(left: loadedElement || isSelected ? 0 : 16, right: 8),
                       child: SizedBox(
-                          width: MediaQuery.of(context).size.width-48,
+                          width: MediaQuery.of(context).size.width - 48,
                           child: Row(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.max, children: [
-                            loadedElement ? IconButton(onPressed: () => unloadTrack(index, true), icon: const Icon(Icons.landscape)) : Container(),
-                            Flexible(fit: FlexFit.tight, child: Text(trackListEntity.name, maxLines: 1, overflow: TextOverflow.ellipsis)),
-                            IconButton(
+                            AnimatedContainer(
+                                duration: const Duration(milliseconds: 250),
+                                width: selectedIconWidth,
+                                curve: Curves.fastOutSlowIn,
+                                child: isSelected ? const Icon(Icons.check_circle) : const SizedBox(width: 48,)),
+                            (AnimatedContainer(
+                                duration: const Duration(milliseconds: 250),
+                                width: loadedElement && !isSelectionMode ? 48 : 0,
+                                curve: Curves.fastOutSlowIn,
+                                child: loadedElement && !isSelectionMode
+                                    ? IconButton(onPressed: () => unloadTrack(index, true), icon: const Icon(Icons.landscape))
+                                    : const SizedBox())),
+                            Expanded(child: Container(margin: EdgeInsets.only(left: loadedElement && isSelectionMode ? 15: 0, right: isSelectionMode ? 15:0), child: Text(trackListEntity.name,  maxLines: 1, overflow: TextOverflow.ellipsis))),
+                            AnimatedContainer(
+                                duration: const Duration(milliseconds: 250),
+                                width: !isSelectionMode ? 48 : 0,
+                                curve: Curves.fastLinearToSlowEaseIn,
+                                child: !isSelectionMode ? IconButton(
                                 alignment: Alignment.centerRight,
                                 onPressed: () => showTrackInfo(index, lightMode, MediaQuery.of(context).size.height),
-                                icon: const Icon(Icons.more_vert))
+                                icon: const Icon(Icons.more_vert)):const SizedBox(height: 48,))
                           ])))),
         ));
   }
