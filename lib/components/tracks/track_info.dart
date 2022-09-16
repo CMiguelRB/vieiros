@@ -302,7 +302,7 @@ class TrackInfoState extends State<TrackInfo> {
                             shape: BoxShape.circle),
                       );
                     }))
-                : Container(),
+                : const SizedBox(),
             BottomSheetActions(actions: widget.actions, lightMode: widget.lightMode, loading: _loading)
           ],
         )));

@@ -254,7 +254,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
               tabMap: _tabMap,
               onValueChanged: _slidingStateChanged,
             )
-          : Container(),
+          : const SizedBox(),
       Flexible(
           flex: 1,
           child: Column(children: [

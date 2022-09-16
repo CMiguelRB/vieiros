@@ -111,7 +111,7 @@ class MoveEntityComponentState extends State<MoveEntityComponent> {
                     width: _backButtonWidth,
                     curve: Curves.fastOutSlowIn,
                     height: 50,
-                    child: _backButtonWidth != 0 ? IconButton(icon: const Icon(Icons.arrow_back), enableFeedback: _backButtonWidth != 0, onPressed: () => _goBack()):Container()),
+                    child: _backButtonWidth != 0 ? IconButton(icon: const Icon(Icons.arrow_back), enableFeedback: _backButtonWidth != 0, onPressed: () => _goBack()):const SizedBox()),
                 Expanded(
                   child: Container(margin: EdgeInsets.symmetric(horizontal: _backButtonWidth != 0 ? 0 : 20),
                     child: Text(

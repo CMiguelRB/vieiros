@@ -58,6 +58,8 @@ class TracksState extends State<Tracks> {
   bool _loadingFiles = true;
   String? _searchValue;
   bool _add = false;
+  final List<int> _selectedItems = [];
+  bool _selectionMode = false;
 
   @override
   void initState() {
@@ -122,7 +124,7 @@ class TracksState extends State<Tracks> {
           _currentDirectory = currentDirectory;
         }
         if (_currentDirectory!.path != _rootPath) {
-          _backButtonWidth = 50;
+          _backButtonWidth = 40;
         } else {
           _backButtonWidth = 0;
         }
@@ -373,6 +375,12 @@ class TracksState extends State<Tracks> {
   }
 
   _showBottomSheet(Widget content) async {
+    if(_selectionMode){
+      setState(() {
+        _selectionMode = false;
+        _selectedItems.clear();
+      });
+    }
     showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -629,10 +637,17 @@ class TracksState extends State<Tracks> {
   }
 
   _onSearchChanged(String text) async {
-    if(_searchValue == text){
+    if (_searchValue == text) {
       return;
     }
     _loadFiles(searchValue: text);
+  }
+
+  _selectItem(int index) {
+    setState(() {
+      _selectedItems.contains(index) ? _selectedItems.remove(index) : _selectedItems.add(index);
+      _selectionMode = true;
+    });
   }
 
   @override
@@ -652,36 +667,78 @@ class TracksState extends State<Tracks> {
                 child: Column(
               children: [
                 Container(
-                    margin: const EdgeInsets.all(12),
-                    child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            width: _backButtonWidth,
-                            curve: Curves.fastOutSlowIn,
-                            child: IconButton(
-                                icon: const Icon(Icons.arrow_back),
-                                enableFeedback: _currentDirectory != null && _currentDirectory!.parent.path != _rootPath,
-                                onPressed: () => navigateUp()),
-                          ),
-                          Expanded(
-                              child: VieirosTextInput(
-                                  lightMode: lightMode,
-                                  hintText: I18n.translate('tracks_search_hint'),
-                                  onChanged: (text) => _onSearchChanged(text),
-                                  controller: _controller,
-                                  focusNode: _searchFocusNode,
-                                  suffix: IconButton(
-                                      icon: Icon(_controller.value.text == '' ? Icons.search : Icons.clear,
-                                          color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
-                                      onPressed: _controller.value.text == '' ? null : _clearValue))),
-                          IconButton(
-                              icon: const Icon(Icons.sort),
-                              onPressed: () => _setSortDirection(sortDirection: _sortDirection == 'asc' ? 'desc' : 'asc'))
-                        ])),
+                  width: MediaQuery.of(context).size.width,
+                  height: 40,
+                  margin: const EdgeInsets.all(12),
+                  child:
+                Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      AnimatedContainer(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.fastOutSlowIn,
+                          width: _selectionMode ? MediaQuery.of(context).size.width - 24 : 0,
+                          child: _selectionMode ? Row(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.close),
+                                onPressed: () => setState(() {
+                                  _selectionMode = false;
+                                  _selectedItems.clear();
+                                }),
+                              ),
+                              Expanded(child: const SizedBox()),
+                              IconButton(
+                                icon: Icon(Icons.drive_file_move_outline, color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
+                                onPressed: () =>{},
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete, color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
+                                onPressed: () =>{},
+                              ),
+                            ],
+                          ): const SizedBox()),
+                      AnimatedContainer(
+                          duration: const Duration(milliseconds: 250),
+                          curve: Curves.fastOutSlowIn,
+                          width: !_selectionMode ? MediaQuery.of(context).size.width - 24 : 0,
+                          child: !_selectionMode
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                      AnimatedContainer(
+                                        duration: const Duration(milliseconds: 250),
+                                        width: _backButtonWidth,
+                                        curve: Curves.fastOutSlowIn,
+                                        child: IconButton(
+                                            icon: const Icon(Icons.arrow_back),
+                                            enableFeedback: _currentDirectory != null && _currentDirectory!.parent.path != _rootPath,
+                                            onPressed: () => navigateUp()),
+                                      ),
+                                      Expanded(
+                                          child: VieirosTextInput(
+                                              lightMode: lightMode,
+                                              hintText: I18n.translate('tracks_search_hint'),
+                                              onChanged: (text) => _onSearchChanged(text),
+                                              controller: _controller,
+                                              focusNode: _searchFocusNode,
+                                              suffix: IconButton(
+                                                  icon: Icon(_controller.value.text == '' ? Icons.search : Icons.clear,
+                                                      color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
+                                                  onPressed: _controller.value.text == '' ? null : _clearValue))),
+                                      IconButton(
+                                          icon: const Icon(Icons.sort),
+                                          onPressed: () => _setSortDirection(sortDirection: _sortDirection == 'asc' ? 'desc' : 'asc'))
+                                    ])
+                              : const SizedBox())
+                    ])),
                 Expanded(
                     child: _files.isEmpty && !_loadingFiles
                         ? Container(
@@ -696,8 +753,7 @@ class TracksState extends State<Tracks> {
                                 index: 0,
                                 navigate: _navigate,
                                 showTrackInfo: _showTrackInfo,
-                                unloadTrack: _unloadTrack,
-                              )
+                                unloadTrack: _unloadTrack)
                             : AnimatedList(
                                 key: _animatedListKey,
                                 scrollDirection: Axis.vertical,
@@ -706,45 +762,31 @@ class TracksState extends State<Tracks> {
                                 shrinkWrap: true,
                                 itemBuilder: (itemContext, index, animation) {
                                   return SlideTransition(
-                                      position: animation.drive(Tween(begin: const Offset(0, 1), end: const Offset(0, 0))),
-                                      child: LongPressDraggable<TrackListEntity>(
-                                          data: _files[index],
-                                          feedback: TrackListElement(
-                                            elevation: 2,
+                                    position: animation.drive(Tween(begin: const Offset(0, 1), end: const Offset(0, 0))),
+                                    child: _files[index].isFile
+                                        ? TrackListElement(
                                             lightMode: lightMode,
                                             loadedTrack: widget.loadedTrack,
                                             trackListEntity: _files[index],
                                             index: index,
                                             navigate: _navigate,
+                                            selectItem: _selectItem,
+                                            selectionMode: _selectionMode,
+                                            selected: _selectedItems.contains(index),
                                             showTrackInfo: _showTrackInfo,
                                             unloadTrack: _unloadTrack,
-                                          ),
-                                          dragAnchorStrategy: childDragAnchorStrategy,
-                                          child: _files[index].isFile
-                                              ? TrackListElement(
-                                                  lightMode: lightMode,
-                                                  loadedTrack: widget.loadedTrack,
-                                                  trackListEntity: _files[index],
-                                                  index: index,
-                                                  navigate: _navigate,
-                                                  showTrackInfo: _showTrackInfo,
-                                                  unloadTrack: _unloadTrack,
-                                                )
-                                              : DragTarget<TrackListEntity>(
-                                                  builder: (context, candidateItems, rejectedItems) {
-                                                    return DirectoryListElement(
-                                                        trackListEntity: _files[index],
-                                                        loadedTrack: widget.loadedTrack,
-                                                        lightMode: lightMode,
-                                                        navigate: _setCurrentDirectory,
-                                                        highlighted: candidateItems.isNotEmpty,
-                                                        index: index,
-                                                        showDirectoryActions: _showDirectoryActions);
-                                                  },
-                                                  onAccept: (file) {
-                                                    _moveFile(_files[index].path!, file);
-                                                  },
-                                                )));
+                                          )
+                                        : DirectoryListElement(
+                                            trackListEntity: _files[index],
+                                            loadedTrack: widget.loadedTrack,
+                                            lightMode: lightMode,
+                                            navigate: _setCurrentDirectory,
+                                            index: index,
+                                            selectItem: _selectItem,
+                                            selectionMode: _selectionMode,
+                                            selected: _selectedItems.contains(index),
+                                            showDirectoryActions: _showDirectoryActions),
+                                  );
                                 }))
               ],
             ))));
