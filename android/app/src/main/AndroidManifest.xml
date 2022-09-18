@@ -1,10 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.rabocorp.vieiros">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="32"
+        tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <queries>
         <intent>
@@ -23,7 +25,7 @@
        android:allowBackup="true"
        android:fullBackupContent="true"
        android:localeConfig="@xml/locales_config"
-       tools:targetApi="donut">
+       tools:targetApi="tiramisu">
        <meta-data
            android:name="com.google.android.geo.API_KEY"
            android:value="***REMOVED***" />
@@ -36,7 +38,7 @@
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
-            tools:targetApi="honeycomb">
+            >
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues
@@ -48,28 +50,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND"/>
-                <action android:name="android.intent.action.SEND_MULTIPLE"/>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="file"/>
-                <data android:scheme="content"/>
-                <data android:scheme="http"/>
-                <data android:scheme="https"/>
-                <data android:mimeType="*/*"/>
-                <data android:host="*" android:pathPattern=".*\\.gpx" android:scheme="file"/>
-                <data android:host="*" android:pathPattern=".*\\..*\\.gpx" android:scheme="file"/>
-                <data android:host="*" android:pathPattern=".*\\..*\\..*\\.gpx" android:scheme="file"/>
-                <data android:host="*" android:pathPattern=".*\\..*\\..*\\..*\\.gpx" android:scheme="file"/>
-                <data android:host="*" android:pathPattern=".*\\..*\\..*\\..*\\..*\\.gpx" android:scheme="file"/>
-                <data android:host="*" android:pathPattern=".*\\.GPX" android:scheme="file"/>
-                <data android:host="*" android:pathPattern=".*\\..*\\.GPX" android:scheme="file"/>
-                <data android:host="*" android:pathPattern=".*\\..*\\..*\\.GPX" android:scheme="file"/>
-                <data android:host="*" android:pathPattern=".*\\..*\\..*\\..*\\.GPX" android:scheme="file"/>
-                <data android:host="*" android:pathPattern=".*\\..*\\..*\\..*\\..*\\.GPX" android:scheme="file"/>
             </intent-filter>
         </activity>
        <activity android:name="Vieiros"

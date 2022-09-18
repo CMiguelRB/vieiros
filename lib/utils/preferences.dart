@@ -30,6 +30,10 @@ class Preferences {
     return preferences[key];
   }
 
+  List<MapEntry<String, dynamic>> getAll(){
+    return preferences.entries.toList();
+  }
+
   Future<void> remove(String key) async {
     preferences.remove(key);
     final file = File('${(await getApplicationDocumentsDirectory()).path}/$_fileName.json');

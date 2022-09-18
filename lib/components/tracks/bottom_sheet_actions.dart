@@ -15,14 +15,22 @@ class BottomSheetActions extends StatelessWidget {
     actions.forEach((key, value) {
       Function? action;
       Icon? icon;
+      bool? disabled;
 
       value.forEach((key, value) {
-        if (key == 'action') {
-          action = value;
-        } else {
-          icon = Icon(value);
+        switch(key){
+          case 'action':
+            action = value;
+            break;
+          case 'icon':
+            icon = Icon(value);
+            break;
+          case 'disabled':
+            disabled = value;
         }
       });
+
+      Color color = disabled != null && disabled == true ? (lightMode ? CustomColors.faintedText : CustomColors.subText) :(lightMode ? CustomColors.subText : CustomColors.subTextDark);
 
       actionWidgets.add(Container(
           margin: const EdgeInsets.symmetric(vertical: 10),
@@ -31,15 +39,16 @@ class BottomSheetActions extends StatelessWidget {
             IconButton(
               icon: icon!,
               disabledColor: Colors.black26,
-              color: lightMode ? CustomColors.subText : CustomColors.subTextDark,
+              color: color,
               onPressed: loading == null || loading == false ? () => action!() : null,
+              enableFeedback: disabled != null && disabled == true,
               style: IconButton.styleFrom(
-                side: BorderSide(color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
+                side: BorderSide(color: color),
               ),
             ),
             Container(
                 margin: const EdgeInsets.only(top: 8),
-                child: Text(I18n.translate(key), style: TextStyle(color: lightMode ? CustomColors.subText : CustomColors.subTextDark, fontSize: 12)))
+                child: Text(I18n.translate(key), style: TextStyle(color: color, fontSize: 12)))
           ])));
     });
     return Center(
