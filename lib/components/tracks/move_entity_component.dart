@@ -13,7 +13,7 @@ class MoveEntityComponent extends StatefulWidget {
   final Function setMoveDirectory;
   final String rootPath;
   final Function filesSorter;
-  final TrackListEntity moveElement;
+  final List<TrackListEntity> moveElement;
 
   const MoveEntityComponent(
       {Key? key,
@@ -35,6 +35,7 @@ class MoveEntityComponentState extends State<MoveEntityComponent> {
   String _currentDirectory = '';
   bool _hideMove = false;
   double _backButtonWidth = 0;
+  Offset _animationOffset = const Offset(1, 0);
 
   @override
   void initState() {
@@ -55,20 +56,24 @@ class MoveEntityComponentState extends State<MoveEntityComponent> {
           name: fileSystemEntities[i].path.split('/')[fileSystemEntities[i].path.split('/').length - 1],
           path: fileSystemEntities[i].path,
           isFile: false);
-      if (!widget.moveElement.path!.contains(directoryPath) || widget.moveElement.path! != trackListEntity.path) {
-        moveListEntities.add(trackListEntity);
-      }
+      moveListEntities.add(trackListEntity);
     }
     moveListEntities = widget.filesSorter(files: moveListEntities);
-    if (!widget.moveElement.isFile) {
-      String pat = Directory(widget.moveElement.path!).parent.path;
-      hideMove = directoryPath == widget.rootPath && _moveListEntities.isEmpty && widget.rootPath == pat;
+    for(int i = 0;i<widget.moveElement.length;i++){
+      if (!widget.moveElement[i].isFile) {
+        String pat = Directory(widget.moveElement[i].path!).parent.path;
+        hideMove = directoryPath == widget.rootPath && _moveListEntities.isEmpty && widget.rootPath == pat;
+        if(hideMove == true){
+          break;
+        }
+      }
     }
     setState(() {
       _moveListEntities = moveListEntities;
       _currentDirectory = directoryPath;
       _hideMove = hideMove;
       _backButtonWidth = directoryPath != widget.rootPath ? 50 : 0;
+      _animationOffset = const Offset(1, 0);
     });
     if (callParent == true) {
       widget.setMoveDirectory(directoryPath);
@@ -84,13 +89,20 @@ class MoveEntityComponentState extends State<MoveEntityComponent> {
   _goBack() {
     Directory directory = Directory(_currentDirectory);
     _setMoveDirectory(directory.parent.path, true);
+    setState(() {
+      _animationOffset = const Offset(-1, 0);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     Map<String, Map<String, dynamic>> actions = {...widget.actions};
     if (_hideMove) {
-      actions.removeWhere((key, value) => key == 'common_move');
+      actions.forEach((key, value) {
+        if(key == 'common_move'){
+          value.addEntries([const MapEntry("disabled", true)]);
+        }
+      });
     }
     return Container(
         height: MediaQuery.of(context).size.height * .9,
@@ -126,25 +138,7 @@ class MoveEntityComponentState extends State<MoveEntityComponent> {
                     decoration: BoxDecoration(
                         color: widget.lightMode ? CustomColors.faintedFaintedAccent : CustomColors.trackBackgroundDark,
                         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8))),
-                    child: _hideMove
-                        ? Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                                Column(
-                                    mainAxisSize: MainAxisSize.max,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                          width: MediaQuery.of(context).size.width * .8,
-                                          margin: const EdgeInsets.only(bottom: 10),
-                                          child: Text(I18n.translate('tracks_move_forbidden'), maxLines: 3, textAlign: TextAlign.center)),
-                                      const Icon(Icons.cancel_outlined, size: 80, color: Colors.black54)
-                                    ])
-                              ])
-                        : AnimatedList(
+                    child: AnimatedList(
                             key: _animatedListKey,
                             scrollDirection: Axis.vertical,
                             padding: const EdgeInsets.only(top: 4, left: 4, right: 4, bottom: 4),
@@ -152,7 +146,7 @@ class MoveEntityComponentState extends State<MoveEntityComponent> {
                             shrinkWrap: true,
                             itemBuilder: (itemContext, index, animation) {
                               return SlideTransition(
-                                  position: animation.drive(Tween(begin: const Offset(0, 1), end: const Offset(0, 0))), child: MoveListElement(
+                                  position: animation.drive(Tween(begin: _animationOffset, end: const Offset(0, 0))), child: MoveListElement(
                                   lightMode: widget.lightMode,
                                   trackListEntity: _moveListEntities.elementAt(index),
                                   setMoveDirectory: _setMoveDirectory));

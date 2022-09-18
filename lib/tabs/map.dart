@@ -85,7 +85,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   _initializeNotifications() async {
     AndroidInitializationSettings initializationSettingsAndroid = const AndroidInitializationSettings('ic_stat_name');
     final InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
-    await _flutterLocalNotificationsPlugin.initialize(initializationSettings, onSelectNotification: (payload) => {});
+    await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
   getLocation() async {

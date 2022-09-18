@@ -101,9 +101,6 @@ class TrackListElement extends StatelessWidget {
 
                             ])),
                             Expanded(child: Text(trackListEntity.name,  maxLines: 1, overflow: TextOverflow.ellipsis)),
-                            //Todo move feature
-                            //Todo Save animatedListError
-                            //Todo animatedList side animation
                             AnimatedOpacity(
                                 duration: const Duration(milliseconds: 250),
                                 opacity: !isSelectionMode ? 1 : 0,

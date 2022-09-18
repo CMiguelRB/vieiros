@@ -60,6 +60,7 @@ class TracksState extends State<Tracks> {
   bool _add = false;
   final List<int> _selectedItems = [];
   bool _selectionMode = false;
+  Offset _trackListOffset = const Offset(1, 0);
 
   @override
   void initState() {
@@ -146,7 +147,7 @@ class TracksState extends State<Tracks> {
       setState(() {
         _add = true;
       });
-      for (int i = 0; i < _files.length; i++) {
+      for (int i = 0; i < files.length; i++) {
         _animatedListKey.currentState!.insertItem(i, duration: const Duration(milliseconds: 100));
       }
     }
@@ -185,6 +186,7 @@ class TracksState extends State<Tracks> {
     Preferences().set('current_directory', path);
     setState(() {
       _currentDirectory = Directory(path);
+      _trackListOffset = const Offset(1, 0);
     });
     _loadFiles(init: false);
   }
@@ -255,8 +257,11 @@ class TracksState extends State<Tracks> {
   }
 
   void _saveFiles(List<Track> tracks) async {
+    if (_animatedListKey.currentState != null) {
+
+    }
     String directory = _currentDirectory!.path;
-    List<TrackListEntity> files = _files;
+    List<TrackListEntity> files = [..._files];
     List<Track> trackList = _trackList;
     for (int i = 0; i < tracks.length; i++) {
       String newPath = '$directory/${tracks[i].name.replaceAll(' ', '_')}.gpx';
@@ -290,15 +295,11 @@ class TracksState extends State<Tracks> {
       Navigator.pop(context);
       _currentTrackIndex = 0;
     }
-    Future.delayed(const Duration(milliseconds: 200));
-    if (_animatedListKey.currentState != null) {
-      for (int i = 0; i < files.length; i++) {
-        _animatedListKey.currentState!.insertItem(i, duration: const Duration(milliseconds: 100));
-      }
-    }
+    await _generateList(files);
   }
 
   _unloadTrack(int index, bool showNotification) async {
+    //Todo change current track when moving
     String? current = Preferences().get('currentTrack');
     TrackListEntity file = _files[index];
     if (current == file.path) {
@@ -320,8 +321,9 @@ class TracksState extends State<Tracks> {
     bool loadedRemoved = false;
     List<TrackListEntity> files = [..._files];
     for (var i = 0; i < indexList.length; i++) {
-      TrackListEntity file = files.removeAt(indexList[i] - i);
-      _animatedListKey.currentState!.removeItem(indexList[i] - i, (context, i) => Container(), duration: const Duration(milliseconds: 100));
+      int fileIndex = indexList[i]-i;
+      TrackListEntity file = files.removeAt(fileIndex);
+      _animatedListKey.currentState!.removeItem(fileIndex, (context, i) => Container(), duration: const Duration(milliseconds: 100));
       await FilesHandler().removeFile(file.path);
       String? current = Preferences().get('currentTrack');
       if (current == file.path) {
@@ -337,8 +339,8 @@ class TracksState extends State<Tracks> {
         widget.clearTrack();
         widget.loadedTrack.clear();
       }
-      Navigator.pop(context, I18n.translate("common_ok"));
     });
+    Navigator.pop(context, I18n.translate("common_ok"));
   }
 
   _navigate(index) async {
@@ -431,7 +433,7 @@ class TracksState extends State<Tracks> {
         "common_share": {"icon": Icons.share, "action": () => _shareFile(index)},
         "common_move": {
           "icon": Icons.drive_file_move_outline,
-          "action": () => _showBottomSheet(_moveManagerContent(lightMode: lightMode, trackListEntity: _files[index]))
+          "action": () => _showBottomSheet(_moveManagerContent(lightMode: lightMode, trackListEntity: [_files[index]], popContext: true))
         },
         "common_delete": {
           "icon": Icons.delete,
@@ -476,7 +478,7 @@ class TracksState extends State<Tracks> {
       "common_rename": {"icon": Icons.drive_file_rename_outline, "action": () => _showRenameDirectoryModal(index, lightMode)},
       "common_move": {
         "icon": Icons.drive_file_move_outline,
-        "action": () => _showBottomSheet(_moveManagerContent(lightMode: lightMode, trackListEntity: _files[index]))
+        "action": () => _showBottomSheet(_moveManagerContent(lightMode: lightMode, trackListEntity: [_files[index]], popContext: true))
       },
       "common_delete": {"icon": Icons.delete, "action": () => _deleteDirectory(index)}
     };
@@ -495,9 +497,10 @@ class TracksState extends State<Tracks> {
             ]));
   }
 
-  _moveManagerContent({required bool lightMode, required TrackListEntity trackListEntity}) {
-    Navigator.pop(context, '');
-
+  _moveManagerContent({required bool lightMode, required List<TrackListEntity> trackListEntity, required bool popContext}) {
+    if(popContext){
+      Navigator.pop(context, '');
+    }
     _setMoveDirectory(_rootPath!);
     Map<String, Map<String, dynamic>> actions = {
       "common_move": {"icon": Icons.check, "action": () => _moveFileAction(_moveDestinationPath, trackListEntity)},
@@ -548,7 +551,7 @@ class TracksState extends State<Tracks> {
     }
   }
 
-  _moveFileAction(String directory, TrackListEntity trackListEntity) {
+  _moveFileAction(String directory, List<TrackListEntity> trackListEntity) {
     if (directory != '') {
       _moveFile(directory, trackListEntity);
       _cancelMove();
@@ -562,25 +565,25 @@ class TracksState extends State<Tracks> {
     });
   }
 
-  _moveFile(String directory, TrackListEntity trackListEntity) {
-    if (trackListEntity.isFile) {
-      String newPath = '$directory/${trackListEntity.name}.gpx';
-      File(trackListEntity.path!).renameSync(newPath);
-      Preferences().remove(trackListEntity.path!);
-      Preferences().set(newPath, trackListEntity.name);
-    } else {
-      if (directory != trackListEntity.path) {
-        Directory(trackListEntity.path!).renameSync('$directory/${trackListEntity.name}');
-      }
-    }
+  _moveFile(String directory, List<TrackListEntity> trackListEntity) {
     List<TrackListEntity> files = [..._files];
-    files.removeWhere((file) => file.path == trackListEntity.path);
-    if (_animatedListKey.currentState != null) {
-      _animatedListKey.currentState!.removeItem(0, (context, animation) => Container());
+    for(int i = 0;i<trackListEntity.length;i++){
+      if (trackListEntity[i].isFile) {
+        String newPath = '$directory/${trackListEntity[i].name}.gpx';
+        File(trackListEntity[i].path!).renameSync(newPath);
+        Preferences().remove(trackListEntity[i].path!);
+        Preferences().set(newPath, trackListEntity[i].name);
+      } else {
+        if (directory != trackListEntity[i].path) {
+          Directory(trackListEntity[i].path!).renameSync('$directory/${trackListEntity[i].name}');
+        }
+      }
+      files.removeWhere((file) => file.path == trackListEntity[i].path);
     }
     setState(() {
       _files = files;
     });
+    _generateList(files);
   }
 
   _showDirectoryActions(int index, bool lightMode) {
@@ -611,6 +614,16 @@ class TracksState extends State<Tracks> {
     List<TrackListEntity> files = [..._files];
     files[index].name = name;
     files[index].path = newPath;
+    List<MapEntry<String,dynamic>> preferences = Preferences().getAll();
+    for(int i = 0;i<preferences.length;i++){
+      if(preferences[i].key.contains(path)){
+        String pat = preferences[i].key;
+        String? name = preferences[i].value;
+        Preferences().remove(path);
+        pat = pat.replaceAll(path, newPath);
+        Preferences().set(pat, name!);
+      }
+    }
     setState(() {
       _files = files;
     });
@@ -625,6 +638,7 @@ class TracksState extends State<Tracks> {
       Preferences().set('current_directory', _currentDirectory!.parent.path);
       setState(() {
         _currentDirectory = _currentDirectory!.parent;
+        _trackListOffset = const Offset(-1, 0);
       });
       _loadFiles();
       return false;
@@ -669,8 +683,17 @@ class TracksState extends State<Tracks> {
   _selectItem(int index) {
     setState(() {
       _selectedItems.contains(index) ? _selectedItems.remove(index) : _selectedItems.add(index);
+      _selectedItems.sort();
       _selectionMode = true;
     });
+  }
+
+  _moveSelection(bool lightMode){
+    List<TrackListEntity> files = [];
+    for(int i = 0;i<_selectedItems.length;i++){
+      files.add(_files[_selectedItems[i]]);
+    }
+    _showBottomSheet(_moveManagerContent(lightMode: lightMode, trackListEntity: files, popContext: false));
   }
 
   @override
@@ -719,7 +742,7 @@ class TracksState extends State<Tracks> {
                                         IconButton(
                                           icon:
                                               Icon(Icons.drive_file_move_outline, color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
-                                          onPressed: () => {},
+                                          onPressed: () => _moveSelection(lightMode),
                                         ),
                                         IconButton(
                                           icon: Icon(Icons.delete, color: lightMode ? CustomColors.subText : CustomColors.subTextDark),
@@ -787,7 +810,7 @@ class TracksState extends State<Tracks> {
                                 shrinkWrap: true,
                                 itemBuilder: (itemContext, index, animation) {
                                   return SlideTransition(
-                                    position: animation.drive(Tween(begin: const Offset(0, 1), end: const Offset(0, 0))),
+                                    position: animation.drive(Tween(begin: _trackListOffset, end: const Offset(0, 0))),
                                     child: _files[index].isFile
                                         ? TrackListElement(
                                             lightMode: lightMode,
