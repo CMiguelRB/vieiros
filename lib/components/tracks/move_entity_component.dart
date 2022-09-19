@@ -59,11 +59,11 @@ class MoveEntityComponentState extends State<MoveEntityComponent> {
       moveListEntities.add(trackListEntity);
     }
     moveListEntities = widget.filesSorter(files: moveListEntities);
-    for(int i = 0;i<widget.moveElement.length;i++){
+    for (int i = 0; i < widget.moveElement.length; i++) {
       if (!widget.moveElement[i].isFile) {
         String pat = Directory(widget.moveElement[i].path!).parent.path;
         hideMove = directoryPath == widget.rootPath && _moveListEntities.isEmpty && widget.rootPath == pat;
-        if(hideMove == true){
+        if (hideMove == true) {
           break;
         }
       }
@@ -99,7 +99,7 @@ class MoveEntityComponentState extends State<MoveEntityComponent> {
     Map<String, Map<String, dynamic>> actions = {...widget.actions};
     if (_hideMove) {
       actions.forEach((key, value) {
-        if(key == 'common_move'){
+        if (key == 'common_move') {
           value.addEntries([const MapEntry("disabled", true)]);
         }
       });
@@ -117,20 +117,27 @@ class MoveEntityComponentState extends State<MoveEntityComponent> {
               decoration: BoxDecoration(
                   color: widget.lightMode ? CustomColors.faintedFaintedAccent : CustomColors.trackBackgroundDark,
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(8))),
-              child: Row(mainAxisSize: MainAxisSize.max, mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.center, children: [
-                AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    width: _backButtonWidth,
-                    curve: Curves.fastOutSlowIn,
-                    height: 50,
-                    child: _backButtonWidth != 0 ? IconButton(icon: const Icon(Icons.arrow_back), enableFeedback: _backButtonWidth != 0, onPressed: () => _goBack()):const SizedBox()),
-                Expanded(
-                  child: Container(margin: EdgeInsets.symmetric(horizontal: _backButtonWidth != 0 ? 0 : 20),
-                    child: Text(
-                  I18n.translate('tracks_select_move_destination'),
-                  style: const TextStyle(fontSize: 16),
-                )))
-              ]),
+              child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        width: _backButtonWidth,
+                        curve: Curves.fastOutSlowIn,
+                        height: 50,
+                        child: _backButtonWidth != 0
+                            ? IconButton(icon: const Icon(Icons.arrow_back), enableFeedback: _backButtonWidth != 0, onPressed: () => _goBack())
+                            : const SizedBox()),
+                    Expanded(
+                        child: Container(
+                            margin: EdgeInsets.symmetric(horizontal: _backButtonWidth != 0 ? 0 : 20),
+                            child: Text(
+                              I18n.translate('tracks_select_move_destination'),
+                              style: const TextStyle(fontSize: 16),
+                            )))
+                  ]),
             ),
             Expanded(
                 child: Container(
@@ -139,18 +146,19 @@ class MoveEntityComponentState extends State<MoveEntityComponent> {
                         color: widget.lightMode ? CustomColors.faintedFaintedAccent : CustomColors.trackBackgroundDark,
                         borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8))),
                     child: AnimatedList(
-                            key: _animatedListKey,
-                            scrollDirection: Axis.vertical,
-                            padding: const EdgeInsets.only(top: 4, left: 4, right: 4, bottom: 4),
-                            initialItemCount: 0,
-                            shrinkWrap: true,
-                            itemBuilder: (itemContext, index, animation) {
-                              return SlideTransition(
-                                  position: animation.drive(Tween(begin: _animationOffset, end: const Offset(0, 0))), child: MoveListElement(
+                        key: _animatedListKey,
+                        scrollDirection: Axis.vertical,
+                        padding: const EdgeInsets.only(top: 4, left: 4, right: 4, bottom: 4),
+                        initialItemCount: 0,
+                        shrinkWrap: true,
+                        itemBuilder: (itemContext, index, animation) {
+                          return SlideTransition(
+                              position: animation.drive(Tween(begin: _animationOffset, end: const Offset(0, 0))),
+                              child: MoveListElement(
                                   lightMode: widget.lightMode,
                                   trackListEntity: _moveListEntities.elementAt(index),
                                   setMoveDirectory: _setMoveDirectory));
-                            }))),
+                        }))),
             Container(
                 margin: const EdgeInsets.only(bottom: 30), child: BottomSheetActions(actions: actions, lightMode: widget.lightMode, loading: false))
           ],

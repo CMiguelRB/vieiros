@@ -9,7 +9,7 @@ publish_to: 'none'
 # A version number is three numbers separated by dots, like 1.2.43
 # followed by an optional build number separated by a +.
 # Both the version and the builder number may be overridden in flutter
-version: 1.4.6+146
+version: 1.5.0+150
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
