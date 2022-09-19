@@ -30,7 +30,7 @@ class Preferences {
     return preferences[key];
   }
 
-  List<MapEntry<String, dynamic>> getAll(){
+  List<MapEntry<String, dynamic>> getAll() {
     return preferences.entries.toList();
   }
 

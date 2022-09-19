@@ -18,7 +18,7 @@ class BottomSheetActions extends StatelessWidget {
       bool? disabled;
 
       value.forEach((key, value) {
-        switch(key){
+        switch (key) {
           case 'action':
             action = value;
             break;
@@ -30,16 +30,17 @@ class BottomSheetActions extends StatelessWidget {
         }
       });
 
-      Color color = disabled != null && disabled == true ? (lightMode ? CustomColors.faintedText : CustomColors.subText) :(lightMode ? CustomColors.subText : CustomColors.subTextDark);
+      Color color = disabled != null && disabled == true
+          ? (lightMode ? CustomColors.faintedText : CustomColors.subText)
+          : (lightMode ? CustomColors.subText : CustomColors.subTextDark);
 
       bool isDisabled = disabled != null && disabled == true;
 
       bool isLoading = loading != null && loading == true;
 
-
       actionWidgets.add(Container(
           margin: const EdgeInsets.symmetric(vertical: 10),
-          width: MediaQuery.of(context).size.width/actions.length,
+          width: MediaQuery.of(context).size.width / actions.length,
           child: Column(children: [
             IconButton(
               icon: icon!,
@@ -52,8 +53,7 @@ class BottomSheetActions extends StatelessWidget {
               ),
             ),
             Container(
-                margin: const EdgeInsets.only(top: 8, bottom: 20),
-                child: Text(I18n.translate(key), style: TextStyle(color: color, fontSize: 12)))
+                margin: const EdgeInsets.only(top: 8, bottom: 20), child: Text(I18n.translate(key), style: TextStyle(color: color, fontSize: 12)))
           ])));
     });
     return Center(

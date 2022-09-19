@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:vieiros/components/info/altitude_widget.dart';
-import 'package:vieiros/components/info/distance_widget.dart';
-import 'package:vieiros/components/info/time_widget.dart';
-import 'package:vieiros/components/shimmer.dart';
 import 'package:vieiros/components/tracks/bottom_sheet_actions.dart';
+import 'package:vieiros/components/tracks/loading_track_info.dart';
+import 'package:vieiros/components/tracks/track_info_track_altitude.dart';
+import 'package:vieiros/components/tracks/track_info_track_distance.dart';
+import 'package:vieiros/components/tracks/track_info_track_name.dart';
+import 'package:vieiros/components/tracks/track_info_track_time.dart';
 import 'package:vieiros/model/track.dart';
 import 'package:vieiros/model/track_minimap_info_data.dart';
 import 'package:vieiros/resources/custom_colors.dart';
@@ -49,11 +50,10 @@ class TrackInfoState extends State<TrackInfo> {
     super.initState();
     _trackList = widget.tracks;
     _pageController = PageController(initialPage: 0);
-    if(_trackList.isNotEmpty){
+    if (_trackList.isNotEmpty) {
       setTrackList(tracks: widget.tracks);
     }
   }
-
 
   _onIndexChange({required int value}) {
     setTrackList(tracks: _trackList, index: value);
@@ -126,8 +126,10 @@ class TrackInfoState extends State<TrackInfo> {
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height * .9;
+
     return Ink(
-        height: MediaQuery.of(context).size.height * .9,
+        height: height,
         padding: const EdgeInsets.only(top: 20, bottom: 30),
         color: widget.lightMode ? CustomColors.background : CustomColors.backgroundDark,
         child: Center(
@@ -142,150 +144,59 @@ class TrackInfoState extends State<TrackInfo> {
                     onPageChanged: (value) => _onIndexChange(value: value),
                     controller: _pageController,
                     itemBuilder: (context, index) {
-                      return Column(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.max, children: [
-                        _loading
-                            ? Shimmer.fromColors(
-                                highlightColor: widget.lightMode ? CustomColors.background : CustomColors.backgroundDark,
-                                baseColor: widget.lightMode ? CustomColors.faintedFaintedAccent : CustomColors.trackBackgroundDark,
+                      return _loading
+                          ? LoadingTrackInfo(lightMode: widget.lightMode)
+                          : Column(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.max, children: [
+                              TrackInfoTrackName(
+                                trackName: _currentTrack!.gpx!.trks.first.name.toString(),
+                                lightMode: widget.lightMode,
+                              ),
+                              Expanded(
                                 child: Container(
-                                    margin: const EdgeInsets.all(20),
-                                    height: 55,
-                                    decoration:
-                                        const BoxDecoration(color: CustomColors.background, borderRadius: BorderRadius.all(Radius.circular(16))),
+                                    margin: const EdgeInsets.symmetric(horizontal: 20),
                                     width: width,
-                                    child: const Text('')))
-                            : Container(
-                                margin: const EdgeInsets.all(20),
-                                height: 55,
-                                child: Text(
-                                  _currentTrack!.gpx!.trks.first.name.toString(),
-                                  maxLines: 2,
-                                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                                )),
-                        Expanded(
-                          child: Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 20),
-                              width: width,
-                              child: ClipRRect(
-                                  borderRadius: const BorderRadius.all(Radius.circular(12)),
-                                  child: _loading
-                                      ? Shimmer.fromColors(
-                                          baseColor: CustomColors.faintedFaintedAccent,
-                                          highlightColor: CustomColors.background,
-                                          child: Container(color: CustomColors.background))
-                                      : GoogleMap(
-                                          liteModeEnabled: true,
-                                          compassEnabled: false,
-                                          buildingsEnabled: false,
-                                          mapType: MapType.satellite,
-                                          mapToolbarEnabled: false,
-                                          myLocationButtonEnabled: false,
-                                          myLocationEnabled: false,
-                                          indoorViewEnabled: false,
-                                          zoomControlsEnabled: false,
-                                          zoomGesturesEnabled: false,
-                                          trafficEnabled: false,
-                                          scrollGesturesEnabled: false,
-                                          rotateGesturesEnabled: false,
-                                          polylines: mapInfo!.polyline,
-                                          markers: mapInfo!.markers,
-                                          initialCameraPosition: CameraPosition(
-                                            target: LatLng(mapInfo!.centerLat, mapInfo!.centerLon),
-                                            zoom: 13,
-                                          )))),
-                        ),
-                        Container(
-                            margin: const EdgeInsets.symmetric(vertical: 20),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.max,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, mainAxisSize: MainAxisSize.max, children: [
-                                  _loading
-                                      ? Shimmer.fromColors(
-                                          highlightColor: widget.lightMode ? CustomColors.background : CustomColors.backgroundDark,
-                                          baseColor: widget.lightMode ? CustomColors.faintedFaintedAccent : CustomColors.trackBackgroundDark,
-                                          child: Card(
-                                              elevation: 0,
-                                              color: widget.lightMode ? CustomColors.faintedFaintedAccent : CustomColors.trackBackgroundDark,
-                                              child: (DistanceWidget(
-                                                lightMode: widget.lightMode,
-                                                distance: '0',
-                                                distanceUnit: '',
-                                                width: width - 60,
-                                              ))))
-                                      : Card(
-                                          elevation: 0,
-                                          color: widget.lightMode ? CustomColors.faintedFaintedAccent : CustomColors.trackBackgroundDark,
-                                          child: (Container(
-                                              margin: const EdgeInsets.symmetric(vertical: 4),
-                                              child: DistanceWidget(
-                                                lightMode: widget.lightMode,
-                                                distance: (_currentTrack!.distance / 1000).toStringAsFixed(2),
-                                                distanceUnit: 'Km',
-                                                width: width - 60,
-                                              )))),
-                                  _loading
-                                      ? Shimmer.fromColors(
-                                          highlightColor: widget.lightMode ? CustomColors.background : CustomColors.backgroundDark,
-                                          baseColor: widget.lightMode ? CustomColors.faintedFaintedAccent : CustomColors.trackBackgroundDark,
-                                          child: Card(
-                                              elevation: 0,
-                                              color: widget.lightMode ? CustomColors.faintedFaintedAccent : CustomColors.trackBackgroundDark,
-                                              child: (TimeWidget(
-                                                lightMode: widget.lightMode,
-                                                slideState: 0,
-                                                isRecording: false,
-                                                totalTime: '',
-                                                initDatetime: null,
-                                                width: width - 60,
-                                              ))))
-                                      : Card(
-                                          elevation: 0,
-                                          color: widget.lightMode ? CustomColors.faintedFaintedAccent : CustomColors.trackBackgroundDark,
-                                          child: (Container(
-                                              margin: const EdgeInsets.symmetric(vertical: 4),
-                                              child: TimeWidget(
-                                                lightMode: widget.lightMode,
-                                                slideState: 0,
-                                                isRecording: false,
-                                                totalTime: _totalTime,
-                                                initDatetime: _initTime,
-                                                width: width - 60,
-                                              ))))
-                                ]),
-                                _loading
-                                    ? Shimmer.fromColors(
-                                        highlightColor: widget.lightMode ? CustomColors.background : CustomColors.backgroundDark,
-                                        baseColor: widget.lightMode ? CustomColors.faintedFaintedAccent : CustomColors.trackBackgroundDark,
-                                        child: Card(
-                                            elevation: 0,
-                                            color: widget.lightMode ? CustomColors.faintedFaintedAccent : CustomColors.trackBackgroundDark,
-                                            child: AltitudeWidget(
-                                                lightMode: widget.lightMode,
-                                                altitudeUnit: '',
-                                                altitude: '',
-                                                altitudeGain: '',
-                                                altitudeCurrent: '',
-                                                width: width - 40,
-                                                isAltitudeMin: true)))
-                                    : Card(
-                                        elevation: 0,
-                                        color: widget.lightMode ? CustomColors.faintedFaintedAccent : CustomColors.trackBackgroundDark,
-                                        child: (Container(
-                                            margin: const EdgeInsets.symmetric(vertical: 4),
-                                            child: AltitudeWidget(
-                                                lightMode: widget.lightMode,
-                                                altitudeUnit: 'm',
-                                                altitude: _currentTrack!.altitudeTop.toString(),
-                                                altitudeGain: _currentTrack!.altitudeGain.toString(),
-                                                altitudeCurrent: _currentTrack!.altitudeMin.toString(),
-                                                width: width - 40,
-                                                isAltitudeMin: true))))
-                              ],
-                            ))
-                      ]);
+                                    child: ClipRRect(
+                                        borderRadius: const BorderRadius.all(Radius.circular(12)),
+                                        child: GoogleMap(
+                                            liteModeEnabled: true,
+                                            compassEnabled: false,
+                                            buildingsEnabled: false,
+                                            mapType: MapType.satellite,
+                                            mapToolbarEnabled: false,
+                                            myLocationButtonEnabled: false,
+                                            myLocationEnabled: false,
+                                            indoorViewEnabled: false,
+                                            zoomControlsEnabled: false,
+                                            zoomGesturesEnabled: false,
+                                            trafficEnabled: false,
+                                            scrollGesturesEnabled: false,
+                                            rotateGesturesEnabled: false,
+                                            polylines: mapInfo!.polyline,
+                                            markers: mapInfo!.markers,
+                                            initialCameraPosition: CameraPosition(
+                                              target: LatLng(mapInfo!.centerLat, mapInfo!.centerLon),
+                                              zoom: 13,
+                                            )))),
+                              ),
+                              Container(
+                                  margin: const EdgeInsets.symmetric(vertical: 20),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.max,
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, mainAxisSize: MainAxisSize.max, children: [
+                                        TrackInfoTrackDistance(lightMode: widget.lightMode, distance: _currentTrack!.distance),
+                                        TrackInfoTrackTime(lightMode: widget.lightMode, totalTime: _totalTime, initTime: _initTime)
+                                      ]),
+                                      TrackInfoTrackAltitude(
+                                          lightMode: widget.lightMode,
+                                          altitudeTop: _currentTrack!.altitudeTop.toString(),
+                                          altitudeGain: _currentTrack!.altitudeGain.toString(),
+                                          altitudeMin: _currentTrack!.altitudeMin.toString())
+                                    ],
+                                  ))
+                            ]);
                     })),
             _trackList.length > 1
                 ? Row(

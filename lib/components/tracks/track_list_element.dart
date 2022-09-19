@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vieiros/components/shimmer.dart';
 import 'package:vieiros/model/loaded_track.dart';
 import 'package:vieiros/model/track_list_entity.dart';
 import 'package:vieiros/resources/custom_colors.dart';
@@ -40,11 +39,11 @@ class TrackListElement extends StatelessWidget {
       selectedIconWidth = 48;
     }
     Color backgroundColor;
-    if(loadedElement && !isSelectionMode){
+    if (loadedElement && !isSelectionMode) {
       backgroundColor = lightMode ? CustomColors.trackBackgroundLight : CustomColors.trackBackgroundDark;
-    }else if(isSelected){
+    } else if (isSelected) {
       backgroundColor = lightMode ? CustomColors.trackBackgroundLight : CustomColors.trackBackgroundDark;
-    }else{
+    } else {
       backgroundColor = Colors.black12;
     }
     return Material(
@@ -53,38 +52,17 @@ class TrackListElement extends StatelessWidget {
           onLongPress: () => selectItem != null ? selectItem!(index) : {},
           onTap: () => selectionMode != null && selectionMode! ? selectItem!(index) : navigate(index),
           key: Key(trackListEntity.path!),
-          child: trackListEntity.path == '/loading'
-              ? Shimmer.fromColors(
-                  highlightColor: lightMode ? CustomColors.background : CustomColors.backgroundDark,
-                  baseColor: lightMode ? CustomColors.faintedFaintedAccent : CustomColors.subText,
-                  child: Column(children: [
-                    Container(
-                      height: 48,
-                      decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(12))),
-                      margin: const EdgeInsets.only(bottom: 8, top: 4, left: 4, right: 4),
-                    ),
-                    Container(
-                      height: 48,
-                      decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(12))),
-                      margin: const EdgeInsets.only(bottom: 8, left: 4, right: 4),
-                    ),
-                    Container(
-                      height: 48,
-                      decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.all(Radius.circular(12))),
-                      margin: const EdgeInsets.only(left: 4, right: 4),
-                    )
-                  ]))
-              : Card(
-                  elevation: 0,
-                  color: backgroundColor,
-                  child: Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: SizedBox(
-                          width: MediaQuery.of(context).size.width - 48,
-                          child: Row(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.max, children: [
-                            SizedBox(width: 48, child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.min,
-                              children: [
+          child: Card(
+              elevation: 0,
+              color: backgroundColor,
+              child: Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: SizedBox(
+                      width: MediaQuery.of(context).size.width - 48,
+                      child: Row(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.max, children: [
+                        SizedBox(
+                            width: 48,
+                            child: Row(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [
                               AnimatedContainer(
                                   duration: const Duration(milliseconds: 250),
                                   width: selectedIconWidth,
@@ -96,19 +74,21 @@ class TrackListElement extends StatelessWidget {
                                   curve: Curves.fastOutSlowIn,
                                   child: loadedElement && !isSelectionMode
                                       ? IconButton(onPressed: () => unloadTrack(index, true), icon: const Icon(Icons.landscape))
-                                      : const SizedBox()
-                              )
-
+                                      : const SizedBox())
                             ])),
-                            Expanded(child: Text(trackListEntity.name,  maxLines: 1, overflow: TextOverflow.ellipsis)),
-                            AnimatedOpacity(
-                                duration: const Duration(milliseconds: 250),
-                                opacity: !isSelectionMode ? 1 : 0,
-                                child: !isSelectionMode ? IconButton(
-                                alignment: Alignment.centerRight,
-                                onPressed: () => showTrackInfo(index, lightMode, MediaQuery.of(context).size.height),
-                                icon: const Icon(Icons.more_vert)):const SizedBox(height: 48,))
-                          ])))),
+                        Expanded(child: Text(trackListEntity.name, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                        AnimatedOpacity(
+                            duration: const Duration(milliseconds: 250),
+                            opacity: !isSelectionMode ? 1 : 0,
+                            child: !isSelectionMode
+                                ? IconButton(
+                                    alignment: Alignment.centerRight,
+                                    onPressed: () => showTrackInfo(index, lightMode, MediaQuery.of(context).size.height),
+                                    icon: const Icon(Icons.more_vert))
+                                : const SizedBox(
+                                    height: 48,
+                                  ))
+                      ])))),
         ));
   }
 }

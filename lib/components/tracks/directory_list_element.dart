@@ -29,7 +29,12 @@ class DirectoryListElement extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool loadedElement = loadedTrack.path != null ? loadedTrack.path!.contains(trackListEntity.path!) : false;
+
+    String result = '';
+    if(loadedTrack.path != null){
+      result = loadedTrack.path!.replaceAll(trackListEntity.path!, '');
+    }
+    bool loadedElement = !result.contains('data') && result.startsWith('/');
     bool isSelected = selected != null && selected!;
     bool isSelectionMode = selectionMode != null && selectionMode!;
     double selectedIconWidth = 0;
@@ -53,7 +58,7 @@ class DirectoryListElement extends StatelessWidget {
           color: backgroundColor,
           surfaceTintColor: Colors.transparent,
           child: Padding(
-              padding: const EdgeInsets.only( right: 8, top: 10, bottom: 10),
+              padding: const EdgeInsets.only(right: 8, top: 10, bottom: 10),
               child: Row(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.max, children: [
                 AnimatedContainer(
                     duration: const Duration(milliseconds: 250),
@@ -68,13 +73,21 @@ class DirectoryListElement extends StatelessWidget {
                     duration: const Duration(milliseconds: 250),
                     width: isSelected ? 0 : 48,
                     curve: Curves.fastOutSlowIn,
-                    child: !isSelected ? const Icon(Icons.folder) : const SizedBox(width: 48,)),
+                    child: !isSelected
+                        ? const Icon(Icons.folder)
+                        : const SizedBox(
+                            width: 48,
+                          )),
                 Expanded(child: Text(trackListEntity.name, maxLines: 1, overflow: TextOverflow.ellipsis)),
                 AnimatedOpacity(
-              duration: const Duration(milliseconds: 250),
-              opacity: !isSelectionMode ? 1 : 0,
-              child: !isSelectionMode ?IconButton(
-                    alignment: Alignment.centerRight, onPressed: () => showDirectoryActions(index, lightMode), icon: const Icon(Icons.more_vert)):const SizedBox(height: 48))
+                    duration: const Duration(milliseconds: 250),
+                    opacity: !isSelectionMode ? 1 : 0,
+                    child: !isSelectionMode
+                        ? IconButton(
+                            alignment: Alignment.centerRight,
+                            onPressed: () => showDirectoryActions(index, lightMode),
+                            icon: const Icon(Icons.more_vert))
+                        : const SizedBox(height: 48))
               ]))),
     );
   }
