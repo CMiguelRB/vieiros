@@ -464,7 +464,7 @@ class TracksState extends State<Tracks> {
     };
 
     return Ink(
-        height: 180,
+        height: 192,
         padding: const EdgeInsets.only(top: 20, bottom: 30),
         color: lightMode ? CustomColors.background : CustomColors.backgroundDark,
         child: Column(children: [
