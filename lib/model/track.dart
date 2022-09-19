@@ -29,6 +29,7 @@ class Track {
     try {
       final xmlFile = File(path);
       String? gpxString = await FilesHandler().readAsStringAsync(xmlFile);
+      if(gpxString == '') throw Exception('Empty xml string');
       this.gpxString = gpxString;
       gpx = GpxReader().fromString(gpxString);
       String? name = gpx!.trks[0].name;

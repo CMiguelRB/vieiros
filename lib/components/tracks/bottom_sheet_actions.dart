@@ -32,6 +32,11 @@ class BottomSheetActions extends StatelessWidget {
 
       Color color = disabled != null && disabled == true ? (lightMode ? CustomColors.faintedText : CustomColors.subText) :(lightMode ? CustomColors.subText : CustomColors.subTextDark);
 
+      bool isDisabled = disabled != null && disabled == true;
+
+      bool isLoading = loading != null && loading == true;
+
+
       actionWidgets.add(Container(
           margin: const EdgeInsets.symmetric(vertical: 10),
           width: MediaQuery.of(context).size.width/actions.length,
@@ -40,8 +45,8 @@ class BottomSheetActions extends StatelessWidget {
               icon: icon!,
               disabledColor: Colors.black26,
               color: color,
-              onPressed: loading == null || loading == false ? () => action!() : null,
-              enableFeedback: disabled != null && disabled == true,
+              onPressed: !isDisabled && !isLoading ? () => action!() : null,
+              enableFeedback: !isDisabled && !isLoading,
               style: IconButton.styleFrom(
                 side: BorderSide(color: color),
               ),
