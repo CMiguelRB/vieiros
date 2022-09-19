@@ -56,7 +56,12 @@ class FilesHandler {
 
   void computeReadAsStringAsync(List<dynamic> params){
     SendPort sendPort = params[1];
-    String stringFile = params[0].readAsStringSync();
+    String stringFile;
+    try{
+      stringFile = params[0].readAsStringSync();
+    }catch(e){
+      stringFile = '';
+    }
     sendPort.send(stringFile);
   }
 

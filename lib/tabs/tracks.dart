@@ -299,7 +299,6 @@ class TracksState extends State<Tracks> {
   }
 
   _unloadTrack(int index, bool showNotification) async {
-    //Todo change current track when moving
     String? current = Preferences().get('currentTrack');
     TrackListEntity file = _files[index];
     if (current == file.path) {
@@ -573,6 +572,10 @@ class TracksState extends State<Tracks> {
         File(trackListEntity[i].path!).renameSync(newPath);
         Preferences().remove(trackListEntity[i].path!);
         Preferences().set(newPath, trackListEntity[i].name);
+        if(widget.loadedTrack.path == trackListEntity[i].path){
+          Preferences().set('currentTrack', newPath);
+          widget.loadedTrack.loadTrack(newPath);
+        }
       } else {
         if (directory != trackListEntity[i].path) {
           Directory(trackListEntity[i].path!).renameSync('$directory/${trackListEntity[i].name}');
