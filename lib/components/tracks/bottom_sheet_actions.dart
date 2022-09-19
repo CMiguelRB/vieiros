@@ -52,7 +52,7 @@ class BottomSheetActions extends StatelessWidget {
               ),
             ),
             Container(
-                margin: const EdgeInsets.only(top: 8),
+                margin: const EdgeInsets.only(top: 8, bottom: 20),
                 child: Text(I18n.translate(key), style: TextStyle(color: color, fontSize: 12)))
           ])));
     });
