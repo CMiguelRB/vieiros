@@ -3,6 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:vieiros/components/tracks/bottom_sheet_actions.dart';
 import 'package:vieiros/components/tracks/directory_list_element.dart';
 import 'package:vieiros/components/tracks/file_manager_bar.dart';
@@ -431,6 +432,7 @@ class TracksState extends State<Tracks> {
     } else {
       actions = {
         "common_share": {"icon": Icons.share, "action": () => _shareFile(index)},
+        "common_directions": {"icon": Icons.directions, "action": () => _getDirections(index)},
         "common_move": {
           "icon": Icons.drive_file_move_outline,
           "action": () => _showBottomSheet(_moveManagerContent(lightMode: lightMode, trackListEntity: [_files[index]], popContext: true))
@@ -710,6 +712,23 @@ class TracksState extends State<Tracks> {
       _selectionMode = false;
       _selectedItems.clear();
     });
+  }
+
+  _getDirections(index) async {
+    Gpx gpx;
+    try{
+      gpx = GpxReader().fromString(File(_files[index].path!).readAsStringSync());
+    }catch(e){
+      VieirosNotification().showNotification(context, 'tracks_open_maps_error', NotificationType.error);
+      throw 'Unreadable file';
+    }
+    Uri uri = Uri.parse('${'geo:0,0?q=${gpx.trks.first.trksegs.first.trkpts.first.lat}'},${gpx.trks.first.trksegs.first.trkpts.first.lon}');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      VieirosNotification().showNotification(context, 'tracks_open_maps_error', NotificationType.error);
+     throw 'Could not launch ${uri.toString()}';
+    }
   }
 
   @override
