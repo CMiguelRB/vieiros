@@ -10,6 +10,7 @@ class FilesHandler {
     if (hasPermission) {
       String path;
       if (downloads) {
+        name = name.replaceRange(100, name.length, '...');
         path = '${(await getApplicationDocumentsDirectory()).path}/tracks/${name.replaceAll(' ', '_')}.gpx';
       } else {
         path = newPath;

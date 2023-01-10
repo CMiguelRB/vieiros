@@ -20,6 +20,7 @@ class Settings extends StatefulWidget {
 
 class SettingsState extends State<Settings> {
   bool _voiceAlerts = true;
+  final String _version = 'v1.5.2';
   String? _themeSelectValue = 'system';
   String? _themeSelectTag = '';
   String? _gradientSelectedValue = 'none';
@@ -244,7 +245,7 @@ class SettingsState extends State<Settings> {
             margin: const EdgeInsets.only(bottom: 10),
           ),
           TextButton(
-              onPressed: () => _showThirdParties(lightMode), child: const Text('Vieiros v1.5.1', style: TextStyle(color: CustomColors.faintedText))),
+              onPressed: () => _showThirdParties(lightMode), child: Text('Vieiros $_version', style: const TextStyle(color: CustomColors.faintedText))),
           Container(
             margin: const EdgeInsets.only(bottom: 10),
           )

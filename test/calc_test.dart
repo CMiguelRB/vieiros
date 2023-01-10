@@ -1,10 +1,10 @@
-//import 'package:test/test.dart';
-//import 'package:vieiros/model/current_track.dart';
-//import 'package:vieiros/model/position.dart';
-//import 'package:vieiros/utils/calc.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:vieiros/model/current_track.dart';
+import 'package:vieiros/model/position.dart';
+import 'package:vieiros/utils/calc.dart';
 
 void main() {
-  /*group('Measurements', () {
+  group('Measurements', () {
     test('Add distance test', () {
       final CurrentTrack currentTrack = CurrentTrack();
       Calc().addDistance(currentTrack);
@@ -47,5 +47,5 @@ void main() {
       expect(currentTrack.altitudeTop, 8.0);
       expect(currentTrack.altitudeMin, 1.0);
     });
-  });*/
+  });
 }
