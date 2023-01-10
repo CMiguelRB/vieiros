@@ -374,11 +374,11 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
 
   _setPKMarker(RecordedPosition? position, String distance) async {
     List<dynamic> pksJSON = json.decode(await rootBundle.loadString('assets/pkMarkers.json'));
-    final mergedImage = image.Image(65, 65);
     String suffix = position != null ? 'l' : 'r';
     String baseB64 = '';
     String num1B64 = '';
     String num2B64 = '';
+    Uint8List markerIcon = Uint8List(0);
     if (int.parse(distance) >= 10) {
       for (int i = 0; i < pksJSON.length; i++) {
         PKMarker base = PKMarker.fromJson(pksJSON[i]);
@@ -392,12 +392,12 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
           num2B64 = base.marker;
         }
       }
-      final image1 = image.decodeImage(await _getBytesFromAsset(base64Decode(baseB64), 65));
-      final image2 = image.decodeImage(await _getBytesFromAsset(base64Decode(num1B64), 14));
-      final image3 = image.decodeImage(await _getBytesFromAsset(base64Decode(num2B64), 14));
-      image.copyInto(mergedImage, image1!, blend: false);
-      image.copyInto(mergedImage, image2!, dstX: 18, dstY: 21, blend: false);
-      image.copyInto(mergedImage, image3!, dstX: 32, dstY: 21, blend: false);
+      final image1 = image.decodePng(await _getBytesFromAsset(base64Decode(baseB64), 65));
+      final image2 = image.decodePng(await _getBytesFromAsset(base64Decode(num1B64), 14));
+      final image3 = image.decodePng(await _getBytesFromAsset(base64Decode(num2B64), 14));
+      image.compositeImage(image1!, image2!, dstX: 18, dstY: 21);
+      image.compositeImage(image1, image3!, dstX: 32, dstY: 21);
+      markerIcon = await _getBytesFromAsset(image.encodePng(image1), 65);
     } else {
       for (int i = 0; i < pksJSON.length; i++) {
         PKMarker base = PKMarker.fromJson(pksJSON[i]);
@@ -408,12 +408,11 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
           num1B64 = base.marker;
         }
       }
-      final image1 = image.decodeImage(await _getBytesFromAsset(base64Decode(baseB64), 65));
-      final image2 = image.decodeImage(await _getBytesFromAsset(base64Decode(num1B64), 14));
-      image.copyInto(mergedImage, image1!, blend: false);
-      image.copyInto(mergedImage, image2!, dstX: 25, dstY: 21, blend: false);
+      final image1 = image.decodePng(await _getBytesFromAsset(base64Decode(baseB64), 65));
+      final image2 = image.decodePng(await _getBytesFromAsset(base64Decode(num1B64), 14));
+      image.compositeImage(image1!, image2!, dstX: 25, dstY: 21);
+      markerIcon = await _getBytesFromAsset(image.encodePng(image1), 65);
     }
-    final Uint8List markerIcon = await _getBytesFromAsset(image.encodePng(mergedImage) as Uint8List, 65);
     BitmapDescriptor icon = BitmapDescriptor.fromBytes(markerIcon);
     Marker marker;
     if (position != null) {
@@ -548,7 +547,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
             )));
   }
 
-  _stopAndSave(name) async {
+  _stopAndSave(String name) async {
     if (!_formKey.currentState!.validate()) return;
     _location.enableBackgroundMode(enable: false);
     Gpx gpx = GpxHandler().createGpx(widget.currentTrack, name, currentMarkers: _currentMarkers);
@@ -556,7 +555,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     //add namespaces
     gpxString = gpxString.replaceFirst(RegExp('creator="vieiros"'),
         'creator="vieiros" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"');
-    String? result = await FilesHandler().writeFile(gpxString, name, '', true);
+
+    String? result = await FilesHandler().writeFile(gpxString, name.replaceRange(100,name.length, '...'), '', true);
     if (result == '###file_exists') {
       if (!mounted) return;
       return VieirosNotification().showNotification(context, I18n.translate('map_save_error_file_exists'), NotificationType.error);

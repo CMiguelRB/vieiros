@@ -8,7 +8,7 @@ class PermissionHandler {
     if (Platform.isAndroid) {
       DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
       AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-      if (androidInfo.version.sdkInt! < 33) {
+      if (androidInfo.version.sdkInt < 33) {
         bool hasPermission = await Permission.storage.isGranted;
         if (hasPermission) return true;
         final status = await Permission.storage.request();

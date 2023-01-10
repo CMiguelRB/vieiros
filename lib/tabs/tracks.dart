@@ -660,7 +660,7 @@ class TracksState extends State<Tracks> {
 
   _shareFile(int index) {
     Navigator.of(context).pop();
-    Share.shareFiles([_files[index].path!], text: _files[index].name);
+    Share.shareXFiles([XFile(_files[index].path!)], text: _files[index].name);
   }
 
   _showDeleteDialog(List<int> indexList, bool? isTrack) {
