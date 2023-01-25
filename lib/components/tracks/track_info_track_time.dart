@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vieiros/components/info/time_widget.dart';
 import 'package:vieiros/resources/custom_colors.dart';
+import 'package:vieiros/tabs/info.dart';
 
 class TrackInfoTrackTime extends StatelessWidget {
   final bool lightMode;
@@ -21,7 +22,7 @@ class TrackInfoTrackTime extends StatelessWidget {
             margin: const EdgeInsets.symmetric(vertical: 4),
             child: TimeWidget(
               lightMode: lightMode,
-              slideState: 0,
+              slideState: InfoDisplay.current,
               isRecording: false,
               totalTime: totalTime,
               initDatetime: initTime,

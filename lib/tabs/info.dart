@@ -29,8 +29,10 @@ class Info extends StatefulWidget {
   InfoState createState() => InfoState();
 }
 
+enum InfoDisplay {current, loaded}
+
 class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
-  int _slideState = 0;
+  InfoDisplay currentDisplaySet = InfoDisplay.current;
   String _distanceUnit = 'Km';
   String _distance = '0';
   String _totalTime = '--:--:--';
@@ -52,7 +54,10 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   List<AltitudePoint> _altitudeDataLoaded = [];
   List<AltitudePoint> _altitudeDataCurrent = [];
 
-  final Map<int, Widget> _tabMap = {0: Text(I18n.translate('info_current_track')), 1: Text(I18n.translate('info_loaded_track'))};
+  final List<ButtonSegment> _tabMap = [
+    ButtonSegment<InfoDisplay>(value: InfoDisplay.current, label: Text(I18n.translate('info_current_track')), icon: null),
+    ButtonSegment<InfoDisplay>(value: InfoDisplay.loaded, label: Text(I18n.translate('info_loaded_track')), icon: null)
+  ];
 
   Map axisValuesCenter = {'mainAxisSize': MainAxisSize.max, 'mainAxisAlignment': MainAxisAlignment.center};
 
@@ -80,7 +85,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
         _loadTrackData();
         if (!_started) {
           setState(() {
-            _slideState = 0;
+            currentDisplaySet = InfoDisplay.current;
             _started = true;
           });
         }
@@ -89,14 +94,14 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
       clearScreen();
       _loadTrackData();
       setState(() {
-        _slideState = 1;
+        currentDisplaySet = InfoDisplay.loaded;
       });
     }
   }
 
   void clearLoadedListener() {
     setState(() {
-      _slideState = 0;
+      currentDisplaySet = InfoDisplay.current;
     });
     if (!widget.currentTrack.isRecording) {
       clearScreen();
@@ -136,7 +141,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
     String avgPaceMin = '';
     String avgPaceSec = '';
 
-    if (widget.currentTrack.isRecording && _slideState == 0) {
+    if (widget.currentTrack.isRecording && currentDisplaySet == InfoDisplay.current) {
       totalDistance = widget.currentTrack.distance;
       avgPaceSeconds = Calc().avgPaceSecs(widget.currentTrack);
       avgPaceMin = Calc().avgPaceMinString(avgPaceSeconds);
@@ -232,10 +237,10 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  _slidingStateChanged(value) {
+  _slidingStateChanged(Set value) {
     if (mounted) {
       setState(() {
-        _slideState = int.parse(value!.toString());
+        currentDisplaySet = value.first;
       });
       _loadTrackData();
     }
@@ -246,11 +251,12 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
     super.build(context);
     bool lightMode = Provider.of<ThemeProvider>(context).isLightMode;
     double width = MediaQuery.of(context).size.width;
+
     return SafeArea(
         child: Column(children: [
       widget.currentTrack.isRecording && widget.loadedTrack.gpx != null
           ? VieirosSegmentedControl(
-              slideState: _slideState,
+              infoDisplaySet: <InfoDisplay>{currentDisplaySet},
               tabMap: _tabMap,
               onValueChanged: _slidingStateChanged,
             )
@@ -267,7 +273,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                     children: [
                       TimeWidget(
                         lightMode: lightMode,
-                        slideState: _slideState,
+                        slideState: currentDisplaySet,
                         initDatetime: widget.currentTrack.dateTime,
                         isRecording: widget.currentTrack.isRecording,
                         totalTime: _totalTime,
@@ -306,14 +312,14 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
             Flexible(
                 flex: 1,
                 child: Container(
-                    margin: const EdgeInsets.only(top: 20, bottom: 20, right: 25, left: 5),
+                    margin: const EdgeInsets.only(top: 20, bottom: 20, right: 25, left: 15),
                     child: _loadingAltitudeChart
                         ? const CircularProgressIndicator(
                             color: CustomColors.accent,
                           )
                         : ChartWidget(
                             lightMode: lightMode,
-                            altitudeData: _slideState == 0 && widget.currentTrack.isRecording ? _altitudeDataCurrent : _altitudeDataLoaded,
+                            altitudeData: currentDisplaySet == InfoDisplay.current && widget.currentTrack.isRecording ? _altitudeDataCurrent : _altitudeDataLoaded,
                             chartColor: _chartColor,
                             chartColorFainted: _chartColorFainted,
                             altitude: _altitude,
