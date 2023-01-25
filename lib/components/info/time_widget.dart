@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:vieiros/components/info/vieiros_timer.dart';
 import 'package:vieiros/resources/custom_colors.dart';
 import 'package:vieiros/resources/i18n.dart';
+import 'package:vieiros/tabs/info.dart';
 
 class TimeWidget extends StatelessWidget {
   final bool lightMode;
-  final int slideState;
+  final InfoDisplay slideState;
   final bool isRecording;
   final DateTime? initDatetime;
   final String? totalTime;
@@ -32,7 +33,7 @@ class TimeWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(I18n.translate('info_total_time'), style: TextStyle(color: lightMode ? CustomColors.subText : CustomColors.subTextDark)),
-            isRecording && slideState == 0
+            isRecording && slideState == InfoDisplay.current
                 ? TimerWidget(time: initDatetime!.millisecondsSinceEpoch)
                 : Text(totalTime!, style: const TextStyle(fontSize: 35, fontWeight: FontWeight.bold))
           ],

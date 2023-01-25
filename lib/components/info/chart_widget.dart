@@ -51,7 +51,9 @@ class ChartWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     NumberFormat formatter = NumberFormat('###,###,###', 'es_ES');
-    return LineChart(LineChartData(
+    return LineChart(
+      swapAnimationDuration: Duration.zero,
+        LineChartData(
       baselineY: altitudeMin.toDouble(),
       minY: altitudeMin.toDouble(),
       borderData: FlBorderData(
@@ -125,7 +127,7 @@ class ChartWidget extends StatelessWidget {
           bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                   showTitles: true,
-                  reservedSize: 10,
+                  reservedSize: 15,
                   getTitlesWidget: (value, titleMetaData) {
                     if (altitudeData.isEmpty || altitudeData.length == 1) {
                       return Container();

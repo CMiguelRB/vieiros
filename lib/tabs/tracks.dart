@@ -723,10 +723,13 @@ class TracksState extends State<Tracks> {
       throw 'Unreadable file';
     }
     Uri uri = Uri.parse('${'geo:0,0?q=${gpx.trks.first.trksegs.first.trkpts.first.lat}'},${gpx.trks.first.trksegs.first.trkpts.first.lon}');
-    if (await canLaunchUrl(uri)) {
+    bool launch = await canLaunchUrl(uri);
+    if (launch) {
       await launchUrl(uri);
     } else {
-      VieirosNotification().showNotification(context, 'tracks_open_maps_error', NotificationType.error);
+      if(context.mounted){
+        VieirosNotification().showNotification(context, 'tracks_open_maps_error', NotificationType.error);
+      }
      throw 'Could not launch ${uri.toString()}';
     }
   }

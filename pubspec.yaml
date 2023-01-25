@@ -19,10 +19,8 @@ dependencies:
   device_info_plus: ^8.0.0
   file_picker: ^5.2.5
   firebase_core: ^2.4.1
-  firebase_crashlytics: ^3.0.9
+  firebase_crashlytics: ^3.0.11
   flutter:
-    sdk: flutter
-  flutter_localizations:
     sdk: flutter
   flutter_local_notifications: ^13.0.0
   flutter_tts: ^3.6.3
@@ -30,15 +28,15 @@ dependencies:
   geolocator: ^9.0.2
   google_maps_flutter: ^2.2.3
   gpx: ^2.2.1
-  image: ^4.0.8
-  intl: ^0.17.0
+  image: ^4.0.12
+  intl: ^0.18.0
   location: ^4.4.0
-  path_provider: ^2.0.11
+  path_provider: ^2.0.12
   permission_handler: ^10.2.0
   provider: ^6.0.5
   share_plus: ^6.3.0
   sunrise_sunset_calc: ^3.0.0
-  url_launcher: ^6.1.7
+  url_launcher: ^6.1.8
   uuid: ^3.0.7
 
 dev_dependencies:

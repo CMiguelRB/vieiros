@@ -9,7 +9,6 @@ import 'package:vieiros/model/loaded_track.dart';
 import 'package:vieiros/resources/custom_colors.dart';
 import 'package:vieiros/resources/themes.dart';
 import 'package:vieiros/utils/preferences.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -94,12 +93,12 @@ class MyApp extends StatelessWidget {
         }
         return MaterialApp(
             title: 'Vieiros',
-            localizationsDelegates: const [
+            /*localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            supportedLocales: const [Locale('en', ''), Locale('es', ''), Locale('gl', '')],
+            supportedLocales: const [Locale('en', ''), Locale('es', ''), Locale('gl', '')],*/
             themeMode: provider.themeMode,
             theme: Themes.lightTheme,
             darkTheme: Themes.darkTheme,

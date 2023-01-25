@@ -43,10 +43,21 @@ class ThemeProvider extends ChangeNotifier {
 class Themes {
   static final lightTheme = ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
-      primaryColor: CustomColors.background,
-      backgroundColor: CustomColors.background,
-      bottomAppBarColor: CustomColors.background,
+      colorScheme: const ColorScheme(
+          error: CustomColors.error,
+          background: CustomColors.faintedFaintedAccent,
+          brightness: Brightness.light,
+          onPrimary: CustomColors.faintedAccent,
+          onPrimaryContainer: CustomColors.faintedAccent,
+          onSecondary: CustomColors.faintedAccent,
+          onSecondaryContainer: CustomColors.faintedFaintedAccent,
+          primary: CustomColors.faintedAccent,
+          secondary: CustomColors.faintedAccent,
+          onError: CustomColors.error,
+          onBackground: CustomColors.faintedFaintedAccent,
+          surface: Colors.black,
+          onSurface: Colors.black
+      ),
       elevatedButtonTheme:
           ElevatedButtonThemeData(style: ElevatedButton.styleFrom(foregroundColor: Colors.white, backgroundColor: CustomColors.accent)),
       floatingActionButtonTheme:
@@ -70,19 +81,37 @@ class Themes {
       ),
       fontFamily: 'Lato',
       textTheme: const TextTheme(
-        headline1: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, fontFamily: 'Rubik', color: Colors.black87),
-        bodyText1: TextStyle(fontSize: 14.0, fontFamily: 'Lato', color: Colors.black87),
+        displayLarge: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, fontFamily: 'Rubik', color: Colors.black87),
+        bodyLarge: TextStyle(fontSize: 14.0, fontFamily: 'Lato', color: Colors.black87),
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
       dialogTheme: const DialogTheme(
           backgroundColor: CustomColors.background, elevation: 2, shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(24)))),
-      snackBarTheme: const SnackBarThemeData(contentTextStyle: TextStyle(color: CustomColors.background)));
+      snackBarTheme: const SnackBarThemeData(contentTextStyle: TextStyle(color: CustomColors.background)),
+      segmentedButtonTheme: const SegmentedButtonThemeData(style: ButtonStyle(
+        padding: MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 25, vertical: 0)),
+        foregroundColor: MaterialStatePropertyAll(Colors.black),
+        side: MaterialStatePropertyAll(BorderSide(color: CustomColors.background)),
+      )),
+      bottomAppBarTheme: const BottomAppBarTheme(color: CustomColors.background));
 
   static final darkTheme = ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
-      primaryColor: CustomColors.backgroundDark,
-      backgroundColor: CustomColors.backgroundDark,
+      colorScheme: const ColorScheme(
+          error: CustomColors.error,
+          background: CustomColors.trackBackgroundDark,
+          brightness: Brightness.dark,
+          onPrimary: CustomColors.accent,
+          onPrimaryContainer: CustomColors.faintedAccent,
+          onSecondary: CustomColors.accent,
+          onSecondaryContainer: CustomColors.trackBackgroundDark,
+          primary: CustomColors.accent,
+          secondary: CustomColors.accent,
+          onError: CustomColors.error,
+          onBackground: CustomColors.trackBackgroundDark,
+          surface: CustomColors.subTextDark,
+          onSurface: CustomColors.subTextDark
+      ),
       elevatedButtonTheme:
           ElevatedButtonThemeData(style: ElevatedButton.styleFrom(foregroundColor: Colors.white, backgroundColor: CustomColors.accent)),
       floatingActionButtonTheme:
@@ -109,13 +138,18 @@ class Themes {
           })),
       fontFamily: 'Lato',
       textTheme: const TextTheme(
-        headline1: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, fontFamily: 'Rubik', color: Colors.white),
-        bodyText1: TextStyle(fontSize: 14.0, fontFamily: 'Lato', color: Colors.white),
+        displayLarge: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold, fontFamily: 'Rubik', color: Colors.white),
+        bodyLarge: TextStyle(fontSize: 14.0, fontFamily: 'Lato', color: Colors.white),
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
       dialogTheme: const DialogTheme(
           backgroundColor: CustomColors.backgroundDark,
           elevation: 2,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(24)))),
+      segmentedButtonTheme: const SegmentedButtonThemeData(style: ButtonStyle(
+        padding: MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 25, vertical: 0)),
+        foregroundColor: MaterialStatePropertyAll(CustomColors.subTextDark),
+        side: MaterialStatePropertyAll(BorderSide(color: CustomColors.backgroundDark)),
+      )),
       snackBarTheme: const SnackBarThemeData(contentTextStyle: TextStyle(color: CustomColors.background)));
 }
