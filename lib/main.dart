@@ -46,7 +46,7 @@ void loadStatusBarTheme() {
       light = false;
       break;
     default:
-      SchedulerBinding.instance.window.platformBrightness == Brightness.dark ? light = false : light = true;
+      SchedulerBinding.instance.platformDispatcher.platformBrightness == Brightness.dark ? light = false : light = true;
   }
   if (light) {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -86,19 +86,13 @@ class MyApp extends StatelessWidget {
             prefsMode = false;
             break;
           default:
-            SchedulerBinding.instance.window.platformBrightness == Brightness.dark ? prefsMode = false : prefsMode = true;
+            SchedulerBinding.instance.platformDispatcher.platformBrightness == Brightness.dark ? prefsMode = false : prefsMode = true;
         }
         if (currentMode != prefsMode) {
           provider.setThemeMode(currentPrefs);
         }
         return MaterialApp(
             title: 'Vieiros',
-            /*localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: const [Locale('en', ''), Locale('es', ''), Locale('gl', '')],*/
             themeMode: provider.themeMode,
             theme: Themes.lightTheme,
             darkTheme: Themes.darkTheme,

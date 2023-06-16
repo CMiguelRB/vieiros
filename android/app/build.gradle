@@ -31,12 +31,12 @@ apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
 
     defaultConfig {
         applicationId "com.rabocorp.vieiros"
-        minSdkVersion 24
-        targetSdkVersion 33
+        minSdkVersion 28
+        targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
@@ -60,7 +60,7 @@ android {
     }
 
     dependencies{
-        implementation 'com.google.android.material:material:1.6.1'
+        implementation 'com.google.android.material:material:1.9.0'
     }
     namespace 'com.rabocorp.vieiros'
 }

@@ -15,7 +15,7 @@ class GpxHandler {
           lat: currentTrack.positions[i].latitude,
           lon: currentTrack.positions[i].longitude,
           ele: currentTrack.positions[i].altitude,
-          time: DateTime.fromMillisecondsSinceEpoch(currentTrack.positions[i].timestamp!)));
+          time: currentTrack.positions[i].timestamp!));
     }
     List<Trkseg> trksegs = [];
     trksegs.add(Trkseg(trkpts: wpts));
