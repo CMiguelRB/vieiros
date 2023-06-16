@@ -5,9 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:geolocator/geolocator.dart' as geolocator;
+import 'package:geolocator/geolocator.dart';
 import 'package:image/image.dart' as image;
-import 'package:location/location.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:vieiros/components/vieiros_dialog.dart';
@@ -23,6 +22,8 @@ import 'package:gpx/gpx.dart';
 import 'package:vieiros/resources/custom_colors.dart';
 import 'package:vieiros/resources/i18n.dart';
 import 'package:vieiros/resources/themes.dart';
+
+//import 'package:vieiros/services/foreground_location_service.dart';
 import 'package:vieiros/utils/calc.dart';
 import 'package:vieiros/utils/files_handler.dart';
 import 'package:vieiros/utils/gpx_handler.dart';
@@ -41,8 +42,8 @@ class Map extends StatefulWidget {
 }
 
 class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
-  final Location _location = Location();
   final Completer<GoogleMapController> _mapController = Completer();
+  late StreamSubscription<Position> positionStream;
   final Set<Polyline> _polyline = {};
   final Set<Marker> _markers = {};
   List<Marker> _currentMarkers = [];
@@ -99,21 +100,13 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
           });
         }
       });
-      _location.changeNotificationOptions(
-          iconName: 'ic_stat_name',
-          color: CustomColors.faintedFaintedAccent,
-          channelName: I18n.translate('map_channel_name_location'),
-          onTapBringToFront: true,
-          title: I18n.translate('map_notification_title'),
-          description: I18n.translate('map_notification_desc'));
-      _location.changeSettings(interval: 2000, distanceFilter: 5, accuracy: LocationAccuracy.high);
-      LocationData locationData;
+
       final GoogleMapController controller = await _mapController.future;
 
-      locationData = await _location.getLocation();
+      Position locationData = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
       double? lat = locationData.latitude;
       double? lon = locationData.longitude;
-      if (lat != null && lon != null && widget.loadedTrack.gpx == null) {
+      if (widget.loadedTrack.gpx == null) {
         controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(lat, lon), zoom: 15.0)));
       }
     } else {
@@ -201,7 +194,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
       for (int i = 0; i < points.length - 1; i++) {
         pointsAux.add(LatLng(points[i].lat!, points[i].lon!));
         if (i > 0) {
-          distance = distance + geolocator.Geolocator.distanceBetween(points[i].lat!, points[i].lon!, points[i - 1].lat!, points[i - 1].lon!);
+          distance = distance + Geolocator.distanceBetween(points[i].lat!, points[i].lon!, points[i - 1].lat!, points[i - 1].lon!);
           if (distance > referenceDistance) {
             referenceDistance += 1000;
             _setPKMarker(RecordedPosition(points[i].lat, points[i].lon, null, null), ((referenceDistance ~/ 1000) - 1).toString());
@@ -308,14 +301,29 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     VieirosNotification().showNotification(context, 'map_start_recording_message', NotificationType.info);
     widget.currentTrack.setRecording(true);
     widget.currentTrack.dateTime = DateTime.now();
-    _location.enableBackgroundMode(enable: true);
     int referenceDistance = 1000;
     BitmapDescriptor icon = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(100, 100)), 'assets/current_pin.png');
     Marker? marker;
-    _location.onLocationChanged.listen((event) async {
+    positionStream = Geolocator.getPositionStream(
+            locationSettings: AndroidSettings(
+                distanceFilter: 5,
+                accuracy: LocationAccuracy.best,
+                intervalDuration: const Duration(seconds: 2),
+                useMSLAltitude: true,
+                foregroundNotificationConfig: ForegroundNotificationConfig(
+                    notificationTitle: I18n.translate('map_notification_title'),
+                    notificationText: I18n.translate('map_notification_desc'),
+                    notificationIcon: const AndroidResource(name: 'ic_stat_name', defType: 'drawable'),
+                    enableWakeLock: true)))
+        .listen((position) {
       if (widget.currentTrack.isRecording) {
-        _checkOffTrack(event);
-        widget.currentTrack.addPosition(RecordedPosition(event.latitude, event.longitude, event.altitude, event.time!.toInt()));
+        List<RecordedPosition> positions = widget.currentTrack.positions;
+        if (positions.isNotEmpty &&
+            Geolocator.distanceBetween(positions.last.latitude!, positions.last.longitude!, position.latitude, position.longitude) < 5) {
+          return;
+        }
+        _checkOffTrack();
+        widget.currentTrack.addPosition(RecordedPosition(position.latitude, position.longitude, position.altitude, position.timestamp));
         Calc().setGain(widget.currentTrack);
         Calc().setTop(widget.currentTrack);
         Calc().setMin(widget.currentTrack);
@@ -433,12 +441,12 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  _checkOffTrack(LocationData event) {
+  _checkOffTrack() {
     if (widget.loadedTrack.gpx != null) {
       List<Wpt> trackPoints = widget.loadedTrack.gpx!.trks[0].trksegs[0].trkpts;
       if (widget.loadedTrack.gpx != null && widget.currentTrack.positions.isNotEmpty) {
         for (int i = 0; i < trackPoints.length; i++) {
-          double distance = geolocator.Geolocator.distanceBetween(
+          double distance = Geolocator.distanceBetween(
               widget.currentTrack.positions.last.latitude!, widget.currentTrack.positions.last.longitude!, trackPoints[i].lat!, trackPoints[i].lon!);
           if (distance < 30) {
             offTrack = false;
@@ -549,14 +557,14 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
 
   _stopAndSave(String name) async {
     if (!_formKey.currentState!.validate()) return;
-    _location.enableBackgroundMode(enable: false);
+    positionStream.cancel();
     Gpx gpx = GpxHandler().createGpx(widget.currentTrack, name, currentMarkers: _currentMarkers);
     String gpxString = GpxWriter().asString(gpx, pretty: true);
     //add namespaces
     gpxString = gpxString.replaceFirst(RegExp('creator="vieiros"'),
         'creator="vieiros" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"');
 
-    String? result = await FilesHandler().writeFile(gpxString, name.replaceRange(100,name.length, '...'), '', true);
+    String? result = await FilesHandler().writeFile(gpxString, name.replaceRange(100, name.length, '...'), '', true);
     if (result == '###file_exists') {
       if (!mounted) return;
       return VieirosNotification().showNotification(context, I18n.translate('map_save_error_file_exists'), NotificationType.error);
@@ -579,7 +587,6 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   }
 
   void _stopAndDiscard() {
-    _location.enableBackgroundMode(enable: false);
     Navigator.pop(context, 'Stop and discard');
     if (mounted) {
       setState(() {
@@ -625,9 +632,9 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
 
   _moveCurrentLocation() async {
     final GoogleMapController controller = await _mapController.future;
-    LocationData locationData = await _location.getLocation();
+    Position locationData = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
     controller
-        .animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(locationData.latitude!, locationData.longitude!), zoom: 14.0)));
+        .animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(locationData.latitude, locationData.longitude), zoom: 14.0)));
   }
 
   _onCameraMove(CameraPosition camera) async {

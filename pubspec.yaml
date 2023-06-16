@@ -12,31 +12,30 @@ publish_to: 'none'
 version: 1.5.3+153
 
 environment:
-  sdk: ">=2.17.0-0 <3.0.0"
+  sdk: ">=2.18.0 <3.0.0"
 
 dependencies:
   cupertino_icons: ^1.0.5
-  device_info_plus: ^8.0.0
-  file_picker: ^5.2.5
-  firebase_core: ^2.4.1
-  firebase_crashlytics: ^3.0.11
+  device_info_plus: ^9.0.2
+  file_picker: ^5.3.2
+  firebase_core: ^2.14.0
+  firebase_crashlytics: ^3.3.3
   flutter:
     sdk: flutter
-  flutter_local_notifications: ^13.0.0
-  flutter_tts: ^3.6.3
-  fl_chart: ^0.60.0
+  flutter_local_notifications: ^14.1.1
+  flutter_tts: ^3.7.0
+  fl_chart: ^0.63.0
   geolocator: ^9.0.2
-  google_maps_flutter: ^2.2.3
+  google_maps_flutter: ^2.3.1
   gpx: ^2.2.1
-  image: ^4.0.12
-  intl: ^0.18.0
-  location: ^4.4.0
-  path_provider: ^2.0.12
-  permission_handler: ^10.2.0
+  image: ^4.0.17
+  intl: ^0.18.1
+  path_provider: ^2.0.15
+  permission_handler: ^10.3.0
   provider: ^6.0.5
-  share_plus: ^6.3.0
+  share_plus: ^7.0.2
   sunrise_sunset_calc: ^3.0.0
-  url_launcher: ^6.1.8
+  url_launcher: ^6.1.11
   uuid: ^3.0.7
 
 dev_dependencies:

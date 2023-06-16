@@ -17,7 +17,7 @@ class ThemeProvider extends ChangeNotifier {
         themeMode = ThemeMode.dark;
         break;
       default:
-        SchedulerBinding.instance.window.platformBrightness == Brightness.dark ? themeMode = ThemeMode.dark : themeMode = ThemeMode.light;
+        SchedulerBinding.instance.platformDispatcher.platformBrightness == Brightness.dark ? themeMode = ThemeMode.dark : themeMode = ThemeMode.light;
     }
 
     if (themeMode == ThemeMode.light) {

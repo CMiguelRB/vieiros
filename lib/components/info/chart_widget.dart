@@ -52,7 +52,7 @@ class ChartWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     NumberFormat formatter = NumberFormat('###,###,###', 'es_ES');
     return LineChart(
-      swapAnimationDuration: Duration.zero,
+      duration: Duration.zero,
         LineChartData(
       baselineY: altitudeMin.toDouble(),
       minY: altitudeMin.toDouble(),
@@ -65,7 +65,7 @@ class ChartWidget extends StatelessWidget {
           getTouchedSpotIndicator: (LineChartBarData barData, List<int> spotIndexes) {
             return spotIndexes.map((index) {
               return TouchedSpotIndicatorData(
-                FlLine(),
+                const FlLine(),
                 FlDotData(
                   show: true,
                   getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
@@ -109,8 +109,8 @@ class ChartWidget extends StatelessWidget {
       ),
       titlesData: FlTitlesData(
           show: true,
-          topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
           leftTitles: AxisTitles(
               sideTitles: SideTitles(
                   showTitles: true,
@@ -158,7 +158,7 @@ class ChartWidget extends StatelessWidget {
           isCurved: false,
           barWidth: 1,
           isStrokeCapRound: true,
-          dotData: FlDotData(
+          dotData: const FlDotData(
             show: false,
           ),
         ),
