@@ -8,7 +8,7 @@ class TrackInfoTrackTime extends StatelessWidget {
   final String? totalTime;
   final DateTime? initTime;
 
-  const TrackInfoTrackTime({Key? key, required this.totalTime, required this.initTime, required this.lightMode}) : super(key: key);
+  const TrackInfoTrackTime({super.key, required this.totalTime, required this.initTime, required this.lightMode});
 
   @override
   Widget build(BuildContext context) {

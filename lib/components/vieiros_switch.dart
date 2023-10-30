@@ -9,8 +9,7 @@ class VieirosSwitch extends StatelessWidget {
   final String? descTag;
   final bool lightMode;
 
-  const VieirosSwitch({Key? key, required this.onChanged, required this.value, required this.titleTag, required this.lightMode, this.descTag})
-      : super(key: key);
+  const VieirosSwitch({super.key, required this.onChanged, required this.value, required this.titleTag, required this.lightMode, this.descTag});
 
   Color _getTextColor(Set<MaterialState> states, isTrack) {
     const Set<MaterialState> interactiveStates = <MaterialState>{MaterialState.pressed, MaterialState.selected};

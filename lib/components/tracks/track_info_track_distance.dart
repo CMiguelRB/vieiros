@@ -6,7 +6,7 @@ class TrackInfoTrackDistance extends StatelessWidget {
   final int distance;
   final bool lightMode;
 
-  const TrackInfoTrackDistance({Key? key, required this.distance, required this.lightMode}) : super(key: key);
+  const TrackInfoTrackDistance({super.key, required this.distance, required this.lightMode});
 
   @override
   Widget build(BuildContext context) {

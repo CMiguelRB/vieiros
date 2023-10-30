@@ -36,8 +36,7 @@ class Tracks extends StatefulWidget {
   final CurrentTrack currentTrack;
   final LoadedTrack loadedTrack;
 
-  const Tracks({Key? key, required this.toTabIndex, required this.currentTrack, required this.loadedTrack, required this.clearTrack})
-      : super(key: key);
+  const Tracks({super.key, required this.toTabIndex, required this.currentTrack, required this.loadedTrack, required this.clearTrack});
 
   @override
   TracksState createState() => TracksState();

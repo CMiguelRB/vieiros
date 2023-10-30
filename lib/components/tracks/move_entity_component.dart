@@ -16,14 +16,13 @@ class MoveEntityComponent extends StatefulWidget {
   final List<TrackListEntity> moveElement;
 
   const MoveEntityComponent(
-      {Key? key,
+      {super.key,
       required this.actions,
       required this.lightMode,
       required this.rootPath,
       required this.setMoveDirectory,
       required this.filesSorter,
-      required this.moveElement})
-      : super(key: key);
+      required this.moveElement});
 
   @override
   MoveEntityComponentState createState() => MoveEntityComponentState();

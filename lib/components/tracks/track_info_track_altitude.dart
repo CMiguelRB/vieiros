@@ -6,10 +6,10 @@ class TrackInfoTrackAltitude extends StatelessWidget {
   final String altitudeTop;
   final String altitudeGain;
   final String altitudeMin;
+  final String avgSlope;
   final bool lightMode;
 
-  const TrackInfoTrackAltitude({Key? key, required this.lightMode, required this.altitudeTop, required this.altitudeGain, required this.altitudeMin})
-      : super(key: key);
+  const TrackInfoTrackAltitude({super.key, required this.lightMode, required this.altitudeTop, required this.altitudeGain, required this.altitudeMin, required this.avgSlope});
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +26,8 @@ class TrackInfoTrackAltitude extends StatelessWidget {
                 altitude: altitudeTop.toString(),
                 altitudeGain: altitudeGain.toString(),
                 altitudeCurrent: altitudeMin.toString(),
+                avgSlope: avgSlope,
+                avgSlopeUnit: '%',
                 width: width - 40,
                 isAltitudeMin: true)));
   }

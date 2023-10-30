@@ -13,14 +13,13 @@ class TimeWidget extends StatelessWidget {
   final double width;
 
   const TimeWidget(
-      {Key? key,
+      {super.key,
       required this.lightMode,
       required this.slideState,
       required this.isRecording,
       required this.totalTime,
       required this.initDatetime,
-      required this.width})
-      : super(key: key);
+      required this.width});
 
   @override
   Widget build(BuildContext context) {

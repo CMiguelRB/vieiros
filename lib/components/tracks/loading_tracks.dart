@@ -5,7 +5,7 @@ import 'package:vieiros/resources/custom_colors.dart';
 class LoadingTracks extends StatelessWidget {
   final bool lightMode;
 
-  const LoadingTracks({Key? key, required this.lightMode}) : super(key: key);
+  const LoadingTracks({super.key, required this.lightMode});
 
   @override
   Widget build(BuildContext context) {

@@ -12,7 +12,7 @@ import 'package:vieiros/resources/themes.dart';
 import 'package:vieiros/utils/preferences.dart';
 
 class Settings extends StatefulWidget {
-  const Settings({Key? key}) : super(key: key);
+  const Settings({super.key});
 
   @override
   SettingsState createState() => SettingsState();
@@ -20,7 +20,7 @@ class Settings extends StatefulWidget {
 
 class SettingsState extends State<Settings> {
   bool _voiceAlerts = true;
-  final String _version = 'v1.5.3';
+  final String _version = 'v1.5.5';
   String? _themeSelectValue = 'system';
   String? _themeSelectTag = '';
   String? _gradientSelectedValue = 'none';

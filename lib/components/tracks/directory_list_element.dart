@@ -15,7 +15,7 @@ class DirectoryListElement extends StatelessWidget {
   final bool? selected;
 
   const DirectoryListElement({
-    Key? key,
+    super.key,
     required this.lightMode,
     required this.trackListEntity,
     required this.loadedTrack,
@@ -25,7 +25,7 @@ class DirectoryListElement extends StatelessWidget {
     this.selectItem,
     this.selectionMode,
     this.selected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

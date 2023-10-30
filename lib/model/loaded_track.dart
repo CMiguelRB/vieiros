@@ -15,6 +15,7 @@ class LoadedTrack extends Track {
     altitudeGain = 0;
     altitudeMin = 8849;
     altitudePoints = [];
+    avgSlope = 0.0;
     event.add('loaded cleared');
   }
 

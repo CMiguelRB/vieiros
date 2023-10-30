@@ -6,7 +6,7 @@ class VieirosSegmentedControl extends StatelessWidget {
   final Set<InfoDisplay> infoDisplaySet;
   final Function onValueChanged;
 
-  const VieirosSegmentedControl({Key? key, required this.tabMap, required this.infoDisplaySet, required this.onValueChanged}) : super(key: key);
+  const VieirosSegmentedControl({super.key, required this.tabMap, required this.infoDisplaySet, required this.onValueChanged});
 
   @override
   Widget build(BuildContext context) {

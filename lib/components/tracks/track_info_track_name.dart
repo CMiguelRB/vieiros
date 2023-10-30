@@ -5,7 +5,7 @@ class TrackInfoTrackName extends StatelessWidget {
   final String trackName;
   final bool lightMode;
 
-  const TrackInfoTrackName({Key? key, required this.trackName, required this.lightMode}) : super(key: key);
+  const TrackInfoTrackName({super.key, required this.trackName, required this.lightMode});
 
   @override
   Widget build(BuildContext context) {

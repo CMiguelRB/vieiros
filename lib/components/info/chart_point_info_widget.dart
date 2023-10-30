@@ -5,7 +5,7 @@ import 'package:vieiros/resources/i18n.dart';
 class ChartPointInfoWidget extends StatelessWidget {
   final AltitudePoint? selectedPoint;
 
-  const ChartPointInfoWidget({Key? key, required this.selectedPoint}) : super(key: key);
+  const ChartPointInfoWidget({super.key, required this.selectedPoint});
 
   @override
   Widget build(BuildContext context) {

@@ -20,7 +20,7 @@ class SearchTrackBar extends StatelessWidget {
   final FocusNode? searchFocusNode;
 
   const SearchTrackBar(
-      {Key? key,
+      {super.key,
       required this.lightMode,
       required this.selectionMode,
       required this.sortDirection,
@@ -32,8 +32,7 @@ class SearchTrackBar extends StatelessWidget {
       required this.setSortDirection,
       required this.clearValue,
       required this.controller,
-      required this.searchFocusNode})
-      : super(key: key);
+      required this.searchFocusNode});
 
   @override
   Widget build(BuildContext context) {

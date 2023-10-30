@@ -19,12 +19,12 @@ if (flutterRoot == null) {
 
 def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
 if (flutterVersionCode == null) {
-    flutterVersionCode = '153'
+    flutterVersionCode = '154'
 }
 
 def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
-    flutterVersionName = '1.5.3'
+    flutterVersionName = '1.5.5'
 }
 
 apply plugin: 'com.android.application'
@@ -60,7 +60,7 @@ android {
     }
 
     dependencies{
-        implementation 'com.google.android.material:material:1.9.0'
+        implementation 'com.google.android.material:material:1.10.0'
     }
     namespace 'com.rabocorp.vieiros'
 }

@@ -45,6 +45,22 @@ class GpxHandler {
     return points;
   }
 
+  String reduceGpxFile(String gpxString){
+    Gpx gpx = GpxReader().fromString(gpxString);
+
+    List<Wpt> points = gpx.trks.first.trksegs.first.trkpts;
+    List<Wpt> reducedPoints = [];
+    int reductionFactor = points.length ~/ 500;
+    if(reductionFactor > 0){
+      for(int i = 0; i < points.length; i = (i + 1 + reductionFactor)){
+        reducedPoints.add(points[i]);
+      }
+      gpx.trks.first.trksegs.first.trkpts = reducedPoints;
+    }
+
+    return GpxWriter().asString(gpx, pretty: true);
+  }
+
   GpxHandler._privateConstructor();
 
   static final GpxHandler _instance = GpxHandler._privateConstructor();

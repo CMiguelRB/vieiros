@@ -12,15 +12,14 @@ class VieirosTextInput extends StatelessWidget {
   final FocusNode? focusNode;
 
   const VieirosTextInput(
-      {Key? key,
+      {super.key,
       required this.hintText,
       required this.onChanged,
       required this.lightMode,
       this.initialValue,
       this.suffix,
       this.controller,
-      this.focusNode})
-      : super(key: key);
+      this.focusNode});
 
   @override
   Widget build(BuildContext context) {

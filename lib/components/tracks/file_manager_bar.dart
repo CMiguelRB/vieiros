@@ -9,13 +9,12 @@ class FileManagerBar extends StatelessWidget {
   final Function showDeleteDialog;
 
   const FileManagerBar(
-      {Key? key,
+      {super.key,
       required this.lightMode,
       required this.selectionMode,
       required this.cancelSelectionMode,
       required this.moveSelection,
-      required this.showDeleteDialog})
-      : super(key: key);
+      required this.showDeleteDialog});
 
   @override
   Widget build(BuildContext context) {
