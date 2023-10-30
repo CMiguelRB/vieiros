@@ -12,15 +12,14 @@ class VieirosSelect extends StatelessWidget {
   final BuildContext context;
 
   const VieirosSelect(
-      {Key? key,
+      {super.key,
       required this.lightMode,
       required this.onChanged,
       required this.value,
       required this.titleTag,
       required this.valueTag,
       required this.items,
-      required this.context})
-      : super(key: key);
+      required this.context});
 
   Future<void> _themeSelector() async {
     return await showDialog(

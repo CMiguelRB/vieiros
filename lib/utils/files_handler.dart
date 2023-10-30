@@ -1,21 +1,25 @@
 import 'dart:io';
 import 'dart:isolate';
 import 'package:path_provider/path_provider.dart';
+import 'package:vieiros/utils/gpx_handler.dart';
 import 'package:vieiros/utils/permission_handler.dart';
 import 'package:vieiros/utils/preferences.dart';
 
 class FilesHandler {
   Future<String?> writeFile(String gpxString, String name, newPath, bool downloads) async {
+    if(name.length >= 100){
+      name = name.replaceRange(100, name.length, '...');
+    }
     bool hasPermission = await PermissionHandler().handleWritePermission();
     if (hasPermission) {
       String path;
       if (downloads) {
-        name = name.replaceRange(100, name.length, '...');
         path = '${(await getApplicationDocumentsDirectory()).path}/tracks/${name.replaceAll(' ', '_')}.gpx';
       } else {
         path = newPath;
       }
       if (!File(path).existsSync()) {
+        gpxString = GpxHandler().reduceGpxFile(gpxString);
         File(path).writeAsStringSync(gpxString);
         Preferences().set(path, name);
       } else {

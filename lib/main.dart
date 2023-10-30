@@ -32,7 +32,7 @@ void main() async {
     }
   }
   Preferences().set('current_directory', '');
-  runApp(MyApp(loadedTrack));
+  runApp(Vieiros(loadedTrack));
 }
 
 void loadStatusBarTheme() {
@@ -65,10 +65,10 @@ void loadStatusBarTheme() {
   }
 }
 
-class MyApp extends StatelessWidget {
+class Vieiros extends StatelessWidget {
   final LoadedTrack _loadedTrack;
 
-  const MyApp(this._loadedTrack, {Key? key}) : super(key: key);
+  const Vieiros(this._loadedTrack, {super.key});
 
   @override
   Widget build(BuildContext context) => ChangeNotifierProvider(

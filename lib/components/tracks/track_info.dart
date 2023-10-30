@@ -22,14 +22,13 @@ class TrackInfo extends StatefulWidget {
   final Function onIndexChange;
 
   const TrackInfo(
-      {Key? key,
+      {super.key,
       required this.lightMode,
       required this.tracks,
       required this.actions,
       required this.iconStart,
       required this.iconEnd,
-      required this.onIndexChange})
-      : super(key: key);
+      required this.onIndexChange});
 
   @override
   TrackInfoState createState() => TrackInfoState();
@@ -193,7 +192,8 @@ class TrackInfoState extends State<TrackInfo> {
                                           lightMode: widget.lightMode,
                                           altitudeTop: _currentTrack!.altitudeTop.toString(),
                                           altitudeGain: _currentTrack!.altitudeGain.toString(),
-                                          altitudeMin: _currentTrack!.altitudeMin.toString())
+                                          altitudeMin: _currentTrack!.altitudeMin.toString(),
+                                          avgSlope: _currentTrack!.avgSlope.toInt().toString())
                                     ],
                                   ))
                             ]);

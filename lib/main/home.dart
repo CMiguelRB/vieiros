@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:path_provider/path_provider.dart';
 import 'package:vieiros/components/vieiros_dialog.dart';
 import 'package:vieiros/model/loaded_track.dart';
@@ -15,7 +14,7 @@ import 'package:vieiros/utils/preferences.dart';
 class Home extends StatefulWidget {
   final LoadedTrack loadedTrack;
 
-  const Home({Key? key, required this.loadedTrack}) : super(key: key);
+  const Home({super.key, required this.loadedTrack});
 
   @override
   HomeState createState() => HomeState();

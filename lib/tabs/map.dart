@@ -35,7 +35,7 @@ class Map extends StatefulWidget {
   final CurrentTrack currentTrack;
   final LoadedTrack loadedTrack;
 
-  const Map({Key? key, required this.currentTrack, required this.loadedTrack}) : super(key: key);
+  const Map({super.key, required this.currentTrack, required this.loadedTrack});
 
   @override
   MapState createState() => MapState();
@@ -564,7 +564,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     gpxString = gpxString.replaceFirst(RegExp('creator="vieiros"'),
         'creator="vieiros" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"');
 
-    String? result = await FilesHandler().writeFile(gpxString, name.replaceRange(100, name.length, '...'), '', true);
+    String? result = await FilesHandler().writeFile(gpxString, name, '', true);
     if (result == '###file_exists') {
       if (!mounted) return;
       return VieirosNotification().showNotification(context, I18n.translate('map_save_error_file_exists'), NotificationType.error);

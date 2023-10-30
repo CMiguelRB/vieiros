@@ -14,7 +14,7 @@ class ChartWidget extends StatelessWidget {
   final Color chartColorFainted;
 
   const ChartWidget({
-    Key? key,
+    super.key,
     required this.lightMode,
     required this.chartColor,
     required this.chartColorFainted,
@@ -22,7 +22,7 @@ class ChartWidget extends StatelessWidget {
     required this.altitude,
     required this.altitudeMin,
     required this.distance,
-  }) : super(key: key);
+  });
 
   Widget bottomTitleWidgets(double value, TitleMeta meta) {
     String text = '';

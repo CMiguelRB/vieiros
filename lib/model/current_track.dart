@@ -43,6 +43,7 @@ class CurrentTrack extends Track {
     altitudeTop = 0;
     altitudeMin = 8849;
     altitudeGain = 0;
+    avgSlope = 0.0;
     event.add('cleared');
   }
 

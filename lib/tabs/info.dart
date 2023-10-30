@@ -23,13 +23,13 @@ class Info extends StatefulWidget {
   final CurrentTrack currentTrack;
   final LoadedTrack loadedTrack;
 
-  const Info({Key? key, required this.currentTrack, required this.loadedTrack}) : super(key: key);
+  const Info({super.key, required this.currentTrack, required this.loadedTrack});
 
   @override
   InfoState createState() => InfoState();
 }
 
-enum InfoDisplay {current, loaded}
+enum InfoDisplay { current, loaded }
 
 class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   InfoDisplay currentDisplaySet = InfoDisplay.current;
@@ -48,6 +48,8 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
   DateTime? _sunset;
   String _sunsetTime = '--:--';
   String _toSunset = '--:--';
+  String _avgSlope = '0';
+  final String _avgSlopeUnit = '%';
   Color _chartColor = CustomColors.accent;
   Color _chartColorFainted = CustomColors.faintedFaintedAccent;
   bool _started = false;
@@ -154,6 +156,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           _distance = totalDistance > 1000 ? (totalDistance / 1000).toStringAsFixed(2) : totalDistance.toString();
           _distanceUnit = totalDistance > 1000 ? 'Km' : 'm';
           _altitude = widget.currentTrack.altitudeTop.toString();
+          _avgSlope = widget.currentTrack.avgSlope.toInt().toString();
           _altitudeMin = widget.currentTrack.altitudeMin;
           _altitudeGain = widget.currentTrack.altitudeGain.toString();
           if (widget.currentTrack.positions.isNotEmpty) {
@@ -197,6 +200,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
           _altitude = widget.loadedTrack.altitudeTop.toString();
           _altitudeMin = widget.loadedTrack.altitudeMin;
           _altitudeGain = widget.loadedTrack.altitudeGain.toString();
+          _avgSlope = widget.loadedTrack.avgSlope.toInt().toString();
           _totalTime = timeEnd.difference(timeStart).abs().toString().split('.').first.padLeft(8, "0");
           _altitudeDataLoaded = altitudePoints;
           _loadingAltitudeChart = false;
@@ -228,6 +232,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
         _altitudeMin = 0;
         _altitudeGain = '-';
         _altitudeCurrent = '-';
+        _avgSlope = '0';
         _started = false;
         _avgPace = '00:00';
         //_sunsetTime = '--:--';
@@ -303,6 +308,8 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                         altitude: _altitude,
                         altitudeGain: _altitudeGain,
                         altitudeCurrent: _altitudeCurrent,
+                        avgSlope: _avgSlope,
+                        avgSlopeUnit: _avgSlopeUnit,
                         width: width,
                         isAltitudeMin: false,
                       )
@@ -319,7 +326,9 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
                           )
                         : ChartWidget(
                             lightMode: lightMode,
-                            altitudeData: currentDisplaySet == InfoDisplay.current && widget.currentTrack.isRecording ? _altitudeDataCurrent : _altitudeDataLoaded,
+                            altitudeData: currentDisplaySet == InfoDisplay.current && widget.currentTrack.isRecording
+                                ? _altitudeDataCurrent
+                                : _altitudeDataLoaded,
                             chartColor: _chartColor,
                             chartColorFainted: _chartColorFainted,
                             altitude: _altitude,

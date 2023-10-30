@@ -80,6 +80,8 @@ class Calc {
 
   void loadedTrackValues(Track track) {
     int distance = 0;
+    double avgSlopeSum = 0.0;
+    double avgSlopeCounter = 0;
     Gpx gpx = track.gpx!;
     List<Wpt> trackPoints = gpx.trks[0].trksegs[0].trkpts;
     for (int i = 0; i < trackPoints.length; i++) {
@@ -88,7 +90,15 @@ class Calc {
             Geolocator.distanceBetween(trackPoints[i - 1].lat!, trackPoints[i - 1].lon!, trackPoints[i].lat!, trackPoints[i].lon!).round();
         distance += distanceAux;
         double gainDiff = trackPoints[i].ele! - trackPoints[i - 1].ele!;
-        if (gainDiff > 0) track.setGain(track.altitudeGain + gainDiff.round());
+        if (gainDiff > 0){
+          double avgSlopePSection = gainDiff * 100 /distanceAux;
+          int slopeThreshold = 70;
+          if(avgSlopePSection != double.infinity && avgSlopePSection < slopeThreshold) {
+            avgSlopeSum += avgSlopePSection;
+            avgSlopeCounter += 1;
+          }
+          track.setGain(track.altitudeGain + gainDiff.round());
+        }
       }
       if (trackPoints[i].ele! > track.altitudeTop) {
         track.setTop(trackPoints[i].ele!.round());
@@ -96,11 +106,9 @@ class Calc {
       if (trackPoints[i].ele! < track.altitudeMin) {
         track.setMin(trackPoints[i].ele!.round());
       }
-      if (((trackPoints.length > 500 && i % 2 != 0) || (trackPoints.length > 1000 && i % 3 != 0) || (trackPoints.length > 3000 && i % 5 != 0))) {
-        continue;
-      }
       track.setAltitudePoint(distance, trackPoints[i].ele!);
     }
+    track.setAvgSlope(avgSlopeSum/avgSlopeCounter);
     track.setDistance(distance);
   }
 

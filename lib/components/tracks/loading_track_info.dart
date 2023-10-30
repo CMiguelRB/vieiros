@@ -9,7 +9,7 @@ import 'package:vieiros/resources/custom_colors.dart';
 class LoadingTrackInfo extends StatelessWidget {
   final bool lightMode;
 
-  const LoadingTrackInfo({Key? key, required this.lightMode}) : super(key: key);
+  const LoadingTrackInfo({super.key, required this.lightMode});
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +52,7 @@ class LoadingTrackInfo extends StatelessWidget {
               Shimmer.fromColors(
                   highlightColor: highlightColor,
                   baseColor: baseColor,
-                  child: TrackInfoTrackAltitude(lightMode: lightMode, altitudeGain: '', altitudeMin: '', altitudeTop: ''))
+                  child: TrackInfoTrackAltitude(lightMode: lightMode, altitudeGain: '', altitudeMin: '', altitudeTop: '', avgSlope: ''))
             ],
           ))
     ]);

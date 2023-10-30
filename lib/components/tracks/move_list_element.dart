@@ -6,7 +6,7 @@ class MoveListElement extends StatelessWidget {
   final TrackListEntity trackListEntity;
   final Function setMoveDirectory;
 
-  const MoveListElement({Key? key, required this.lightMode, required this.trackListEntity, required this.setMoveDirectory}) : super(key: key);
+  const MoveListElement({super.key, required this.lightMode, required this.trackListEntity, required this.setMoveDirectory});
 
   @override
   Widget build(BuildContext context) {

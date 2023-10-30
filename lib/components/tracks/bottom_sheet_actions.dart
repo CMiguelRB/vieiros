@@ -7,7 +7,7 @@ class BottomSheetActions extends StatelessWidget {
   final bool lightMode;
   final bool? loading;
 
-  const BottomSheetActions({Key? key, required this.actions, required this.lightMode, this.loading}) : super(key: key);
+  const BottomSheetActions({super.key, required this.actions, required this.lightMode, this.loading});
 
   @override
   Widget build(BuildContext context) {

@@ -8,7 +8,7 @@ class VieirosDropdown extends StatelessWidget {
   final Function onChanged;
   final List<Map<String, String>> items;
 
-  const VieirosDropdown({Key? key, required this.lightMode, required this.onChanged, required this.value, required this.items}) : super(key: key);
+  const VieirosDropdown({super.key, required this.lightMode, required this.onChanged, required this.value, required this.items});
 
   @override
   Widget build(BuildContext context) {

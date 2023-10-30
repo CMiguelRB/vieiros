@@ -16,7 +16,7 @@ class TrackListElement extends StatelessWidget {
   final bool? selected;
 
   const TrackListElement({
-    Key? key,
+    super.key,
     required this.lightMode,
     required this.trackListEntity,
     required this.loadedTrack,
@@ -27,7 +27,7 @@ class TrackListElement extends StatelessWidget {
     this.selectItem,
     this.selectionMode,
     this.selected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

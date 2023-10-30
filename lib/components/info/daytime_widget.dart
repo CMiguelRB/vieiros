@@ -7,7 +7,7 @@ class DaytimeWidget extends StatelessWidget {
   final String toSunset;
   final String sunsetTime;
 
-  const DaytimeWidget({Key? key, required this.lightMode, required this.toSunset, required this.sunsetTime}) : super(key: key);
+  const DaytimeWidget({super.key, required this.lightMode, required this.toSunset, required this.sunsetTime});
 
   @override
   Widget build(BuildContext context) {

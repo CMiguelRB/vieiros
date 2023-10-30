@@ -8,8 +8,7 @@ class DistanceWidget extends StatelessWidget {
   final String distanceUnit;
   final double width;
 
-  const DistanceWidget({Key? key, required this.lightMode, required this.distance, required this.distanceUnit, required this.width})
-      : super(key: key);
+  const DistanceWidget({super.key, required this.lightMode, required this.distance, required this.distanceUnit, required this.width});
 
   @override
   Widget build(BuildContext context) {

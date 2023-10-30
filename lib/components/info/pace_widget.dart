@@ -7,7 +7,7 @@ class PaceWidget extends StatelessWidget {
   final String avgPace;
   final String paceUnit;
 
-  const PaceWidget({Key? key, required this.lightMode, required this.avgPace, required this.paceUnit}) : super(key: key);
+  const PaceWidget({super.key, required this.lightMode, required this.avgPace, required this.paceUnit});
 
   @override
   Widget build(BuildContext context) {
