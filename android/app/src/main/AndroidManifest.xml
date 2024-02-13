@@ -30,7 +30,7 @@
        tools:targetApi="tiramisu">
        <meta-data
            android:name="com.google.android.geo.API_KEY"
-           android:value="AIzaSyAQfUhmiVuHzLgBnevwZE0EiCsJTVZ4OV0" />
+           android:value="*APY_KEY*" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
