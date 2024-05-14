@@ -59,7 +59,7 @@ class VieirosDialog {
     actions.forEach((tag, function) {
       dialogActions.add(TextButton(
         style: ButtonStyle(
-          overlayColor: MaterialStateColor.resolveWith((states) => CustomColors.subTextDark),
+          overlayColor: WidgetStateColor.resolveWith((states) => CustomColors.subTextDark),
         ),
         onPressed: () => function(),
         child: Text(I18n.translate(tag), style: const TextStyle(color: CustomColors.accent, fontSize: 15)),

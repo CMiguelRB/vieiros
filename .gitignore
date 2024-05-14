@@ -300,3 +300,5 @@ hs_err_pid*
 
 !/gradle/wrapper/gradle-wrapper.jar
 lib/firebase_options.dart
+
+.vscode

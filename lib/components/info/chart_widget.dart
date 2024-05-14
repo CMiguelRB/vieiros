@@ -82,7 +82,7 @@ class ChartWidget extends StatelessWidget {
               showOnTopOfTheChartBoxArea: true,
               tooltipMargin: 10,
               tooltipPadding: const EdgeInsets.all(5),
-              tooltipBgColor: lightMode ? CustomColors.trackBackgroundLight : CustomColors.trackBackgroundDark,
+              getTooltipColor: (LineBarSpot group) => lightMode ? CustomColors.trackBackgroundLight : CustomColors.trackBackgroundDark,
               fitInsideHorizontally: true,
               getTooltipItems: (List<LineBarSpot> spots) {
                 return spots.map((spot) {

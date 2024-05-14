@@ -11,8 +11,8 @@ class VieirosSwitch extends StatelessWidget {
 
   const VieirosSwitch({super.key, required this.onChanged, required this.value, required this.titleTag, required this.lightMode, this.descTag});
 
-  Color _getTextColor(Set<MaterialState> states, isTrack) {
-    const Set<MaterialState> interactiveStates = <MaterialState>{MaterialState.pressed, MaterialState.selected};
+  Color _getTextColor(Set<WidgetState> states, isTrack) {
+    const Set<WidgetState> interactiveStates = <WidgetState>{WidgetState.pressed, WidgetState.selected};
     if (states.any(interactiveStates.contains)) {
       return isTrack ? CustomColors.faintedAccent : CustomColors.accent;
     }
@@ -37,8 +37,8 @@ class VieirosSwitch extends StatelessWidget {
         Switch(
           value: value,
           onChanged: (value) => onChanged(value, context),
-          thumbColor: MaterialStateColor.resolveWith((states) => _getTextColor(states, false)),
-          trackColor: MaterialStateColor.resolveWith((states) => _getTextColor(states, true)),
+          thumbColor: WidgetStateColor.resolveWith((states) => _getTextColor(states, false)),
+          trackColor: WidgetStateColor.resolveWith((states) => _getTextColor(states, true)),
         )
       ]),
     );

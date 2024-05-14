@@ -45,7 +45,6 @@ class Themes {
       useMaterial3: true,
       colorScheme: const ColorScheme(
           error: CustomColors.error,
-          background: CustomColors.faintedFaintedAccent,
           brightness: Brightness.light,
           onPrimary: CustomColors.faintedAccent,
           onPrimaryContainer: CustomColors.faintedAccent,
@@ -54,7 +53,6 @@ class Themes {
           primary: CustomColors.faintedAccent,
           secondary: CustomColors.faintedAccent,
           onError: CustomColors.error,
-          onBackground: CustomColors.faintedFaintedAccent,
           surface: Colors.black,
           onSurface: Colors.black
       ),
@@ -68,8 +66,8 @@ class Themes {
           surfaceTintColor: CustomColors.background,
           backgroundColor: CustomColors.background,
           indicatorColor: CustomColors.faintedAccent,
-          labelTextStyle: MaterialStateProperty.all(const TextStyle(color: CustomColors.backgroundDark)),
-          iconTheme: MaterialStateProperty.all(const IconThemeData(color: CustomColors.backgroundDark))),
+          labelTextStyle: WidgetStateProperty.all(const TextStyle(color: CustomColors.backgroundDark)),
+          iconTheme: WidgetStateProperty.all(const IconThemeData(color: CustomColors.backgroundDark))),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: CustomColors.background,
         selectedLabelStyle: TextStyle(color: CustomColors.backgroundDark),
@@ -89,9 +87,9 @@ class Themes {
           backgroundColor: CustomColors.background, elevation: 2, shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(24)))),
       snackBarTheme: const SnackBarThemeData(contentTextStyle: TextStyle(color: CustomColors.background)),
       segmentedButtonTheme: const SegmentedButtonThemeData(style: ButtonStyle(
-        padding: MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 25, vertical: 0)),
-        foregroundColor: MaterialStatePropertyAll(Colors.black),
-        side: MaterialStatePropertyAll(BorderSide(color: CustomColors.background)),
+        padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 25, vertical: 0)),
+        foregroundColor: WidgetStatePropertyAll(Colors.black),
+        side: WidgetStatePropertyAll(BorderSide(color: CustomColors.background)),
       )),
       bottomAppBarTheme: const BottomAppBarTheme(color: CustomColors.background));
 
@@ -99,7 +97,6 @@ class Themes {
       useMaterial3: true,
       colorScheme: const ColorScheme(
           error: CustomColors.error,
-          background: CustomColors.trackBackgroundDark,
           brightness: Brightness.dark,
           onPrimary: CustomColors.accent,
           onPrimaryContainer: CustomColors.faintedAccent,
@@ -108,7 +105,6 @@ class Themes {
           primary: CustomColors.accent,
           secondary: CustomColors.accent,
           onError: CustomColors.error,
-          onBackground: CustomColors.trackBackgroundDark,
           surface: CustomColors.subTextDark,
           onSurface: CustomColors.subTextDark
       ),
@@ -126,10 +122,10 @@ class Themes {
           surfaceTintColor: CustomColors.backgroundDark,
           backgroundColor: CustomColors.backgroundDark,
           indicatorColor: CustomColors.faintedAccent,
-          labelTextStyle: MaterialStateProperty.all(const TextStyle(color: Colors.white)),
-          iconTheme: MaterialStateProperty.resolveWith((states) {
+          labelTextStyle: WidgetStateProperty.all(const TextStyle(color: Colors.white)),
+          iconTheme: WidgetStateProperty.resolveWith((states) {
             IconThemeData iconThemeData;
-            if (states.isNotEmpty && states.first == MaterialState.selected) {
+            if (states.isNotEmpty && states.first == WidgetState.selected) {
               iconThemeData = const IconThemeData(color: CustomColors.backgroundDark);
             } else {
               iconThemeData = const IconThemeData(color: Colors.white);
@@ -147,9 +143,9 @@ class Themes {
           elevation: 2,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(24)))),
       segmentedButtonTheme: const SegmentedButtonThemeData(style: ButtonStyle(
-        padding: MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 25, vertical: 0)),
-        foregroundColor: MaterialStatePropertyAll(CustomColors.subTextDark),
-        side: MaterialStatePropertyAll(BorderSide(color: CustomColors.backgroundDark)),
+        padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 25, vertical: 0)),
+        foregroundColor: WidgetStatePropertyAll(CustomColors.subTextDark),
+        side: WidgetStatePropertyAll(BorderSide(color: CustomColors.backgroundDark)),
       )),
       snackBarTheme: const SnackBarThemeData(contentTextStyle: TextStyle(color: CustomColors.background)));
 }
