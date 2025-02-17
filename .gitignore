@@ -305,3 +305,9 @@ hs_err_pid*
 lib/firebase_options.dart
 
 .vscode
+android/.idea/misc.xml
+android/.idea/kotlinc.xml
+android/.idea/gradle.xml
+android/.idea/compiler.xml
+android/.idea/workspace.xml
+android/.idea/caches/deviceStreaming.xml

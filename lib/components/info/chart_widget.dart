@@ -151,7 +151,7 @@ class ChartWidget extends StatelessWidget {
         LineChartBarData(
           belowBarData: BarAreaData(
             show: true,
-            color: Color.fromARGB(lightMode ? 150 : 20, chartColorFainted.red, chartColorFainted.green, chartColorFainted.blue),
+            color: Color.fromARGB(lightMode ? 20 : 150, chartColorFainted.r.toInt(), chartColorFainted.g.toInt(), chartColorFainted.b.toInt()),
           ),
           spots: altitudeData.map((e) => FlSpot(e.totalDistance.toDouble(), e.altitude.toInt().toDouble())).toList(),
           color: chartColor,

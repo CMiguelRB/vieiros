@@ -71,14 +71,25 @@ class TrackInfoState extends State<TrackInfo> {
           _pageController!.jumpToPage(currentTrackIndex);
         }
 
-        String totalTime = currentTrack.gpx!.trks.first.trksegs.first.trkpts.last.time!
-            .difference(currentTrack.gpx!.trks.first.trksegs.first.trkpts.first.time!)
-            .abs()
-            .toString()
-            .split('.')
-            .first
-            .padLeft(8, "0");
-        DateTime? initTime = currentTrack.gpx!.trks.first.trksegs.first.trkpts.first.time;
+        String totalTime = "";
+
+        DateTime? initTime =
+            currentTrack.gpx!.trks.first.trksegs.first.trkpts.first.time;
+
+        if (currentTrack.gpx!.trks.first.trksegs.first.trkpts.last.time !=
+                null &&
+            currentTrack.gpx!.trks.first.trksegs.first.trkpts.first.time !=
+                null) {
+          totalTime = currentTrack
+              .gpx!.trks.first.trksegs.first.trkpts.last.time!
+              .difference(
+                  currentTrack.gpx!.trks.first.trksegs.first.trkpts.first.time!)
+              .abs()
+              .toString()
+              .split('.')
+              .first
+              .padLeft(8, "0");
+        }
 
         setState(() {
           _trackList = tracks;
@@ -98,9 +109,15 @@ class TrackInfoState extends State<TrackInfo> {
 
     List<LatLng> points = GpxHandler().getPointsFromGpx(track);
 
-    Marker start = Marker(markerId: const MarkerId('track_preview_start'), position: points.first, icon: widget.iconStart);
+    Marker start = Marker(
+        markerId: const MarkerId('track_preview_start'),
+        position: points.first,
+        icon: widget.iconStart);
 
-    Marker end = Marker(markerId: const MarkerId('track_preview_start'), position: points.last, icon: widget.iconEnd);
+    Marker end = Marker(
+        markerId: const MarkerId('track_preview_start'),
+        position: points.last,
+        icon: widget.iconEnd);
 
     Set<Marker> markers = {};
     markers.add(start);
@@ -119,7 +136,11 @@ class TrackInfoState extends State<TrackInfo> {
 
     Map<String, double> center = Calc().getPolygonCenter(points: points);
 
-    return TrackMiniMapInfoData(markers: markers, polyline: polyLines, centerLat: center['lat']!, centerLon: center['lon']!);
+    return TrackMiniMapInfoData(
+        markers: markers,
+        polyline: polyLines,
+        centerLat: center['lat']!,
+        centerLon: center['lon']!);
   }
 
   @override
@@ -130,7 +151,9 @@ class TrackInfoState extends State<TrackInfo> {
     return Ink(
         height: height,
         padding: const EdgeInsets.only(top: 20, bottom: 30),
-        color: widget.lightMode ? CustomColors.background : CustomColors.backgroundDark,
+        color: widget.lightMode
+            ? CustomColors.background
+            : CustomColors.backgroundDark,
         child: Center(
             child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -145,58 +168,93 @@ class TrackInfoState extends State<TrackInfo> {
                     itemBuilder: (context, index) {
                       return _loading
                           ? LoadingTrackInfo(lightMode: widget.lightMode)
-                          : Column(mainAxisAlignment: MainAxisAlignment.start, mainAxisSize: MainAxisSize.max, children: [
-                              TrackInfoTrackName(
-                                trackName: _currentTrack!.gpx!.trks.first.name.toString(),
-                                lightMode: widget.lightMode,
-                              ),
-                              Expanded(
-                                child: Container(
-                                    margin: const EdgeInsets.symmetric(horizontal: 20),
-                                    width: width,
-                                    child: ClipRRect(
-                                        borderRadius: const BorderRadius.all(Radius.circular(12)),
-                                        child: GoogleMap(
-                                            liteModeEnabled: true,
-                                            compassEnabled: false,
-                                            buildingsEnabled: false,
-                                            mapType: MapType.satellite,
-                                            mapToolbarEnabled: false,
-                                            myLocationButtonEnabled: false,
-                                            myLocationEnabled: false,
-                                            indoorViewEnabled: false,
-                                            zoomControlsEnabled: false,
-                                            zoomGesturesEnabled: false,
-                                            trafficEnabled: false,
-                                            scrollGesturesEnabled: false,
-                                            rotateGesturesEnabled: false,
-                                            polylines: mapInfo!.polyline,
-                                            markers: mapInfo!.markers,
-                                            initialCameraPosition: CameraPosition(
-                                              target: LatLng(mapInfo!.centerLat, mapInfo!.centerLon),
-                                              zoom: 13,
-                                            )))),
-                              ),
-                              Container(
-                                  margin: const EdgeInsets.symmetric(vertical: 20),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.max,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, mainAxisSize: MainAxisSize.max, children: [
-                                        TrackInfoTrackDistance(lightMode: widget.lightMode, distance: _currentTrack!.distance),
-                                        TrackInfoTrackTime(lightMode: widget.lightMode, totalTime: _totalTime, initTime: _initTime)
-                                      ]),
-                                      TrackInfoTrackAltitude(
-                                          lightMode: widget.lightMode,
-                                          altitudeTop: _currentTrack!.altitudeTop.toString(),
-                                          altitudeGain: _currentTrack!.altitudeGain.toString(),
-                                          altitudeMin: _currentTrack!.altitudeMin.toString(),
-                                          avgSlope: _currentTrack!.avgSlope.toInt().toString())
-                                    ],
-                                  ))
-                            ]);
+                          : Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                  TrackInfoTrackName(
+                                    trackName: _currentTrack!
+                                        .gpx!.trks.first.name
+                                        .toString(),
+                                    lightMode: widget.lightMode,
+                                  ),
+                                  Expanded(
+                                    child: Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 20),
+                                        width: width,
+                                        child: ClipRRect(
+                                            borderRadius:
+                                                const BorderRadius.all(
+                                                    Radius.circular(12)),
+                                            child: GoogleMap(
+                                                liteModeEnabled: true,
+                                                compassEnabled: false,
+                                                buildingsEnabled: false,
+                                                mapType: MapType.satellite,
+                                                mapToolbarEnabled: false,
+                                                myLocationButtonEnabled: false,
+                                                myLocationEnabled: false,
+                                                indoorViewEnabled: false,
+                                                zoomControlsEnabled: false,
+                                                zoomGesturesEnabled: false,
+                                                trafficEnabled: false,
+                                                scrollGesturesEnabled: false,
+                                                rotateGesturesEnabled: false,
+                                                polylines: mapInfo!.polyline,
+                                                markers: mapInfo!.markers,
+                                                initialCameraPosition:
+                                                    CameraPosition(
+                                                  target: LatLng(
+                                                      mapInfo!.centerLat,
+                                                      mapInfo!.centerLon),
+                                                  zoom: 13,
+                                                )))),
+                                  ),
+                                  Container(
+                                      margin: const EdgeInsets.symmetric(
+                                          vertical: 20),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        mainAxisSize: MainAxisSize.max,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              mainAxisSize: MainAxisSize.max,
+                                              children: [
+                                                TrackInfoTrackDistance(
+                                                    lightMode: widget.lightMode,
+                                                    distance: _currentTrack!
+                                                        .distance),
+                                                TrackInfoTrackTime(
+                                                    lightMode: widget.lightMode,
+                                                    totalTime: _totalTime,
+                                                    initTime: _initTime)
+                                              ]),
+                                          TrackInfoTrackAltitude(
+                                              lightMode: widget.lightMode,
+                                              altitudeTop: _currentTrack!
+                                                  .altitudeTop
+                                                  .toString(),
+                                              altitudeGain: _currentTrack!
+                                                  .altitudeGain
+                                                  .toString(),
+                                              altitudeMin: _currentTrack!
+                                                  .altitudeMin
+                                                  .toString(),
+                                              avgSlope:
+                                                  !_currentTrack!.avgSlope.isNaN
+                                                      ? _currentTrack!.avgSlope
+                                                          .toInt()
+                                                          .toString()
+                                                      : '')
+                                        ],
+                                      ))
+                                ]);
                     })),
             _trackList.length > 1
                 ? Row(
@@ -208,13 +266,20 @@ class TrackInfoState extends State<TrackInfo> {
                         height: 5,
                         decoration: BoxDecoration(
                             color: _currentTrackIndex == index
-                                ? (widget.lightMode ? CustomColors.subText : CustomColors.subTextDark)
-                                : (widget.lightMode ? CustomColors.faintedText : CustomColors.subText),
+                                ? (widget.lightMode
+                                    ? CustomColors.subText
+                                    : CustomColors.subTextDark)
+                                : (widget.lightMode
+                                    ? CustomColors.faintedText
+                                    : CustomColors.subText),
                             shape: BoxShape.circle),
                       );
                     }))
                 : const SizedBox(),
-            BottomSheetActions(actions: widget.actions, lightMode: widget.lightMode, loading: _loading)
+            BottomSheetActions(
+                actions: widget.actions,
+                lightMode: widget.lightMode,
+                loading: _loading)
           ],
         )));
   }

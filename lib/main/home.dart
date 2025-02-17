@@ -126,7 +126,7 @@ class HomeState extends State<Home> with TickerProviderStateMixin, WidgetsBindin
     }
   }
 
-  Future<bool> _onWillPop(bool didPop, BuildContext context) async {
+  Future<bool> _onWillPop(bool didPop, Object? result, BuildContext context) async {
     if (_currentTrack.isRecording) {
       bool? exitResult = await VieirosDialog().infoDialog(
           context,
@@ -147,7 +147,7 @@ class HomeState extends State<Home> with TickerProviderStateMixin, WidgetsBindin
   @override
   Widget build(BuildContext context) {
     return PopScope(
-        onPopInvoked: (didPop) => _onWillPop(didPop, context),
+        onPopInvokedWithResult: (didPop, result) => _onWillPop(didPop, result, context),
         child: Scaffold(
             resizeToAvoidBottomInset: false,
             body: TabBarView(physics: const NeverScrollableScrollPhysics(), controller: _tabController, children: _tabs),

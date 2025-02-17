@@ -351,9 +351,9 @@ class TracksState extends State<Tracks> {
   }
 
   void _loadIconMarkers() async {
-    BitmapDescriptor futureIconStart = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(100, 100)), 'assets/loaded_pin.png');
+    BitmapDescriptor futureIconStart = await BitmapDescriptor.asset(const ImageConfiguration(), 'assets/loaded_pin.png', width: 25);
     BitmapDescriptor futureIconEnd =
-        await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(100, 100)), 'assets/loaded_pin_end.png');
+        await BitmapDescriptor.asset(const ImageConfiguration(), 'assets/loaded_pin_end.png', width: 25);
     setState(() {
       _iconStart = futureIconStart;
       _iconEnd = futureIconEnd;
@@ -726,7 +726,7 @@ class TracksState extends State<Tracks> {
     if (launch) {
       await launchUrl(uri);
     } else {
-      if(context.mounted){
+      if(mounted){
         VieirosNotification().showNotification(context, 'tracks_open_maps_error', NotificationType.error);
       }
      throw 'Could not launch ${uri.toString()}';

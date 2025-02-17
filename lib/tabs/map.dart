@@ -51,7 +51,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   final _formKey = GlobalKey<FormState>();
   final _formKeyWaypointAdd = GlobalKey<FormState>();
   final _formKeyWaypointEdit = GlobalKey<FormState>();
-  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   bool offTrack = false;
   bool _showBearingButton = false;
   double _bearing = 0.0;
@@ -84,8 +85,10 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   }
 
   _initializeNotifications() async {
-    AndroidInitializationSettings initializationSettingsAndroid = const AndroidInitializationSettings('ic_stat_name');
-    final InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
+    AndroidInitializationSettings initializationSettingsAndroid =
+        const AndroidInitializationSettings('ic_stat_name');
+    final InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
     await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
@@ -103,11 +106,13 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
 
       final GoogleMapController controller = await _mapController.future;
 
-      Position locationData = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+      Position locationData = await Geolocator.getCurrentPosition(
+          locationSettings: LocationSettings(accuracy: LocationAccuracy.best));
       double? lat = locationData.latitude;
       double? lon = locationData.longitude;
       if (widget.loadedTrack.gpx == null) {
-        controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(lat, lon), zoom: 15.0)));
+        controller.animateCamera(CameraUpdate.newCameraPosition(
+            CameraPosition(target: LatLng(lat, lon), zoom: 15.0)));
       }
     } else {
       setState(() {
@@ -116,16 +121,23 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  addMarkerSet(LatLng latLng, bool isWayPoint, String? description, GoogleMapController controller) async {
+  addMarkerSet(LatLng latLng, bool isWayPoint, String? description,
+      GoogleMapController controller) async {
     BitmapDescriptor icon;
     if (!isWayPoint) {
       if (description == I18n.translate('map_track_pin_start')) {
-        icon = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(100, 100)), 'assets/loaded_pin.png');
+        icon = await BitmapDescriptor.asset(
+            createLocalImageConfiguration(context), 'assets/loaded_pin.png',
+            width: 25);
       } else {
-        icon = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(100, 100)), 'assets/loaded_pin_end.png');
+        icon = await BitmapDescriptor.asset(
+            createLocalImageConfiguration(context), 'assets/loaded_pin_end.png',
+            width: 25);
       }
     } else {
-      icon = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(100, 100)), 'assets/loaded_waypoint.png');
+      icon = await BitmapDescriptor.asset(
+          createLocalImageConfiguration(context), 'assets/loaded_waypoint.png',
+          width: 25);
     }
     MarkerId markerId = MarkerId(const Uuid().v4());
     Marker marker;
@@ -154,8 +166,10 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   clearTrack() {
     if (mounted) {
       setState(() {
-        _polyline.removeWhere((element) => element.polylineId.value.contains('loadedTrack'));
-        _markers.removeWhere((element) => !element.markerId.value.contains('##'));
+        _polyline.removeWhere(
+            (element) => element.polylineId.value.contains('loadedTrack'));
+        _markers
+            .removeWhere((element) => !element.markerId.value.contains('##'));
         for (int i = 0; i < _currentMarkers.length; i++) {
           _markers.add(_currentMarkers[i]);
         }
@@ -166,8 +180,11 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   navigateCurrentTrack() async {
     if (!widget.currentTrack.isRecording) {
       final GoogleMapController controller = await _mapController.future;
-      if (widget.loadedTrack.gpx != null && _polyline.isNotEmpty && _polyline.first.points.isNotEmpty) {
-        controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: _polyline.first.points.first, zoom: 14.0)));
+      if (widget.loadedTrack.gpx != null &&
+          _polyline.isNotEmpty &&
+          _polyline.first.points.isNotEmpty) {
+        controller.animateCamera(CameraUpdate.newCameraPosition(
+            CameraPosition(target: _polyline.first.points.first, zoom: 14.0)));
       }
     }
   }
@@ -180,7 +197,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
       List<Wpt> points = gpx.trks.first.trksegs.first.trkpts;
       for (int i = 0; i < gpx.wpts.length; i++) {
         if (gpx.wpts[i].lat == null || gpx.wpts[i].lon == null) return;
-        addMarkerSet(LatLng(gpx.wpts[i].lat!, gpx.wpts[i].lon!), true, gpx.wpts[i].name, controller);
+        addMarkerSet(LatLng(gpx.wpts[i].lat!, gpx.wpts[i].lon!), true,
+            gpx.wpts[i].name, controller);
       }
       String? gradientPolyline = Preferences().get("gradient_mode");
       int referenceDistance = 1000;
@@ -194,10 +212,14 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
       for (int i = 0; i < points.length - 1; i++) {
         pointsAux.add(LatLng(points[i].lat!, points[i].lon!));
         if (i > 0) {
-          distance = distance + Geolocator.distanceBetween(points[i].lat!, points[i].lon!, points[i - 1].lat!, points[i - 1].lon!);
+          distance = distance +
+              Geolocator.distanceBetween(points[i].lat!, points[i].lon!,
+                  points[i - 1].lat!, points[i - 1].lon!);
           if (distance > referenceDistance) {
             referenceDistance += 1000;
-            _setPKMarker(RecordedPosition(points[i].lat, points[i].lon, null, null), ((referenceDistance ~/ 1000) - 1).toString());
+            _setPKMarker(
+                RecordedPosition(points[i].lat, points[i].lon, null, null),
+                ((referenceDistance ~/ 1000) - 1).toString());
           }
           if (gradientPolyline != null && gradientPolyline == "slope") {
             if (distance >= slopeReferenceDistance) {
@@ -209,7 +231,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
               if (prevPoint != null) {
                 pointsAux.insert(0, LatLng(prevPoint.lat!, prevPoint.lon!));
               }
-              pointsAux = _setGradientPolyline(pointsAux, gradientColor, i.toString(), "slope");
+              pointsAux = _setGradientPolyline(
+                  pointsAux, gradientColor, i.toString(), "slope");
               prevPoint = points[i];
             }
           }
@@ -219,7 +242,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
               if (prevPoint != null) {
                 pointsAux.insert(0, LatLng(prevPoint.lat!, prevPoint.lon!));
               }
-              pointsAux = _setGradientPolyline(pointsAux, currentRange, i.toString(), "altitude");
+              pointsAux = _setGradientPolyline(
+                  pointsAux, currentRange, i.toString(), "altitude");
               currentRange = range;
               prevPoint = points[i];
             }
@@ -234,24 +258,33 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         int gradient = (slopeEnd - slopeStart).toInt();
         slopeStart = slopeEnd;
         String gradientColor = _checkGradient(gradient);
-        pointsAux = _setGradientPolyline(pointsAux, gradientColor, 'last', "slope");
+        pointsAux =
+            _setGradientPolyline(pointsAux, gradientColor, 'last', "slope");
       } else if (gradientPolyline != null && gradientPolyline == 'altitude') {
         currentRange = _checkRange(points.last, startingAltitude);
-        pointsAux = _setGradientPolyline(pointsAux, currentRange, 'last', "altitude");
+        pointsAux =
+            _setGradientPolyline(pointsAux, currentRange, 'last', "altitude");
       } else {
         List<LatLng> points = GpxHandler().getPointsFromGpx(widget.loadedTrack);
-        Polyline polyline = Polyline(polylineId: const PolylineId('loadedTrack'), points: points, width: 5, color: CustomColors.accent);
+        Polyline polyline = Polyline(
+            polylineId: const PolylineId('loadedTrack'),
+            points: points,
+            width: 5,
+            color: CustomColors.accent);
         if (mounted) {
           setState(() {
             _polyline.add(polyline);
           });
         }
       }
-      addMarkerSet(LatLng(points.first.lat!, points.first.lon!), false, I18n.translate('map_track_pin_start'), controller);
-      addMarkerSet(LatLng(points.last.lat!, points.last.lon!), false, I18n.translate('map_track_pin_finish'), controller);
+      addMarkerSet(LatLng(points.first.lat!, points.first.lon!), false,
+          I18n.translate('map_track_pin_start'), controller);
+      addMarkerSet(LatLng(points.last.lat!, points.last.lon!), false,
+          I18n.translate('map_track_pin_finish'), controller);
       if (points.isEmpty) return;
       if (widget.currentTrack.isRecording) return;
-      controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(points.first.lat!, points.first.lon!), zoom: 14.0)));
+      controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+          target: LatLng(points.first.lat!, points.first.lon!), zoom: 14.0)));
     }
   }
 
@@ -271,16 +304,26 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     return gradient.toString();
   }
 
-  List<LatLng> _setGradientPolyline(List<LatLng> points, String range, String index, String type) {
+  List<LatLng> _setGradientPolyline(
+      List<LatLng> points, String range, String index, String type) {
     Color color;
     if (type == 'slope') {
-      color = CustomColors.slopeGradient.where((element) => element['range'] == range).last['color'];
+      color = CustomColors.slopeGradient
+          .where((element) => element['range'] == range)
+          .last['color'];
     } else {
-      color = CustomColors.altitudeGradient.where((element) => element['range'] == range).last['color'];
+      color = CustomColors.altitudeGradient
+          .where((element) => element['range'] == range)
+          .last['color'];
     }
     String polIdSuffix = range + index;
     Polyline polyline = Polyline(
-        polylineId: PolylineId('loadedTrack$polIdSuffix'), points: points, width: 5, endCap: Cap.roundCap, startCap: Cap.roundCap, color: color);
+        polylineId: PolylineId('loadedTrack$polIdSuffix'),
+        points: points,
+        width: 5,
+        endCap: Cap.roundCap,
+        startCap: Cap.roundCap,
+        color: color);
     if (mounted) {
       setState(() {
         _polyline.add(polyline);
@@ -292,17 +335,22 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   centerMapView() async {
     final GoogleMapController controller = await _mapController.future;
     if (widget.currentTrack.positions.isNotEmpty) {
-      controller.animateCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(target: LatLng(widget.currentTrack.positions.last.latitude!, widget.currentTrack.positions.last.longitude!), zoom: 14.0)));
+      controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+          target: LatLng(widget.currentTrack.positions.last.latitude!,
+              widget.currentTrack.positions.last.longitude!),
+          zoom: 14.0)));
     }
   }
 
   startRecording() async {
-    VieirosNotification().showNotification(context, 'map_start_recording_message', NotificationType.info);
+    VieirosNotification().showNotification(
+        context, 'map_start_recording_message', NotificationType.info);
     widget.currentTrack.setRecording(true);
     widget.currentTrack.dateTime = DateTime.now();
     int referenceDistance = 1000;
-    BitmapDescriptor icon = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(100, 100)), 'assets/current_pin.png');
+    BitmapDescriptor icon = await BitmapDescriptor.asset(
+        createLocalImageConfiguration(context), 'assets/current_pin.png',
+        width: 25);
     Marker? marker;
     positionStream = Geolocator.getPositionStream(
             locationSettings: AndroidSettings(
@@ -313,17 +361,24 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                 foregroundNotificationConfig: ForegroundNotificationConfig(
                     notificationTitle: I18n.translate('map_notification_title'),
                     notificationText: I18n.translate('map_notification_desc'),
-                    notificationIcon: const AndroidResource(name: 'ic_stat_name', defType: 'drawable'),
+                    notificationIcon: const AndroidResource(
+                        name: 'ic_stat_name', defType: 'drawable'),
                     enableWakeLock: true)))
         .listen((position) {
       if (widget.currentTrack.isRecording) {
         List<RecordedPosition> positions = widget.currentTrack.positions;
         if (positions.isNotEmpty &&
-            Geolocator.distanceBetween(positions.last.latitude!, positions.last.longitude!, position.latitude, position.longitude) < 5) {
+            Geolocator.distanceBetween(
+                    positions.last.latitude!,
+                    positions.last.longitude!,
+                    position.latitude,
+                    position.longitude) <
+                5) {
           return;
         }
         _checkOffTrack();
-        widget.currentTrack.addPosition(RecordedPosition(position.latitude, position.longitude, position.altitude, position.timestamp));
+        widget.currentTrack.addPosition(RecordedPosition(position.latitude,
+            position.longitude, position.altitude, position.timestamp));
         Calc().setGain(widget.currentTrack);
         Calc().setTop(widget.currentTrack);
         Calc().setMin(widget.currentTrack);
@@ -331,7 +386,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         if (widget.currentTrack.positions.length == 1) {
           marker = Marker(
               markerId: const MarkerId('recordingPin##'),
-              position: LatLng(widget.currentTrack.positions.first.latitude!, widget.currentTrack.positions.first.longitude!),
+              position: LatLng(widget.currentTrack.positions.first.latitude!,
+                  widget.currentTrack.positions.first.longitude!),
               icon: icon);
         }
         int dist = widget.currentTrack.distance;
@@ -347,12 +403,19 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
           List<LatLng> points = widget.currentTrack.getPoints();
           setState(() {
             if (points.length == 1) {
-              Polyline recordingPolyline =
-                  Polyline(polylineId: const PolylineId('recordingPolyline'), points: points, width: 5, color: CustomColors.ownPath);
+              Polyline recordingPolyline = Polyline(
+                  polylineId: const PolylineId('recordingPolyline'),
+                  points: points,
+                  width: 5,
+                  color: CustomColors.ownPath);
               _polyline.add(recordingPolyline);
               _markers.add(marker!);
             } else {
-              _polyline.singleWhere((element) => element.polylineId.value == 'recordingPolyline').points.add(points.last);
+              _polyline
+                  .singleWhere((element) =>
+                      element.polylineId.value == 'recordingPolyline')
+                  .points
+                  .add(points.last);
             }
           });
         }
@@ -375,13 +438,17 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   }
 
   Future<Uint8List> _getBytesFromAsset(Uint8List b64Image, int width) async {
-    ui.Codec codec = await ui.instantiateImageCodec(b64Image, targetWidth: width);
+    ui.Codec codec =
+        await ui.instantiateImageCodec(b64Image, targetWidth: width);
     ui.FrameInfo fi = await codec.getNextFrame();
-    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+        .buffer
+        .asUint8List();
   }
 
   _setPKMarker(RecordedPosition? position, String distance) async {
-    List<dynamic> pksJSON = json.decode(await rootBundle.loadString('assets/pkMarkers.json'));
+    List<dynamic> pksJSON =
+        json.decode(await rootBundle.loadString('assets/pkMarkers.json'));
     String suffix = position != null ? 'l' : 'r';
     String baseB64 = '';
     String num1B64 = '';
@@ -400,12 +467,15 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
           num2B64 = base.marker;
         }
       }
-      final image1 = image.decodePng(await _getBytesFromAsset(base64Decode(baseB64), 65));
-      final image2 = image.decodePng(await _getBytesFromAsset(base64Decode(num1B64), 14));
-      final image3 = image.decodePng(await _getBytesFromAsset(base64Decode(num2B64), 14));
+      final image1 =
+          image.decodePng(await _getBytesFromAsset(base64Decode(baseB64), 65));
+      final image2 =
+          image.decodePng(await _getBytesFromAsset(base64Decode(num1B64), 14));
+      final image3 =
+          image.decodePng(await _getBytesFromAsset(base64Decode(num2B64), 14));
       image.compositeImage(image1!, image2!, dstX: 18, dstY: 21);
       image.compositeImage(image1, image3!, dstX: 32, dstY: 21);
-      markerIcon = await _getBytesFromAsset(image.encodePng(image1), 65);
+      markerIcon = await _getBytesFromAsset(image.encodePng(image1), 28);
     } else {
       for (int i = 0; i < pksJSON.length; i++) {
         PKMarker base = PKMarker.fromJson(pksJSON[i]);
@@ -416,23 +486,30 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
           num1B64 = base.marker;
         }
       }
-      final image1 = image.decodePng(await _getBytesFromAsset(base64Decode(baseB64), 65));
-      final image2 = image.decodePng(await _getBytesFromAsset(base64Decode(num1B64), 14));
+      final image1 =
+          image.decodePng(await _getBytesFromAsset(base64Decode(baseB64), 65));
+      final image2 =
+          image.decodePng(await _getBytesFromAsset(base64Decode(num1B64), 14));
       image.compositeImage(image1!, image2!, dstX: 25, dstY: 21);
-      markerIcon = await _getBytesFromAsset(image.encodePng(image1), 65);
+      markerIcon = await _getBytesFromAsset(image.encodePng(image1), 28);
     }
-    BitmapDescriptor icon = BitmapDescriptor.fromBytes(markerIcon);
+    BitmapDescriptor icon = BitmapDescriptor.bytes(markerIcon);
     Marker marker;
     if (position != null) {
-      marker =
-          Marker(markerId: MarkerId('km$distance'), position: LatLng(position.latitude! - 0.000008, position.longitude!), zIndex: 1000, icon: icon);
+      marker = Marker(
+          markerId: MarkerId('km$distance'),
+          position: LatLng(position.latitude! - 0.000008, position.longitude!),
+          zIndex: 1000,
+          icon: icon);
       setState(() {
         _markers.add(marker);
       });
     } else {
       marker = Marker(
           markerId: MarkerId('km$distance##'),
-          position: LatLng(widget.currentTrack.positions.last.latitude! - 0.000008, widget.currentTrack.positions.last.longitude!),
+          position: LatLng(
+              widget.currentTrack.positions.last.latitude! - 0.000008,
+              widget.currentTrack.positions.last.longitude!),
           zIndex: 1000,
           icon: icon);
       setState(() {
@@ -444,10 +521,14 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   _checkOffTrack() {
     if (widget.loadedTrack.gpx != null) {
       List<Wpt> trackPoints = widget.loadedTrack.gpx!.trks[0].trksegs[0].trkpts;
-      if (widget.loadedTrack.gpx != null && widget.currentTrack.positions.isNotEmpty) {
+      if (widget.loadedTrack.gpx != null &&
+          widget.currentTrack.positions.isNotEmpty) {
         for (int i = 0; i < trackPoints.length; i++) {
           double distance = Geolocator.distanceBetween(
-              widget.currentTrack.positions.last.latitude!, widget.currentTrack.positions.last.longitude!, trackPoints[i].lat!, trackPoints[i].lon!);
+              widget.currentTrack.positions.last.latitude!,
+              widget.currentTrack.positions.last.longitude!,
+              trackPoints[i].lat!,
+              trackPoints[i].lon!);
           if (distance < 30) {
             offTrack = false;
             return;
@@ -468,7 +549,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         context,
         'map_waypoint',
         {
-          'common_save': () => _addCurrentMarker(latLng, name, false, lightMode, null),
+          'common_save': () =>
+              _addCurrentMarker(latLng, name, false, lightMode, null),
           'common_cancel': () => Navigator.pop(context, 'map_waypoint'),
         },
         form: Form(
@@ -480,7 +562,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
             )));
   }
 
-  _addCurrentMarker(LatLng latLng, String name, bool edit, bool lightMode, MarkerId? markerId) async {
+  _addCurrentMarker(LatLng latLng, String name, bool edit, bool lightMode,
+      MarkerId? markerId) async {
     if (edit) {
       if (!_formKeyWaypointEdit.currentState!.validate()) return;
       Navigator.pop(context, I18n.translate('common_edit'));
@@ -488,7 +571,9 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
       if (!_formKeyWaypointAdd.currentState!.validate()) return;
       Navigator.pop(context, I18n.translate('common_ok'));
     }
-    BitmapDescriptor icon = await BitmapDescriptor.fromAssetImage(const ImageConfiguration(size: Size(100, 100)), 'assets/current_waypoint.png');
+    BitmapDescriptor icon = await BitmapDescriptor.asset(
+        createLocalImageConfiguration(context), 'assets/current_waypoint.png',
+        width: 25);
     MarkerId mrkId;
     if (edit && markerId != null) {
       mrkId = markerId;
@@ -504,8 +589,10 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     if (mounted) {
       setState(() {
         if (edit) {
-          _markers.removeWhere((element) => element.markerId.value == mrkId.value);
-          _currentMarkers.removeWhere((element) => element.markerId.value == mrkId.value);
+          _markers
+              .removeWhere((element) => element.markerId.value == mrkId.value);
+          _currentMarkers
+              .removeWhere((element) => element.markerId.value == mrkId.value);
         }
         _currentMarkers.add(marker);
         _markers.add(marker);
@@ -513,26 +600,34 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  _editMarkerDialog(MarkerId markerId, LatLng latLng, String name, bool lightMode) {
+  _editMarkerDialog(
+      MarkerId markerId, LatLng latLng, String name, bool lightMode) {
     VieirosDialog().inputDialog(
         context,
         'map_waypoint',
         {
           'common_cancel': () => Navigator.pop(context, 'map_waypoint'),
           'common_delete': () => _removeMarker(markerId),
-          'common_edit': () => _addCurrentMarker(latLng, name, true, lightMode, markerId)
+          'common_edit': () =>
+              _addCurrentMarker(latLng, name, true, lightMode, markerId)
         },
         form: Form(
             key: _formKeyWaypointEdit,
-            child: VieirosTextInput(lightMode: lightMode, hintText: 'common_name', initialValue: name, onChanged: (value) => {name = value})));
+            child: VieirosTextInput(
+                lightMode: lightMode,
+                hintText: 'common_name',
+                initialValue: name,
+                onChanged: (value) => {name = value})));
   }
 
   _removeMarker(MarkerId markerId) {
     Navigator.pop(context, I18n.translate('common_delete'));
     if (mounted) {
       setState(() {
-        _markers.removeWhere((element) => element.markerId.value == markerId.value);
-        _currentMarkers.removeWhere((element) => element.markerId.value == markerId.value);
+        _markers
+            .removeWhere((element) => element.markerId.value == markerId.value);
+        _currentMarkers
+            .removeWhere((element) => element.markerId.value == markerId.value);
       });
     }
   }
@@ -558,7 +653,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
   _stopAndSave(String name) async {
     if (!_formKey.currentState!.validate()) return;
     positionStream.cancel();
-    Gpx gpx = GpxHandler().createGpx(widget.currentTrack, name, currentMarkers: _currentMarkers);
+    Gpx gpx = GpxHandler()
+        .createGpx(widget.currentTrack, name, currentMarkers: _currentMarkers);
     String gpxString = GpxWriter().asString(gpx, pretty: true);
     //add namespaces
     gpxString = gpxString.replaceFirst(RegExp('creator="vieiros"'),
@@ -567,20 +663,24 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     String? result = await FilesHandler().writeFile(gpxString, name, '', true);
     if (result == '###file_exists') {
       if (!mounted) return;
-      return VieirosNotification().showNotification(context, I18n.translate('map_save_error_file_exists'), NotificationType.error);
+      return VieirosNotification().showNotification(context,
+          I18n.translate('map_save_error_file_exists'), NotificationType.error);
     }
     if (!mounted) return;
     Navigator.pop(context, I18n.translate('common_ok'));
     if (mounted) {
       setState(() {
-        _polyline.removeWhere((element) => element.polylineId.value == 'recordingPolyline');
+        _polyline.removeWhere(
+            (element) => element.polylineId.value == 'recordingPolyline');
         widget.currentTrack.clear();
         for (int i = 0; i < _currentMarkers.length; i++) {
-          _markers.removeWhere((element) => element.markerId.value == _currentMarkers[i].markerId.value);
+          _markers.removeWhere((element) =>
+              element.markerId.value == _currentMarkers[i].markerId.value);
         }
         _currentMarkers = [];
         offTrack = false;
-        _markers.removeWhere((element) => element.markerId.value.contains('##'));
+        _markers
+            .removeWhere((element) => element.markerId.value.contains('##'));
         _currentMarkers = [];
       });
     }
@@ -590,14 +690,17 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     Navigator.pop(context, 'Stop and discard');
     if (mounted) {
       setState(() {
-        _polyline.removeWhere((element) => element.polylineId.value == 'recordingPolyline');
+        _polyline.removeWhere(
+            (element) => element.polylineId.value == 'recordingPolyline');
         widget.currentTrack.clear();
         offTrack = false;
         for (int i = 0; i < _currentMarkers.length; i++) {
-          _markers.removeWhere((element) => element.markerId.value == _currentMarkers[i].markerId.value);
+          _markers.removeWhere((element) =>
+              element.markerId.value == _currentMarkers[i].markerId.value);
         }
         _currentMarkers = [];
-        _markers.removeWhere((element) => element.markerId.value.contains('##'));
+        _markers
+            .removeWhere((element) => element.markerId.value.contains('##'));
       });
     }
   }
@@ -606,15 +709,20 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     setState(() {
       offTrack = true;
     });
-    const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails('vieiros_notification_id', 'Vieiros',
-        channelDescription: 'Vieiros notifications',
-        importance: Importance.max,
-        priority: Priority.high,
-        color: CustomColors.accent,
-        ticker: 'ticker');
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails('vieiros_notification_id', 'Vieiros',
+            channelDescription: 'Vieiros notifications',
+            importance: Importance.max,
+            priority: Priority.high,
+            color: CustomColors.accent,
+            ticker: 'ticker');
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
     await _flutterLocalNotificationsPlugin.show(
-        0, I18n.translate('map_off_track_notification_title'), I18n.translate('map_off_track_notification_desc'), platformChannelSpecifics,
+        0,
+        I18n.translate('map_off_track_notification_title'),
+        I18n.translate('map_off_track_notification_desc'),
+        platformChannelSpecifics,
         payload: 'off track');
   }
 
@@ -623,8 +731,11 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     LatLngBounds latLngBounds = await controller.getVisibleRegion();
     controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
         target: LatLng(
-          (latLngBounds.northeast.latitude + latLngBounds.southwest.latitude) / 2,
-          (latLngBounds.northeast.longitude + latLngBounds.southwest.longitude) / 2,
+          (latLngBounds.northeast.latitude + latLngBounds.southwest.latitude) /
+              2,
+          (latLngBounds.northeast.longitude +
+                  latLngBounds.southwest.longitude) /
+              2,
         ),
         bearing: 0.0,
         zoom: 14.0)));
@@ -632,9 +743,11 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
 
   _moveCurrentLocation() async {
     final GoogleMapController controller = await _mapController.future;
-    Position locationData = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
-    controller
-        .animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(locationData.latitude, locationData.longitude), zoom: 14.0)));
+    Position locationData = await Geolocator.getCurrentPosition(
+        locationSettings: LocationSettings(accuracy: LocationAccuracy.best));
+    controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+        target: LatLng(locationData.latitude, locationData.longitude),
+        zoom: 14.0)));
   }
 
   _onCameraMove(CameraPosition camera) async {
@@ -671,22 +784,31 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                     Container(
                         margin: const EdgeInsets.symmetric(vertical: 20),
                         child: Text(I18n.translate('map_permissions_request'),
-                            style: TextStyle(color: lightMode ? CustomColors.subText : CustomColors.subTextDark))),
-                    ElevatedButton(onPressed: _refreshTab, child: Text(I18n.translate('map_grant_permissions')))
+                            style: TextStyle(
+                                color: lightMode
+                                    ? CustomColors.subText
+                                    : CustomColors.subTextDark))),
+                    ElevatedButton(
+                        onPressed: _refreshTab,
+                        child: Text(I18n.translate('map_grant_permissions')))
                   ],
                 ))
             : _showMap
                 ? Scaffold(
-                    floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+                    floatingActionButtonLocation:
+                        FloatingActionButtonLocation.endFloat,
                     floatingActionButton: FloatingActionButton(
                       heroTag: null,
-                      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
+                      shape: const RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.all(Radius.circular(16.0))),
                       onPressed: () => _onFabPressed(lightMode),
                       child: _fabIcon,
                     ),
                     body: Scaffold(
                         body: GoogleMap(
-                          gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                          gestureRecognizers: <Factory<
+                              OneSequenceGestureRecognizer>>{
                             Factory<OneSequenceGestureRecognizer>(
                               () => EagerGestureRecognizer(),
                             ),
@@ -694,7 +816,8 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                           mapType: MapType.hybrid,
                           mapToolbarEnabled: false,
                           buildingsEnabled: false,
-                          initialCameraPosition: const CameraPosition(target: LatLng(43.463305, -8.273529), zoom: 15.0),
+                          initialCameraPosition: const CameraPosition(
+                              target: LatLng(43.463305, -8.273529), zoom: 15.0),
                           myLocationEnabled: true,
                           myLocationButtonEnabled: false,
                           trafficEnabled: false,
@@ -703,14 +826,16 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                           markers: _markers,
                           onCameraMove: _onCameraMove,
                           zoomControlsEnabled: false,
-                          onLongPress: (latLng) => _currentMarkerDialog(latLng, lightMode),
+                          onLongPress: (latLng) =>
+                              _currentMarkerDialog(latLng, lightMode),
                           onMapCreated: (GoogleMapController controller) {
                             if (!_mapController.isCompleted) {
                               _mapController.complete(controller);
                             }
                           },
                         ),
-                        floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
+                        floatingActionButtonLocation:
+                            FloatingActionButtonLocation.miniEndTop,
                         floatingActionButton: Padding(
                             padding: const EdgeInsets.only(top: 20),
                             child: Column(
@@ -720,9 +845,11 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                                 FloatingActionButton(
                                   elevation: 0,
                                   mini: true,
-                                  backgroundColor: const Color.fromARGB(95, 255, 255, 255),
+                                  backgroundColor:
+                                      const Color.fromARGB(95, 255, 255, 255),
                                   onPressed: _moveCurrentLocation,
-                                  child: const Icon(Icons.my_location, color: CustomColors.trackBackgroundDark),
+                                  child: const Icon(Icons.my_location,
+                                      color: CustomColors.trackBackgroundDark),
                                 ),
                                 Transform.rotate(
                                     angle: _bearing,
@@ -730,10 +857,17 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                                       elevation: 0,
                                       mini: true,
                                       enableFeedback: _showBearingButton,
-                                      backgroundColor: _showBearingButton ? const Color.fromARGB(95, 255, 255, 255) : Colors.transparent,
-                                      onPressed: _showBearingButton ? _resetBearing : null,
-                                      child:
-                                          Icon(Icons.navigation, color: _showBearingButton ? CustomColors.trackBackgroundDark : Colors.transparent),
+                                      backgroundColor: _showBearingButton
+                                          ? const Color.fromARGB(
+                                              95, 255, 255, 255)
+                                          : Colors.transparent,
+                                      onPressed: _showBearingButton
+                                          ? _resetBearing
+                                          : null,
+                                      child: Icon(Icons.navigation,
+                                          color: _showBearingButton
+                                              ? CustomColors.trackBackgroundDark
+                                              : Colors.transparent),
                                     ))
                               ],
                             ))))
