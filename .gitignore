@@ -26,6 +26,7 @@ lib/generated_plugin_registrant.dart
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
 **/android/app/.cxx/
+**/android/.idea/
 
 
 # iOS/XCode related
@@ -74,7 +75,6 @@ lib/generated_plugin_registrant.dart
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
-**/android/.idea
 
 # AWS User-specific
 .idea/**/aws.xml
