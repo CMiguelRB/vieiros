@@ -25,7 +25,7 @@ dependencies:
 
   flutter_local_notifications: ^19.3.0
   flutter_tts: ^4.2.3
-  fl_chart: ^0.70.2
+  fl_chart: ^1.0.0
   geolocator: ^13.0.2
   google_maps_flutter: ^2.6.1
   gpx: ^2.2.2
