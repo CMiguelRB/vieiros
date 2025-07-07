@@ -499,7 +499,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
       marker = Marker(
           markerId: MarkerId('km$distance'),
           position: LatLng(position.latitude! - 0.000008, position.longitude!),
-          zIndex: 1000,
+          zIndexInt: 1000,
           icon: icon);
       setState(() {
         _markers.add(marker);
@@ -510,7 +510,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
           position: LatLng(
               widget.currentTrack.positions.last.latitude! - 0.000008,
               widget.currentTrack.positions.last.longitude!),
-          zIndex: 1000,
+          zIndexInt: 1000,
           icon: icon);
       setState(() {
         _markers.add(marker);

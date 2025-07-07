@@ -9,7 +9,7 @@ publish_to: 'none'
 # A version number is three numbers separated by dots, like 1.2.43
 # followed by an optional build number separated by a +.
 # Both the version and the builder number may be overridden in flutter
-version: 1.5.8+158
+version: 1.5.9+159
 
 environment:
   sdk: ^3.5.0
@@ -26,13 +26,13 @@ dependencies:
   flutter_local_notifications: ^19.3.0
   flutter_tts: ^4.2.3
   fl_chart: ^1.0.0
-  geolocator: ^13.0.2
+  geolocator: ^14.0.2
   google_maps_flutter: ^2.6.1
   gpx: ^2.2.2
   image: ^4.1.7
   intl: ^0.20.2
   path_provider: ^2.1.3
-  permission_handler: ^11.3.1
+  permission_handler: ^12.0.0+1
   provider: ^6.1.2
   share_plus: ^11.0.0
   sunrise_sunset_calc: ^3.0.0
