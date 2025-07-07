@@ -312,6 +312,7 @@ android/.idea/compiler.xml
 android/.idea/workspace.xml
 android/.idea/caches/deviceStreaming.xml
 
+.bats/
 
-start_emulator.bat
-app_uninstall.bat
+start_emulator*
+app_uninstall*
