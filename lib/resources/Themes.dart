@@ -60,7 +60,6 @@ class Themes {
           ElevatedButtonThemeData(style: ElevatedButton.styleFrom(foregroundColor: Colors.white, backgroundColor: CustomColors.accent)),
       floatingActionButtonTheme:
           const FloatingActionButtonThemeData(foregroundColor: Colors.white, backgroundColor: CustomColors.accent, elevation: 2),
-      indicatorColor: CustomColors.accent,
       scaffoldBackgroundColor: CustomColors.background,
       navigationBarTheme: NavigationBarThemeData(
           surfaceTintColor: CustomColors.background,
@@ -83,7 +82,7 @@ class Themes {
         bodyLarge: TextStyle(fontSize: 14.0, fontFamily: 'Lato', color: Colors.black87),
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
-      dialogTheme: const DialogTheme(
+      dialogTheme: const DialogThemeData(
           backgroundColor: CustomColors.background, elevation: 2, shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(24)))),
       snackBarTheme: const SnackBarThemeData(contentTextStyle: TextStyle(color: CustomColors.background)),
       segmentedButtonTheme: const SegmentedButtonThemeData(style: ButtonStyle(
@@ -91,7 +90,7 @@ class Themes {
         foregroundColor: WidgetStatePropertyAll(Colors.black),
         side: WidgetStatePropertyAll(BorderSide(color: CustomColors.background)),
       )),
-      bottomAppBarTheme: const BottomAppBarTheme(color: CustomColors.background));
+      bottomAppBarTheme: const BottomAppBarTheme(color: CustomColors.background), tabBarTheme: TabBarThemeData(indicatorColor: CustomColors.accent));
 
   static final darkTheme = ThemeData(
       useMaterial3: true,
@@ -112,7 +111,6 @@ class Themes {
           ElevatedButtonThemeData(style: ElevatedButton.styleFrom(foregroundColor: Colors.white, backgroundColor: CustomColors.accent)),
       floatingActionButtonTheme:
           const FloatingActionButtonThemeData(foregroundColor: Colors.white, backgroundColor: CustomColors.accent, elevation: 2),
-      indicatorColor: CustomColors.accent,
       buttonTheme: const ButtonThemeData(
         buttonColor: CustomColors.accent,
         textTheme: ButtonTextTheme.primary,
@@ -138,7 +136,7 @@ class Themes {
         bodyLarge: TextStyle(fontSize: 14.0, fontFamily: 'Lato', color: Colors.white),
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
-      dialogTheme: const DialogTheme(
+      dialogTheme: const DialogThemeData(
           backgroundColor: CustomColors.backgroundDark,
           elevation: 2,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(24)))),
@@ -147,5 +145,5 @@ class Themes {
         foregroundColor: WidgetStatePropertyAll(CustomColors.subTextDark),
         side: WidgetStatePropertyAll(BorderSide(color: CustomColors.backgroundDark)),
       )),
-      snackBarTheme: const SnackBarThemeData(contentTextStyle: TextStyle(color: CustomColors.background)));
+      snackBarTheme: const SnackBarThemeData(contentTextStyle: TextStyle(color: CustomColors.background)), tabBarTheme: TabBarThemeData(indicatorColor: CustomColors.accent));
 }

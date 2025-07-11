@@ -42,7 +42,7 @@ class MoveEntityComponentState extends State<MoveEntityComponent> {
     _setMoveDirectory(widget.rootPath, false);
   }
 
-  _setMoveDirectory(String directoryPath, bool callParent) async {
+  Future<void> _setMoveDirectory(String directoryPath, bool callParent) async {
     if (_animatedListKey.currentState != null) {
       _animatedListKey = GlobalKey<AnimatedListState>();
     }
@@ -85,7 +85,7 @@ class MoveEntityComponentState extends State<MoveEntityComponent> {
     }
   }
 
-  _goBack() {
+  void _goBack() {
     Directory directory = Directory(_currentDirectory);
     _setMoveDirectory(directory.parent.path, true);
     setState(() {

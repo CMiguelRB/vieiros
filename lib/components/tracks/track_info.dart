@@ -54,7 +54,7 @@ class TrackInfoState extends State<TrackInfo> {
     }
   }
 
-  _onIndexChange({required int value}) {
+  void _onIndexChange({required int value}) {
     setTrackList(tracks: _trackList, index: value);
     widget.onIndexChange(value: value);
   }

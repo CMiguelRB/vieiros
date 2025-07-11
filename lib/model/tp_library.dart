@@ -9,7 +9,7 @@ class TPLibrary {
     return TPLibrary(expanded: json['expanded'], title: json['title'], license: json['license']);
   }
 
-  setExpanded(value) {
+  void setExpanded(bool value) {
     expanded = value;
   }
 

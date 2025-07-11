@@ -20,7 +20,7 @@ class Settings extends StatefulWidget {
 
 class SettingsState extends State<Settings> {
   bool _voiceAlerts = true;
-  final String _version = 'v1.5.9';
+  final String _version = 'v1.5.10';
   String? _themeSelectValue = 'system';
   String? _themeSelectTag = '';
   String? _gradientSelectedValue = 'none';
@@ -71,7 +71,7 @@ class SettingsState extends State<Settings> {
     super.dispose();
   }
 
-  _getLicenses() async {
+  Future<void> _getLicenses() async {
     List<dynamic> tpJSON = json.decode(await rootBundle.loadString('assets/licenses.json'));
     setState(() {
       for (int i = 0; i < tpJSON.length; i++) {
@@ -80,7 +80,7 @@ class SettingsState extends State<Settings> {
     });
   }
 
-  _onChangeDarkMode(Map<String, String> element, context) {
+  void _onChangeDarkMode(Map<String, String> element, context) {
     Preferences().set("dark_mode", element['value']!);
     final provider = Provider.of<ThemeProvider>(context, listen: false);
     provider.setThemeMode(element['value']);
@@ -90,7 +90,7 @@ class SettingsState extends State<Settings> {
     });
   }
 
-  _onChangeGradientMode(Map<String, String> element, context) {
+  void _onChangeGradientMode(Map<String, String> element, context) {
     Preferences().set("gradient_mode", element['value']!);
     setState(() {
       _gradientSelectedValue = element['value'];
@@ -98,7 +98,7 @@ class SettingsState extends State<Settings> {
     });
   }
 
-  _onChangeSwitchValue(value, context, element) {
+  void _onChangeSwitchValue(bool value, String element) {
     setState(() {
       switch (element) {
         case "voice_alerts":
@@ -109,7 +109,7 @@ class SettingsState extends State<Settings> {
     });
   }
 
-  closeThirdParties() {
+  void closeThirdParties() {
     setState(() {
       tpOpen = false;
       for (int i = 0; i < thirdParties.length; i++) {
@@ -119,7 +119,7 @@ class SettingsState extends State<Settings> {
     });
   }
 
-  _showThirdParties(bool lightMode) {
+  void _showThirdParties(bool lightMode) {
     setState(() {
       tpOpen = true;
     });
@@ -216,7 +216,7 @@ class SettingsState extends State<Settings> {
               child: Text(I18n.translate('settings_alerts'), style: const TextStyle(fontSize: 14, color: CustomColors.accent))),
           VieirosSwitch(
               lightMode: lightMode,
-              onChanged: (value, context) => _onChangeSwitchValue(value, context, 'voice_alerts'),
+              onChanged: (value, context) => _onChangeSwitchValue(value, 'voice_alerts'),
               value: _voiceAlerts,
               titleTag: 'settings_voice_alerts',
               descTag: 'settings_voice_alerts_desc'),

@@ -120,7 +120,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  _getDaylight() async {
+  Future<void> _getDaylight() async {
     if (widget.currentTrack.isRecording) {
       _sunset = getSunriseSunset(
               widget.currentTrack.positions.last.latitude!,
@@ -152,7 +152,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  loadTrack(path) async {
+  Future<void> loadTrack(String? path) async {
     await widget.loadedTrack.loadTrack(path);
     _loadTrackData();
   }
@@ -260,7 +260,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  clearLoadedChart() {
+  void clearLoadedChart() {
     _altitudeDataLoaded = [];
   }
 
@@ -287,7 +287,7 @@ class InfoState extends State<Info> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  _slidingStateChanged(Set value) {
+  void _slidingStateChanged(Set value) {
     if (mounted) {
       setState(() {
         currentDisplaySet = value.first;

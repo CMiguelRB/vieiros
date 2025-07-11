@@ -12,12 +12,12 @@ class CurrentTrack extends Track {
   final List<Waypoint> waypoints = [];
   final StreamController event = StreamController.broadcast();
 
-  setRecording(willBeRecording) {
+  void setRecording(bool willBeRecording) {
     isRecording = willBeRecording;
     event.add('recording status');
   }
 
-  void addPosition(position) {
+  void addPosition(RecordedPosition position) {
     positions.add(position);
     event.add('added position');
   }

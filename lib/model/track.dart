@@ -89,7 +89,7 @@ class Track {
     avgSlope = slope;
   }
 
-  clear() {}
+  void clear() {}
 
   Track();
 }

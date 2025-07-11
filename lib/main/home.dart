@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vieiros/components/vieiros_dialog.dart';
 import 'package:vieiros/model/loaded_track.dart';
@@ -20,8 +21,10 @@ class Home extends StatefulWidget {
   HomeState createState() => HomeState();
 }
 
-class HomeState extends State<Home> with TickerProviderStateMixin, WidgetsBindingObserver {
+class HomeState extends State<Home>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   int _tabIndex = 0;
+  bool _canPop = false;
 
   late List<Widget> _tabs;
   late TabController _tabController;
@@ -38,23 +41,37 @@ class HomeState extends State<Home> with TickerProviderStateMixin, WidgetsBindin
     WidgetsBinding.instance.addObserver(this);
     _initTracksFolder();
     _tabs = <Widget>[
-      Tracks(key: _trackKey, toTabIndex: _onTabItemTapped, currentTrack: _currentTrack, loadedTrack: widget.loadedTrack, clearTrack: _clearTrack),
-      Map(key: _mapKey, currentTrack: _currentTrack, loadedTrack: widget.loadedTrack),
-      Info(key: _infoKey, currentTrack: _currentTrack, loadedTrack: widget.loadedTrack),
+      Tracks(
+          key: _trackKey,
+          toTabIndex: _onTabItemTapped,
+          currentTrack: _currentTrack,
+          loadedTrack: widget.loadedTrack,
+          clearTrack: _clearTrack),
+      Map(
+          key: _mapKey,
+          currentTrack: _currentTrack,
+          loadedTrack: widget.loadedTrack),
+      Info(
+          key: _infoKey,
+          currentTrack: _currentTrack,
+          loadedTrack: widget.loadedTrack),
       Settings(key: _settingsKey)
     ];
-    _tabController = TabController(vsync: this, length: _tabs.length, initialIndex: _tabIndex);
+    _tabController = TabController(
+        vsync: this, length: _tabs.length, initialIndex: _tabIndex);
   }
 
-  _initTracksFolder() async {
+  Future<void> _initTracksFolder() async {
     Directory appFolder = await getApplicationDocumentsDirectory();
     Directory tracksFolder = Directory('${appFolder.path}/tracks');
     if (!tracksFolder.existsSync()) {
       tracksFolder.createSync();
       List<FileSystemEntity> files = appFolder.listSync();
       for (int i = 0; i < files.length; i++) {
-        if (FileSystemEntity.isFileSync(files[i].path) && files[i].path.endsWith('.gpx')) {
-          files[i].rename('${appFolder.path}/tracks/${files[i].path.split('/')[files[i].path.split('/').length - 1]}');
+        if (FileSystemEntity.isFileSync(files[i].path) &&
+            files[i].path.endsWith('.gpx')) {
+          files[i].rename(
+              '${appFolder.path}/tracks/${files[i].path.split('/')[files[i].path.split('/').length - 1]}');
         }
       }
     }
@@ -68,7 +85,8 @@ class HomeState extends State<Home> with TickerProviderStateMixin, WidgetsBindin
   }
 
   void _onTabItemTapped(int index) async {
-    if (_settingsKey.currentState != null && _settingsKey.currentState!.tpOpen) {
+    if (_settingsKey.currentState != null &&
+        _settingsKey.currentState!.tpOpen) {
       _settingsKey.currentState!.closeThirdParties();
     }
     if (index == 1) {
@@ -126,7 +144,7 @@ class HomeState extends State<Home> with TickerProviderStateMixin, WidgetsBindin
     }
   }
 
-  Future<bool> _onWillPop(bool didPop, Object? result, BuildContext context) async {
+  void _onWillPop(bool didPop, Object? result, BuildContext context) async {
     if (_currentTrack.isRecording) {
       bool? exitResult = await VieirosDialog().infoDialog(
           context,
@@ -136,31 +154,49 @@ class HomeState extends State<Home> with TickerProviderStateMixin, WidgetsBindin
             'common_cancel': () => Navigator.of(context).pop(false),
           },
           bodyTag: 'app_close_warning');
-      return exitResult ?? false;
+      if (exitResult ?? false) {
+        SystemNavigator.pop();
+      }
     } else if (_trackKey.currentState != null) {
-      return await _trackKey.currentState!.navigateUp();
+      if (await _trackKey.currentState!.navigateUp()) {
+        SystemNavigator.pop();
+      }
     } else {
-      return true;
+      SystemNavigator.pop();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-        onPopInvokedWithResult: (didPop, result) => _onWillPop(didPop, result, context),
+        canPop: _canPop,
+        onPopInvokedWithResult: (didPop, result) =>
+            _onWillPop(didPop, result, context),
         child: Scaffold(
             resizeToAvoidBottomInset: false,
-            body: TabBarView(physics: const NeverScrollableScrollPhysics(), controller: _tabController, children: _tabs),
-            bottomNavigationBar: NavigationBar(selectedIndex: _tabIndex, onDestinationSelected: _onTabItemTapped, destinations: <Widget>[
-              NavigationDestination(icon: const Icon(Icons.timeline_outlined), label: I18n.translate('appbar_tab_tracks')),
-              NavigationDestination(
-                  icon: const Icon(Icons.terrain_outlined), selectedIcon: const Icon(Icons.terrain), label: I18n.translate('appbar_tab_map')),
-              NavigationDestination(
-                  icon: const Icon(Icons.insert_chart_outlined),
-                  selectedIcon: const Icon(Icons.insert_chart),
-                  label: I18n.translate('appbar_tab_info')),
-              NavigationDestination(
-                  icon: const Icon(Icons.settings_outlined), selectedIcon: const Icon(Icons.settings), label: I18n.translate('appbar_tab_settings'))
-            ])));
+            body: TabBarView(
+                physics: const NeverScrollableScrollPhysics(),
+                controller: _tabController,
+                children: _tabs),
+            bottomNavigationBar: NavigationBar(
+                selectedIndex: _tabIndex,
+                onDestinationSelected: _onTabItemTapped,
+                destinations: <Widget>[
+                  NavigationDestination(
+                      icon: const Icon(Icons.timeline_outlined),
+                      label: I18n.translate('appbar_tab_tracks')),
+                  NavigationDestination(
+                      icon: const Icon(Icons.terrain_outlined),
+                      selectedIcon: const Icon(Icons.terrain),
+                      label: I18n.translate('appbar_tab_map')),
+                  NavigationDestination(
+                      icon: const Icon(Icons.insert_chart_outlined),
+                      selectedIcon: const Icon(Icons.insert_chart),
+                      label: I18n.translate('appbar_tab_info')),
+                  NavigationDestination(
+                      icon: const Icon(Icons.settings_outlined),
+                      selectedIcon: const Icon(Icons.settings),
+                      label: I18n.translate('appbar_tab_settings'))
+                ])));
   }
 }

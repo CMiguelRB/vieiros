@@ -23,7 +23,7 @@ class TimerState extends State<TimerWidget> {
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) => _updateTimer());
   }
 
-  _updateTimer() {
+  void _updateTimer() {
     setState(() {
       int diff = DateTime.now().millisecondsSinceEpoch - _baseTime;
       _totalTime = Duration(milliseconds: diff).abs().toString().split('.')[0];

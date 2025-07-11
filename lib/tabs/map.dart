@@ -84,7 +84,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  _initializeNotifications() async {
+  Future<void> _initializeNotifications() async {
     AndroidInitializationSettings initializationSettingsAndroid =
         const AndroidInitializationSettings('ic_stat_name');
     final InitializationSettings initializationSettings =
@@ -92,7 +92,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     await _flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
-  getLocation() async {
+  Future<void> getLocation() async {
     bool hasPermissions = await PermissionHandler().handleLocationPermission();
     if (hasPermissions) {
       Future.delayed(const Duration(milliseconds: 500), () {
@@ -121,7 +121,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  addMarkerSet(LatLng latLng, bool isWayPoint, String? description,
+  Future<void> addMarkerSet(LatLng latLng, bool isWayPoint, String? description,
       GoogleMapController controller) async {
     BitmapDescriptor icon;
     if (!isWayPoint) {
@@ -158,12 +158,12 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  loadTrack(path) async {
+  Future<void> loadTrack(String? path) async {
     await widget.loadedTrack.loadTrack(path);
     loadLoadedTrack();
   }
 
-  clearTrack() {
+  void clearTrack() {
     if (mounted) {
       setState(() {
         _polyline.removeWhere(
@@ -177,7 +177,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  navigateCurrentTrack() async {
+  Future<void> navigateCurrentTrack() async {
     if (!widget.currentTrack.isRecording) {
       final GoogleMapController controller = await _mapController.future;
       if (widget.loadedTrack.gpx != null &&
@@ -189,7 +189,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  loadLoadedTrack() async {
+  Future<void> loadLoadedTrack() async {
     clearTrack();
     final GoogleMapController controller = await _mapController.future;
     if (widget.loadedTrack.gpx != null) {
@@ -332,7 +332,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     return [];
   }
 
-  centerMapView() async {
+  Future<void> centerMapView() async {
     final GoogleMapController controller = await _mapController.future;
     if (widget.currentTrack.positions.isNotEmpty) {
       controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
@@ -342,7 +342,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  startRecording() async {
+  Future<void> startRecording() async {
     VieirosNotification().showNotification(
         context, 'map_start_recording_message', NotificationType.info);
     widget.currentTrack.setRecording(true);
@@ -423,7 +423,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     });
   }
 
-  _onFabPressed(lightMode) {
+  void _onFabPressed(bool lightMode) {
     if (!widget.currentTrack.isRecording) {
       startRecording();
       setState(() {
@@ -446,7 +446,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         .asUint8List();
   }
 
-  _setPKMarker(RecordedPosition? position, String distance) async {
+  Future<void> _setPKMarker(RecordedPosition? position, String distance) async {
     List<dynamic> pksJSON =
         json.decode(await rootBundle.loadString('assets/pkMarkers.json'));
     String suffix = position != null ? 'l' : 'r';
@@ -518,7 +518,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  _checkOffTrack() {
+  void _checkOffTrack() {
     if (widget.loadedTrack.gpx != null) {
       List<Wpt> trackPoints = widget.loadedTrack.gpx!.trks[0].trksegs[0].trkpts;
       if (widget.loadedTrack.gpx != null &&
@@ -542,7 +542,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  _currentMarkerDialog(LatLng latLng, bool lightMode) {
+  void _currentMarkerDialog(LatLng latLng, bool lightMode) {
     if (!widget.currentTrack.isRecording) return;
     String name = '';
     VieirosDialog().inputDialog(
@@ -562,7 +562,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
             )));
   }
 
-  _addCurrentMarker(LatLng latLng, String name, bool edit, bool lightMode,
+  Future<void> _addCurrentMarker(LatLng latLng, String name, bool edit, bool lightMode,
       MarkerId? markerId) async {
     if (edit) {
       if (!_formKeyWaypointEdit.currentState!.validate()) return;
@@ -600,7 +600,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  _editMarkerDialog(
+  void _editMarkerDialog(
       MarkerId markerId, LatLng latLng, String name, bool lightMode) {
     VieirosDialog().inputDialog(
         context,
@@ -620,7 +620,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
                 onChanged: (value) => {name = value})));
   }
 
-  _removeMarker(MarkerId markerId) {
+  void _removeMarker(MarkerId markerId) {
     Navigator.pop(context, I18n.translate('common_delete'));
     if (mounted) {
       setState(() {
@@ -632,7 +632,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  stopRecording(bool lightMode) {
+  void stopRecording(bool lightMode) {
     String name = '';
     VieirosDialog().inputDialog(
         context,
@@ -650,7 +650,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
             )));
   }
 
-  _stopAndSave(String name) async {
+  Future _stopAndSave(String name) async {
     if (!_formKey.currentState!.validate()) return;
     positionStream.cancel();
     Gpx gpx = GpxHandler()
@@ -705,7 +705,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
     }
   }
 
-  _showNotification() async {
+  Future<void> _showNotification() async {
     setState(() {
       offTrack = true;
     });
@@ -726,7 +726,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         payload: 'off track');
   }
 
-  _resetBearing() async {
+  Future<void> _resetBearing() async {
     final GoogleMapController controller = await _mapController.future;
     LatLngBounds latLngBounds = await controller.getVisibleRegion();
     controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
@@ -741,7 +741,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         zoom: 14.0)));
   }
 
-  _moveCurrentLocation() async {
+  Future<void> _moveCurrentLocation() async {
     final GoogleMapController controller = await _mapController.future;
     Position locationData = await Geolocator.getCurrentPosition(
         locationSettings: LocationSettings(accuracy: LocationAccuracy.best));
@@ -750,7 +750,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
         zoom: 14.0)));
   }
 
-  _onCameraMove(CameraPosition camera) async {
+  Future<void> _onCameraMove(CameraPosition camera) async {
     if (camera.bearing != 0.0 && !_showBearingButton) {
       setState(() {
         _showBearingButton = true;

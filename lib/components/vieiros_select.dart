@@ -56,7 +56,7 @@ class VieirosSelect extends StatelessWidget {
         });
   }
 
-  _onElementPressed(element) {
+  void _onElementPressed(Map<String, String> element) {
     onChanged(element);
     Navigator.pop(context, element);
   }

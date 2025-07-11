@@ -79,7 +79,7 @@ class TracksState extends State<Tracks> {
     _searchFocusNode!.dispose();
   }
 
-  _loadFiles({bool? init, String? searchValue}) async {
+  Future<void> _loadFiles({bool? init, String? searchValue}) async {
     if (_loadingFiles != true) {
       setState(() {
         _loadingFiles = true;
@@ -138,7 +138,7 @@ class TracksState extends State<Tracks> {
     }
   }
 
-  _generateList(List<TrackListEntity> files) async {
+  Future<void> _generateList(List<TrackListEntity> files) async {
     setState(() {
       _add = false;
     });
@@ -174,7 +174,7 @@ class TracksState extends State<Tracks> {
     return files;
   }
 
-  _setSortDirection({required String sortDirection}) {
+  void _setSortDirection({required String sortDirection}) {
     setState(() {
       _sortDirection = sortDirection;
     });
@@ -185,7 +185,7 @@ class TracksState extends State<Tracks> {
     });
   }
 
-  _setCurrentDirectory(String path) {
+  void _setCurrentDirectory(String path) {
     Preferences().set('current_directory', path);
     setState(() {
       _currentDirectory = Directory(path);
@@ -236,7 +236,7 @@ class TracksState extends State<Tracks> {
     return tracks;
   }
 
-  _buildTrackInfo({required List<Track> tracks, required bool lightMode, required double height}) {
+  void _buildTrackInfo({required List<Track> tracks, required bool lightMode, required double height}) {
     bool plural = tracks.length > 1;
     if (tracks.isEmpty && mounted) {
       VieirosNotification()
@@ -299,7 +299,7 @@ class TracksState extends State<Tracks> {
     await _generateList(files);
   }
 
-  _unloadTrack(int index, bool showNotification) async {
+  Future<void> _unloadTrack(int index, bool showNotification) async {
     String? current = Preferences().get('currentTrack');
     TrackListEntity file = _files[index];
     if (current == file.path) {
@@ -317,7 +317,7 @@ class TracksState extends State<Tracks> {
     }
   }
 
-  _removeFile(context, List<int> indexList) async {
+  Future<void> _removeFile(BuildContext context, List<int> indexList) async {
     bool loadedRemoved = false;
     List<TrackListEntity> files = [..._files];
     for (var i = 0; i < indexList.length; i++) {
@@ -340,10 +340,12 @@ class TracksState extends State<Tracks> {
         widget.loadedTrack.clear();
       }
     });
-    Navigator.pop(context, I18n.translate("common_ok"));
+    if(context.mounted){
+      Navigator.pop(context, I18n.translate("common_ok"));
+    }
   }
 
-  _navigate(index) async {
+  Future<void> _navigate(int index) async {
     String? path = _files[index].path;
     if (path == null || path == '/loading') return;
     await Preferences().set('currentTrack', path);
@@ -360,7 +362,7 @@ class TracksState extends State<Tracks> {
     });
   }
 
-  _clearValue() {
+  void _clearValue() {
     _controller.clear();
     _searchFocusNode!.unfocus();
     _loadFiles();
@@ -373,7 +375,7 @@ class TracksState extends State<Tracks> {
     _showBottomSheet(_fileManagerContent(lightMode));
   }
 
-  _showTrackInfo(int index, bool lightMode, double height) async {
+  Future<void> _showTrackInfo(int index, bool lightMode, double height) async {
     TrackListEntity file = _files.elementAt(index);
 
     Track track = Track();
@@ -385,7 +387,7 @@ class TracksState extends State<Tracks> {
     _showBottomSheet(_trackManagerContent(index, lightMode, height, false));
   }
 
-  _showBottomSheet(Widget content) async {
+  Future<void> _showBottomSheet(Widget content) async {
     if (_selectionMode) {
       setState(() {
         _selectionMode = false;
@@ -498,7 +500,7 @@ class TracksState extends State<Tracks> {
             ]));
   }
 
-  _moveManagerContent({required bool lightMode, required List<TrackListEntity> trackListEntity, required bool popContext}) {
+  MoveEntityComponent _moveManagerContent({required bool lightMode, required List<TrackListEntity> trackListEntity, required bool popContext}) {
     if (popContext) {
       Navigator.pop(context, '');
     }
@@ -517,11 +519,11 @@ class TracksState extends State<Tracks> {
     );
   }
 
-  _showDirectoryActions(int index, bool lightMode) {
+  void _showDirectoryActions(int index, bool lightMode) {
     _showBottomSheet(_directoryManagerContent(index, lightMode));
   }
 
-  _showRenameDirectoryModal(int index, bool lightMode) {
+  void _showRenameDirectoryModal(int index, bool lightMode) {
     Navigator.pop(context, '');
     String name = '';
     VieirosDialog()
@@ -536,7 +538,7 @@ class TracksState extends State<Tracks> {
                 )));
   }
 
-  _renameDirectory(index, name) {
+  void _renameDirectory(int index, String name) {
     Navigator.pop(context, '');
     String path = _files[index].path!;
     Directory directory = Directory(path);
@@ -565,17 +567,17 @@ class TracksState extends State<Tracks> {
     });
   }
 
-  _deleteDirectory(int index) {
+  void _deleteDirectory(int index) {
     _showDeleteDialog([index], false);
   }
 
-  _setMoveDirectory(String directoryPath) async {
+  Future<void> _setMoveDirectory(String directoryPath) async {
     setState(() {
       _moveDestinationPath = directoryPath;
     });
   }
 
-  _addDirectoryModal(bool lightMode) {
+  void _addDirectoryModal(bool lightMode) {
     Navigator.of(context).pop();
     String name = '';
     VieirosDialog().inputDialog(context, 'common_name', {'common_ok': () => _addDirectory(name), 'common_cancel': () => Navigator.pop(context, '')},
@@ -588,7 +590,7 @@ class TracksState extends State<Tracks> {
             )));
   }
 
-  _addDirectory(String name) {
+  void _addDirectory(String name) {
     Navigator.pop(context, '');
     String path = '${_currentDirectory!.path}/$name';
     Directory newDirectory = Directory(path);
@@ -604,21 +606,21 @@ class TracksState extends State<Tracks> {
     }
   }
 
-  _moveFileAction(String directory, List<TrackListEntity> trackListEntity) {
+  void _moveFileAction(String directory, List<TrackListEntity> trackListEntity) {
     if (directory != '') {
       _moveFile(directory, trackListEntity);
       _cancelMove();
     }
   }
 
-  _cancelMove() {
+  void _cancelMove() {
     Navigator.pop(context, '');
     setState(() {
       _moveDestinationPath = '';
     });
   }
 
-  _moveFile(String directory, List<TrackListEntity> trackListEntity) {
+  void _moveFile(String directory, List<TrackListEntity> trackListEntity) {
     List<TrackListEntity> files = [..._files];
     for (int i = 0; i < trackListEntity.length; i++) {
       if (trackListEntity[i].isFile) {
@@ -657,12 +659,12 @@ class TracksState extends State<Tracks> {
     }
   }
 
-  _shareFile(int index) {
+  void _shareFile(int index) {
     Navigator.of(context).pop();
     SharePlus.instance.share(ShareParams(files:[XFile(_files[index].path!)], text: _files[index].name));
   }
 
-  _showDeleteDialog(List<int> indexList, bool? isTrack) {
+  void _showDeleteDialog(List<int> indexList, bool? isTrack) {
     if (isTrack != null) {
       Navigator.of(context).pop();
     }
@@ -683,14 +685,14 @@ class TracksState extends State<Tracks> {
     );
   }
 
-  _onSearchChanged(String text) async {
+  Future<void> _onSearchChanged(String text) async {
     if (_searchValue == text) {
       return;
     }
     _loadFiles(searchValue: text);
   }
 
-  _selectItem(int index) {
+  void _selectItem(int index) {
     setState(() {
       _selectedItems.contains(index) ? _selectedItems.remove(index) : _selectedItems.add(index);
       _selectedItems.sort();
@@ -698,7 +700,7 @@ class TracksState extends State<Tracks> {
     });
   }
 
-  _moveSelection(bool lightMode) {
+  void _moveSelection(bool lightMode) {
     List<TrackListEntity> files = [];
     for (int i = 0; i < _selectedItems.length; i++) {
       files.add(_files[_selectedItems[i]]);
@@ -706,14 +708,14 @@ class TracksState extends State<Tracks> {
     _showBottomSheet(_moveManagerContent(lightMode: lightMode, trackListEntity: files, popContext: false));
   }
 
-  _cancelSelectionMode() {
+  void _cancelSelectionMode() {
     setState(() {
       _selectionMode = false;
       _selectedItems.clear();
     });
   }
 
-  _getDirections(index) async {
+  Future<void> _getDirections(int index) async {
     Gpx gpx;
     try{
       gpx = GpxReader().fromString(File(_files[index].path!).readAsStringSync());

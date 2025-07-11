@@ -3,8 +3,8 @@ import 'package:vieiros/resources/custom_colors.dart';
 import 'package:vieiros/resources/i18n.dart';
 
 class VieirosDialog {
-  infoDialog(BuildContext context, String titleTag, Map<String, Function> actions, {String? bodyTag}) async {
-    return showDialog(
+  Future<bool?> infoDialog(BuildContext context, String titleTag, Map<String, Function> actions, {String? bodyTag}) async {
+    return showDialog<bool>(
       context: context,
       barrierColor: CustomColors.dimming,
       builder: (BuildContext context) => AlertDialog(
@@ -15,7 +15,7 @@ class VieirosDialog {
     );
   }
 
-  inputDialog(BuildContext context, String titleTag, Map<String, Function> actions, {Form? form}) {
+  void inputDialog(BuildContext context, String titleTag, Map<String, Function> actions, {Form? form}) {
     showDialog(
         context: context,
         barrierColor: CustomColors.dimming,
@@ -53,7 +53,7 @@ class VieirosDialog {
             ));
   }
 
-  List<Widget> _dialogActions(actions) {
+  List<Widget> _dialogActions(Map<String, Function> actions) {
     List<Widget> dialogActions = [];
 
     actions.forEach((tag, function) {

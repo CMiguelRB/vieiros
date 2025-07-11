@@ -3,7 +3,7 @@ import 'package:vieiros/resources/custom_colors.dart';
 import 'package:vieiros/resources/i18n.dart';
 
 class VieirosNotification {
-  showNotification(BuildContext context, String tag, NotificationType type) {
+  void showNotification(BuildContext context, String tag, NotificationType type) {
     Color backgroundColor = type == NotificationType.info ? CustomColors.info : CustomColors.error;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(I18n.translate(tag), overflow: TextOverflow.ellipsis, textAlign: TextAlign.center),
