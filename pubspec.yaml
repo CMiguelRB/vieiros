@@ -19,7 +19,7 @@ dependencies:
   device_info_plus: ^11.5.0
   file_picker: ^10.3.2
   firebase_core: ^3.15.2
-  firebase_crashlytics: ^4.3.9
+  firebase_crashlytics: ^4.3.10
   flutter:
     sdk: flutter
 
