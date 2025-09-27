@@ -34,7 +34,7 @@ class VieirosDialog {
                           IconButton(
                               padding: EdgeInsets.zero,
                               alignment: Alignment.centerRight,
-                              onPressed: () => Navigator.pop(context, ''),
+                              onPressed: () => Navigator.pop(context, true),
                               icon: const Icon(Icons.close))
                         ])),
                     Container(

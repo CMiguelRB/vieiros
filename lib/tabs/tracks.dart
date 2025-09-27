@@ -341,7 +341,7 @@ class TracksState extends State<Tracks> {
       }
     });
     if(context.mounted){
-      Navigator.pop(context, I18n.translate("common_ok"));
+      Navigator.pop(context, true);
     }
   }
 
@@ -674,7 +674,7 @@ class TracksState extends State<Tracks> {
       {
         'common_ok': () => _removeFile(context, indexList),
         'common_cancel': () => {
-              Navigator.pop(context, ''),
+              Navigator.pop(context, true),
               setState(() {
                 _selectionMode = false;
                 _selectedItems.clear();

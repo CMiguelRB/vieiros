@@ -24,7 +24,7 @@ class Home extends StatefulWidget {
 class HomeState extends State<Home>
     with TickerProviderStateMixin, WidgetsBindingObserver {
   int _tabIndex = 0;
-  bool _canPop = false;
+  final bool _canPop = false;
 
   late List<Widget> _tabs;
   late TabController _tabController;

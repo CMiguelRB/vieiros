@@ -90,7 +90,7 @@ class Themes {
         foregroundColor: WidgetStatePropertyAll(Colors.black),
         side: WidgetStatePropertyAll(BorderSide(color: CustomColors.background)),
       )),
-      bottomAppBarTheme: const BottomAppBarTheme(color: CustomColors.background), tabBarTheme: TabBarThemeData(indicatorColor: CustomColors.accent));
+      bottomAppBarTheme: const BottomAppBarThemeData(color: CustomColors.background), tabBarTheme: TabBarThemeData(indicatorColor: CustomColors.accent));
 
   static final darkTheme = ThemeData(
       useMaterial3: true,
