@@ -20,7 +20,7 @@ class Settings extends StatefulWidget {
 
 class SettingsState extends State<Settings> {
   bool _voiceAlerts = true;
-  final String _version = 'v1.5.11';
+  final String _version = 'v1.5.12';
   String? _themeSelectValue = 'system';
   String? _themeSelectTag = '';
   String? _gradientSelectedValue = 'none';
