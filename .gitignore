@@ -317,3 +317,4 @@ android/.idea/caches/deviceStreaming.xml
 start_emulator*
 app_uninstall*
 android/app/src/main/AndroidManifest.xml
+.idea/deviceManager.xml
