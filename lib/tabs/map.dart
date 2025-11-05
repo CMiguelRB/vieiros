@@ -215,7 +215,7 @@ class MapState extends State<Map> with AutomaticKeepAliveClientMixin {
           distance = distance +
               Geolocator.distanceBetween(points[i].lat!, points[i].lon!,
                   points[i - 1].lat!, points[i - 1].lon!);
-          if (distance > referenceDistance) {
+          if (distance > referenceDistance && widget.loadedTrack.distance <= 99999) {
             referenceDistance += 1000;
             _setPKMarker(
                 RecordedPosition(points[i].lat, points[i].lon, null, null),
