@@ -173,9 +173,7 @@ class TrackInfoState extends State<TrackInfo> {
                               mainAxisSize: MainAxisSize.max,
                               children: [
                                   TrackInfoTrackName(
-                                    trackName: _currentTrack!
-                                        .gpx!.trks.first.name
-                                        .toString(),
+                                    trackName: _currentTrack!.name.toString(),
                                     lightMode: widget.lightMode,
                                   ),
                                   Expanded(
@@ -208,7 +206,7 @@ class TrackInfoState extends State<TrackInfo> {
                                                   target: LatLng(
                                                       mapInfo!.centerLat,
                                                       mapInfo!.centerLon),
-                                                  zoom: 13,
+                                                  zoom: _currentTrack!.distance > 99999 ? 6 : 13,
                                                 )))),
                                   ),
                                   Container(

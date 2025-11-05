@@ -34,12 +34,21 @@ class Track {
       String? gpxString = await FilesHandler().readAsStringAsync(xmlFile);
       if (gpxString == '') throw Exception('Empty xml string');
       this.gpxString = gpxString;
-      if(!path.contains('${(await getApplicationDocumentsDirectory()).path}/tracks/')){
+      if (!path.contains(
+        '${(await getApplicationDocumentsDirectory()).path}/tracks/',
+      )) {
         gpxString = GpxHandler().reduceGpxFile(gpxString);
       }
       gpx = GpxReader().fromString(gpxString);
-      String? name = gpx!.trks[0].name;
-      name ??= xmlFile.path.split('/')[(xmlFile.path.split('/').length - 1)].split('.gpx')[0];
+      String? name;
+      if (gpx!.metadata?.name != null) {
+        name = gpx!.metadata?.name;
+      } else {
+        name = gpx!.trks[0].name;
+      }
+      name ??= xmlFile.path
+          .split('/')[(xmlFile.path.split('/').length - 1)]
+          .split('.gpx')[0];
       Preferences().set(path, name);
       this.name = name;
     } on Exception catch (exception) {
@@ -48,19 +57,32 @@ class Track {
       }
     }
 
-    if(gpx != null && !path.contains('${(await getApplicationDocumentsDirectory()).path}/tracks/')){
-      List<Wpt> points = gpx!.trks.first.trksegs.first.trkpts;
+    if (gpx != null &&
+        !path.contains(
+          '${(await getApplicationDocumentsDirectory()).path}/tracks/',
+        )) {
+      List<Wpt> points = List<Wpt>.empty(growable: true);
+      if (gpx!.trks.length > 1) {
+        for (int i = 0; i < gpx!.trks.length; i++) {
+          points.addAll(gpx!.trks[i].trksegs.first.trkpts);
+        }
+      } else {
+        points = gpx!.trks.first.trksegs.first.trkpts;
+      }
       List<Wpt> reducedPoints = [];
       int reductionFactor = points.length ~/ 500;
-      if(reductionFactor > 0){
-        for(int i = 0; i < points.length; i = (i + 1 + reductionFactor)){
+      if (reductionFactor > 0) {
+        for (int i = 0; i < points.length; i = (i + 1 + reductionFactor)) {
           reducedPoints.add(points[i]);
         }
         gpx!.trks.first.trksegs.first.trkpts = reducedPoints;
       }
     }
 
-    if (gpx != null) Calc().loadedTrackValues(this);
+    if (gpx != null) {
+      gpxString = GpxWriter().asString(gpx!);
+      Calc().loadedTrackValues(this);
+    }
 
     return this;
   }
@@ -85,7 +107,7 @@ class Track {
     altitudePoints.add(AltitudePoint(distance, altitude));
   }
 
-  void setAvgSlope(double slope){
+  void setAvgSlope(double slope) {
     avgSlope = slope;
   }
 
