@@ -9,18 +9,20 @@ class Calc {
     int totalDistance = currentTrack.distance;
     if (currentTrack.positions.length <= 1) return;
     int distance = Geolocator.distanceBetween(
-            currentTrack.positions[currentTrack.positions.length - 2].latitude!,
-            currentTrack.positions[currentTrack.positions.length - 2].longitude!,
-            currentTrack.positions.last.latitude!,
-            currentTrack.positions.last.longitude!)
-        .round();
+      currentTrack.positions[currentTrack.positions.length - 2].latitude!,
+      currentTrack.positions[currentTrack.positions.length - 2].longitude!,
+      currentTrack.positions.last.latitude!,
+      currentTrack.positions.last.longitude!,
+    ).round();
     currentTrack.setDistance(totalDistance + distance);
   }
 
   void setGain(CurrentTrack currentTrack) {
     if (currentTrack.positions.length < 2) return;
     int gain = currentTrack.altitudeGain;
-    double gainDiff = currentTrack.positions.last.altitude! - currentTrack.positions[currentTrack.positions.length - 2].altitude!;
+    double gainDiff =
+        currentTrack.positions.last.altitude! -
+        currentTrack.positions[currentTrack.positions.length - 2].altitude!;
     if (gainDiff > 0) gain += gainDiff.round();
     currentTrack.setGain(gain);
   }
@@ -38,24 +40,38 @@ class Calc {
   }
 
   double altitudeDiff(CurrentTrack currentTrack) {
-    return currentTrack.positions.last.altitude! - currentTrack.positions[currentTrack.positions.length - 2].altitude!;
+    return currentTrack.positions.last.altitude! -
+        currentTrack.positions[currentTrack.positions.length - 2].altitude!;
   }
 
   double avgPaceSecs(CurrentTrack currentTrack) {
-    return DateTime.now().difference(currentTrack.dateTime!).abs().inMilliseconds / 1000 / (currentTrack.distance / 1000);
+    return DateTime.now()
+            .difference(currentTrack.dateTime!)
+            .abs()
+            .inMilliseconds /
+        1000 /
+        (currentTrack.distance / 1000);
   }
 
   String avgPaceMinString(double avgPaceSeconds) {
     String avgPaceMin = (avgPaceSeconds / 60).toStringAsFixed(0);
     avgPaceMin =
-        !avgPaceSeconds.isNaN && !avgPaceSeconds.isInfinite && avgPaceSeconds < 3600 ? (avgPaceMin.length > 1 ? avgPaceMin : "0$avgPaceMin") : '00';
+        !avgPaceSeconds.isNaN &&
+            !avgPaceSeconds.isInfinite &&
+            avgPaceSeconds < 3600
+        ? (avgPaceMin.length > 1 ? avgPaceMin : "0$avgPaceMin")
+        : '00';
     return avgPaceMin;
   }
 
   String avgPaceSecString(double avgPaceSeconds) {
     String avgPaceSec = (avgPaceSeconds % 60).toStringAsFixed(0);
     avgPaceSec =
-        !avgPaceSeconds.isNaN && !avgPaceSeconds.isInfinite && avgPaceSeconds < 3600 ? (avgPaceSec.length > 1 ? avgPaceSec : "0$avgPaceSec") : '00';
+        !avgPaceSeconds.isNaN &&
+            !avgPaceSeconds.isInfinite &&
+            avgPaceSeconds < 3600
+        ? (avgPaceSec.length > 1 ? avgPaceSec : "0$avgPaceSec")
+        : '00';
     return avgPaceSec;
   }
 
@@ -67,7 +83,9 @@ class Calc {
   }
 
   String getDaylight(DateTime sunset) {
-    int minutesToSunset = sunset.toUtc().difference(DateTime.now().toLocal()).inMinutes - DateTime.now().timeZoneOffset.inMinutes;
+    int minutesToSunset =
+        sunset.toUtc().difference(DateTime.now().toLocal()).inMinutes -
+        DateTime.now().timeZoneOffset.inMinutes;
     if (minutesToSunset <= 0) return '00:00';
     int toSunsetH = minutesToSunset ~/ 60;
     String toSunsetSH = toSunsetH.toString();
@@ -85,15 +103,23 @@ class Calc {
     Gpx gpx = track.gpx!;
     List<Wpt> trackPoints = gpx.trks[0].trksegs[0].trkpts;
     for (int i = 0; i < trackPoints.length; i++) {
+      if (trackPoints[i].ele == null) {
+        trackPoints[i].ele = 0;
+      }
       if (i > 0) {
-        int distanceAux =
-            Geolocator.distanceBetween(trackPoints[i - 1].lat!, trackPoints[i - 1].lon!, trackPoints[i].lat!, trackPoints[i].lon!).round();
-        distance += distanceAux;
+        int distanceAux = Geolocator.distanceBetween(
+          trackPoints[i - 1].lat!,
+          trackPoints[i - 1].lon!,
+          trackPoints[i].lat!,
+          trackPoints[i].lon!,
+        ).round();
+        distance += distanceAux;        
         double gainDiff = trackPoints[i].ele! - trackPoints[i - 1].ele!;
-        if (gainDiff > 0){
-          double avgSlopePSection = gainDiff * 100 /distanceAux;
+        if (gainDiff > 0) {
+          double avgSlopePSection = gainDiff * 100 / distanceAux;
           int slopeThreshold = 70;
-          if(avgSlopePSection != double.infinity && avgSlopePSection < slopeThreshold) {
+          if (avgSlopePSection != double.infinity &&
+              avgSlopePSection < slopeThreshold) {
             avgSlopeSum += avgSlopePSection;
             avgSlopeCounter += 1;
           }
@@ -108,7 +134,7 @@ class Calc {
       }
       track.setAltitudePoint(distance, trackPoints[i].ele!);
     }
-    track.setAvgSlope(avgSlopeSum/avgSlopeCounter);
+    track.setAvgSlope(avgSlopeSum / avgSlopeCounter);
     track.setDistance(distance);
   }
 
